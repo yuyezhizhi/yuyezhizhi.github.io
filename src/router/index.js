@@ -28,7 +28,7 @@ const routes = [
 ]
 
 const router = createRouter({
-  history: createWebHistory('/yuyezhizhi.github.io/'),
+  history: createWebHistory('/'),
   routes
 })
 
