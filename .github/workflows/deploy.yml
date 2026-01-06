@@ -31,7 +31,7 @@ jobs:
         run: npm install
 
       - name: Build
-        run: npm run build
+        run: npx vite build  # 直接使用 npx 运行 vite build
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

@@ -37,7 +37,7 @@
                   <span class="icon">📱</span>
                   GitHub
                 </a>
-                <a href="mailto:yuyezhizhi@example.com" class="contact-link">
+                <a href="daijiangzhi@163.com" class="contact-link">
                   <span class="icon">✉️</span>
                   邮箱
                 </a>

@@ -37,7 +37,7 @@ npm install
 npm run dev
 ```
 
-访问 http://localhost:5173 查看博客
+访问 <http://localhost:5173> 查看博客
 
 ### 构建生产版本
 
@@ -64,11 +64,11 @@ npm run build
 ### 3. 访问博客
 
 部署完成后，博客将可以通过以下地址访问：
-`https://yuyezhizhi.github.io/yuyezhizhi.github.io/`
+[`https://yuyezhizhi.github.io/yuyezhizhi.github.io/`](https://yuyezhizhi.github.io/yuyezhizhi.github.io/)
 
 ## 项目结构
 
-```
+```md
 ├── src/
 │   ├── views/           # 页面组件
 │   │   ├── Home.vue     # 首页
@@ -102,7 +102,8 @@ npm run build
 ### 修改样式主题
 
 主要颜色变量在 CSS 中定义，可以修改以下颜色：
-- 主色调：`#667eea` 和 `#764ba2`
+
+- 主色调：`#667eea` 和 `#764ba2`  
 - 背景色：`#f8f9fa`
 - 文字颜色：`#333`、`#666`、`#999`
 
