@@ -30,8 +30,11 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Build
-        run: npx vite build  # 直接使用 npx 运行 vite build
+      - name: Fix permissions for node_modules
+        run: chmod -R +x node_modules/.bin
+
+      - name: Build with npm run build
+        run: npm run build
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
