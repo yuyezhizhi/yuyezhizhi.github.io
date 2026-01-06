@@ -37,10 +37,10 @@
                   <span class="icon">📱</span>
                   GitHub
                 </a>
-                <a href="daijiangzhi@163.com" class="contact-link">
+                <div class="contact-link">
                   <span class="icon">✉️</span>
-                  邮箱
-                </a>
+                  邮箱: daijiangzhi@163.com
+                </div>
               </div>
             </div>
           </div>
