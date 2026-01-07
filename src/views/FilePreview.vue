@@ -77,7 +77,6 @@
           <div class="modal-content">
             <!-- 文件上传区域 -->
             <div class="upload-card">
-              <h3>文件上传</h3>
               <div class="upload-btn-container">
                 <button @click="$refs.fileInput.click()" class="upload-btn">
                   <span class="upload-icon">📁</span> 选择文件
@@ -146,7 +145,7 @@
                   <div class="step-number">5</div>
                   <div class="step-content">
                     <strong>刷新页面</strong>
-                    <p>关闭弹窗后点击"刷新"按钮查看新文件</p>
+                    <p>提交代码到仓库，等待部署完成后，关闭弹窗后点击"刷新"按钮查看新文件。（如果在本地操作，直接关闭弹窗即可）</p>
                   </div>
                 </div>
               </div>

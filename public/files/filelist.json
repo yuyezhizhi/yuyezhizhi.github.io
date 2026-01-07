@@ -1,6 +1,10 @@
 {
   "files": [
     {
+      "name": "阿里前端技术方向.pdf",
+      "ext": "pdf"
+    },
+    {
       "name": "example.md",
       "ext": "md"
     },
@@ -9,8 +13,20 @@
       "ext": "pdf"
     },
     {
+      "name": "JavaScript框架设计新.pdf",
+      "ext": "pdf"
+    },
+    {
       "name": "new-test-file.md",
       "ext": "md"
+    },
+    {
+      "name": "node.js开发指南.pdf",
+      "ext": "pdf"
+    },
+    {
+      "name": "progit_v2.1.24.pdf",
+      "ext": "pdf"
     },
     {
       "name": "test-auto-refresh.md",
@@ -19,8 +35,12 @@
     {
       "name": "test-pdf-preview.pdf",
       "ext": "pdf"
+    },
+    {
+      "name": "TypeScript手册指南.pdf",
+      "ext": "pdf"
     }
   ],
-  "lastUpdated": "2026-01-07T03:08:15.521Z",
+  "lastUpdated": "2026-01-07T03:31:13.281Z",
   "version": "1.0"
 }
