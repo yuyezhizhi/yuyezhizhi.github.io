@@ -3,6 +3,7 @@ import Home from '../views/Home.vue'
 import Articles from '../views/Articles.vue'
 import ArticleDetail from '../views/ArticleDetail.vue'
 import About from '../views/About.vue'
+import Animation from '../views/Animation.vue'
 
 const routes = [
   {
@@ -19,6 +20,11 @@ const routes = [
     path: '/article/:id',
     name: 'ArticleDetail',
     component: ArticleDetail
+  },
+  {
+    path: '/animation',
+    name: 'Animation',
+    component: Animation
   },
   {
     path: '/about',

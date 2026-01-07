@@ -100,6 +100,14 @@ export default {
           category: 'React',
           date: '2023-12-25',
           readTime: '14分钟阅读'
+        },
+        {
+          id: 7,
+          title: 'ECharts 入门指南',
+          description: '学习ECharts的基本使用方法，包括图表配置、动画效果和常见图表类型的实现。',
+          category: '数据可视化',
+          date: '2024-01-20',
+          readTime: '12分钟阅读'
         }
       ]
     }

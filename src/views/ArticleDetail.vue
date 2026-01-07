@@ -543,6 +543,141 @@ function useWindowWidth() {
       <h3>8. 合理使用Context</h3>
       <p>不要过度使用Context，只在需要全局共享状态时使用。</p>
     `
+  },
+  7: {
+    id: 7,
+    title: 'ECharts 入门指南',
+    category: '数据可视化',
+    date: '2024-01-20',
+    readTime: '12分钟阅读',
+    tags: ['ECharts', '数据可视化', '图表'],
+    content: `
+      <h2>什么是ECharts？</h2>
+      <p>ECharts是一个基于JavaScript的开源可视化图表库，由百度开发并维护。它提供了丰富的图表类型和交互功能，可以轻松创建各种数据可视化图表。</p>
+      
+      <h3>ECharts的特点</h3>
+      <ul>
+        <li>丰富的图表类型：包括折线图、柱状图、饼图、散点图、地图等</li>
+        <li>强大的交互功能：支持缩放、拖拽、数据筛选等</li>
+        <li>灵活的配置：几乎所有图表元素都可以自定义</li>
+        <li>响应式设计：自动适应不同尺寸的容器</li>
+        <li>良好的兼容性：支持主流浏览器</li>
+      </ul>
+      
+      <h2>ECharts基本使用</h2>
+      
+      <h3>1. 安装ECharts</h3>
+      <pre><code>// 使用npm安装
+npm install echarts
+
+// 或者使用CDN
+&lt;script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js">&lt;/script></code></pre>
+      
+      <h3>2. 基本配置和使用</h3>
+      <p>使用ECharts创建图表的基本步骤：</p>
+      <ol>
+        <li>创建一个DOM容器</li>
+        <li>初始化ECharts实例</li>
+        <li>配置图表选项</li>
+        <li>设置图表数据</li>
+      </ol>
+      
+      <pre><code>// 1. 创建DOM容器
+&lt;div id="chart" style="width: 600px; height: 400px;">&lt;/div>
+
+// 2. 初始化ECharts实例
+const chart = echarts.init(document.getElementById('chart'));
+
+// 3. 配置图表选项
+const option = {
+  title: {
+    text: '销售数据统计'
+  },
+  tooltip: {},
+  legend: {
+    data: ['销量']
+  },
+  xAxis: {
+    data: ['衬衫', '羊毛衫', '雪纺衫', '裤子', '高跟鞋', '袜子']
+  },
+  yAxis: {},
+  series: [{
+    name: '销量',
+    type: 'bar',
+    data: [5, 20, 36, 10, 10, 20]
+  }]
+};
+
+// 4. 设置图表数据
+chart.setOption(option);</code></pre>
+      
+      <h2>ECharts动画效果</h2>
+      <p>ECharts提供了丰富的动画效果，可以通过配置项来控制动画的类型、持续时间等。</p>
+      
+      <pre><code>// 配置动画效果
+const option = {
+  animation: true, // 开启动画
+  animationDuration: 1500, // 动画持续时间
+  animationEasing: 'cubicOut', // 动画缓动效果
+  // 其他配置...
+  series: [{
+    // 系列配置
+    animationDelay: function(idx) {
+      return idx * 100; // 每个数据项的动画延迟
+    }
+  }]
+};</code></pre>
+      
+      <h2>常用图表类型</h2>
+      
+      <h3>1. 柱状图</h3>
+      <p>用于比较不同类别的数据。</p>
+      <pre><code>series: [{
+  type: 'bar',
+  data: [5, 20, 36, 10, 10, 20]
+}]</code></pre>
+      
+      <h3>2. 折线图</h3>
+      <p>用于展示数据随时间或其他连续变量的变化趋势。</p>
+      <pre><code>series: [{
+  type: 'line',
+  data: [5, 20, 36, 10, 10, 20]
+}]</code></pre>
+      
+      <h3>3. 饼图</h3>
+      <p>用于展示各部分占整体的比例。</p>
+      <pre><code>series: [{
+  type: 'pie',
+  radius: '50%',
+  data: [
+    {value: 335, name: '直接访问'},
+    {value: 310, name: '邮件营销'},
+    {value: 234, name: '联盟广告'},
+    {value: 135, name: '视频广告'},
+    {value: 1548, name: '搜索引擎'}
+  ]
+}]</code></pre>
+      
+      <h3>4. 散点图</h3>
+      <p>用于展示两个变量之间的关系。</p>
+      <pre><code>series: [{
+  type: 'scatter',
+  data: [[10.0, 8.04], [8.0, 6.95], [13.0, 7.58], [9.0, 8.81]]
+}]</code></pre>
+      
+      <h2>实践案例</h2>
+      <p>在我们的网站中，我们使用ECharts实现了一些前端开发相关的数据可视化图表，你可以在<a href="/animation">示例栏目</a>中查看这些示例。</p>
+      
+      <p>这些示例包括：</p>
+      <ul>
+        <li>前端开发仓库GitHub Stars排名</li>
+        <li>前端开发工具使用率</li>
+        <li>AI工具使用率趋势</li>
+      </ul>
+      
+      <h2>总结</h2>
+      <p>ECharts是一个功能强大的数据可视化库，它提供了丰富的图表类型和交互功能，可以帮助我们轻松创建各种数据可视化图表。通过学习ECharts的基本使用方法和配置选项，我们可以创建出美观、交互性强的数据可视化效果。</p>
+    `
   }
 }
 

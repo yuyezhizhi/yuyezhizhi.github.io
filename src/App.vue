@@ -8,6 +8,7 @@
         <ul class="nav-menu">
           <li><router-link to="/" class="nav-link">首页</router-link></li>
           <li><router-link to="/articles" class="nav-link">文章</router-link></li>
+          <li><router-link to="/animation" class="nav-link">示例</router-link></li>
           <li><router-link to="/about" class="nav-link">关于</router-link></li>
         </ul>
       </div>
@@ -22,12 +23,47 @@
         <p>&copy; 2024 yuyezhizhi 的前端博客. 保留所有权利.</p>
       </div>
     </footer>
+    
+    <!-- 回到顶部按钮 -->
+    <button 
+      v-if="showBackToTop"
+      @click="backToTop"
+      class="back-to-top-btn"
+    >
+      ↑
+    </button>
   </div>
 </template>
 
 <script>
 export default {
-  name: 'App'
+  name: 'App',
+  data() {
+    return {
+      showBackToTop: false
+    }
+  },
+  mounted() {
+    // 监听滚动事件
+    window.addEventListener('scroll', this.handleScroll)
+  },
+  beforeUnmount() {
+    // 移除滚动事件监听
+    window.removeEventListener('scroll', this.handleScroll)
+  },
+  methods: {
+    handleScroll() {
+      // 当滚动超过200px时显示回到顶部按钮
+      this.showBackToTop = window.scrollY > 200
+    },
+    backToTop() {
+      // 平滑滚动到顶部
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      })
+    }
+  }
 }
 </script>
 
@@ -127,5 +163,29 @@ body {
   .main-content {
     padding: 1rem;
   }
+}
+
+/* 回到顶部按钮样式 */
+.back-to-top-btn {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  opacity: 0.8;
+  transition: opacity 0.3s, transform 0.3s;
+  z-index: 999;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+}
+
+.back-to-top-btn:hover {
+  opacity: 1;
+  transform: translateY(-5px);
 }
 </style>
