@@ -1,0 +1,26 @@
+{
+  "files": [
+    {
+      "name": "example.md",
+      "ext": "md"
+    },
+    {
+      "name": "Git版本控制管理 .pdf",
+      "ext": "pdf"
+    },
+    {
+      "name": "new-test-file.md",
+      "ext": "md"
+    },
+    {
+      "name": "test-auto-refresh.md",
+      "ext": "md"
+    },
+    {
+      "name": "test-pdf-preview.pdf",
+      "ext": "pdf"
+    }
+  ],
+  "lastUpdated": "2026-01-07T03:08:15.521Z",
+  "version": "1.0"
+}

@@ -108,6 +108,14 @@ export default {
           category: '数据可视化',
           date: '2024-01-20',
           readTime: '12分钟阅读'
+        },
+        {
+          id: 8,
+          title: '前端动画原理详解',
+          description: '深入探讨前端动画的原理和实现技术，包括CSS动画、JavaScript动画和性能优化。',
+          category: '动画',
+          date: '2024-01-25',
+          readTime: '18分钟阅读'
         }
       ]
     }

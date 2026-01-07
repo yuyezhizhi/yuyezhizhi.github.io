@@ -678,6 +678,171 @@ const option = {
       <h2>总结</h2>
       <p>ECharts是一个功能强大的数据可视化库，它提供了丰富的图表类型和交互功能，可以帮助我们轻松创建各种数据可视化图表。通过学习ECharts的基本使用方法和配置选项，我们可以创建出美观、交互性强的数据可视化效果。</p>
     `
+  },
+  8: {
+    id: 8,
+    title: '前端动画原理详解',
+    category: '动画',
+    date: '2024-01-25',
+    readTime: '18分钟阅读',
+    tags: ['动画', 'CSS', 'JavaScript', '性能优化'],
+    content: `
+      <h2>什么是前端动画？</h2>
+      <p>前端动画是指在网页上通过CSS或JavaScript实现的动态效果，它可以增强用户体验，使界面更加生动和交互性强。前端动画广泛应用于页面过渡、元素交互反馈、数据可视化等场景。</p>
+      
+      <h3>前端动画的基本原理</h3>
+      <p>前端动画的核心原理是利用人眼的视觉暂留效应，通过快速连续地展示不同状态的画面，从而产生平滑的动画效果。在计算机中，这通常是通过以下两种方式实现的：</p>
+      
+      <ol>
+        <li><strong>帧动画（Frame Animation）</strong>：将动画分解为一系列独立的帧，然后按照一定的帧率连续播放这些帧。</li>
+        <li><strong>属性过渡（Property Transition）</strong>：通过在一段时间内平滑地改变元素的CSS属性值来实现动画效果。</li>
+      </ol>
+      
+      <h2>CSS动画技术</h2>
+      
+      <h3>1. CSS Transitions（过渡）</h3>
+      <p>CSS Transitions允许我们在元素状态变化时，平滑地过渡到新的状态。它需要一个触发条件（如:hover、:focus等）和要过渡的CSS属性。</p>
+      
+      <pre><code>.element {
+  width: 100px;
+  height: 100px;
+  background: blue;
+  transition: width 1s ease;
+}
+
+.element:hover {
+  width: 200px;
+}</code></pre>
+      
+      <h3>2. CSS Animations（动画）</h3>
+      <p>CSS Animations提供了更强大的动画控制能力，它允许我们定义关键帧（keyframes）来控制动画的各个阶段。</p>
+      
+      <pre><code>@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-30px);
+  }
+  60% {
+    transform: translateY(-15px);
+  }
+}
+
+.bouncing-ball {
+  animation: bounce 2s infinite;
+}</code></pre>
+      
+      <h3>3. CSS Transforms（变换）</h3>
+      <p>CSS Transforms允许我们对元素进行旋转、缩放、平移等变换操作，这些变换可以与过渡或动画结合使用，产生丰富的视觉效果。</p>
+      
+      <pre><code>.transformed-element {
+  transform: rotate(45deg) scale(1.5) translateX(50px);
+}</code></pre>
+      
+      <h2>JavaScript动画技术</h2>
+      
+      <h3>1. requestAnimationFrame</h3>
+      <p>requestAnimationFrame是浏览器提供的一个API，它允许我们以浏览器最佳的帧率执行动画，避免了setTimeout/setInterval可能导致的性能问题。</p>
+      
+      <pre><code>function animate(element, targetPosition, duration) {
+  const startPosition = element.offsetLeft;
+  const distance = targetPosition - startPosition;
+  const startTime = performance.now();
+  
+  function updatePosition(currentTime) {
+    const elapsedTime = currentTime - startTime;
+    const progress = Math.min(elapsedTime / duration, 1);
+    
+    // 使用缓动函数
+    const easeInOut = progress < 0.5 
+      ? 2 * progress * progress 
+      : -1 + (4 - 2 * progress) * progress;
+    
+    element.style.left = (startPosition + distance * easeInOut) + 'px';
+    
+    if (progress < 1) {
+      requestAnimationFrame(updatePosition);
+    }
+  }
+  
+  requestAnimationFrame(updatePosition);
+}</code></pre>
+      
+      <h3>2. 动画库</h3>
+      <p>为了简化动画开发，有许多优秀的JavaScript动画库可供选择，如：</p>
+      
+      <ul>
+        <li><strong>Anime.js</strong>：轻量级、高性能的JavaScript动画库</li>
+        <li><strong>GreenSock (GSAP)</strong>：功能强大的动画平台</li>
+        <li><strong>Motion One</strong>：现代化的动画库，支持原生Web Animations API</li>
+        <li><strong>Animate.css</strong>：纯CSS动画库，我们在示例栏目中使用了它</li>
+      </ul>
+      
+      <h2>动画性能优化</h2>
+      
+      <h3>1. 使用GPU加速</h3>
+      <p>通过使用transform和opacity属性来实现动画，可以触发GPU加速，提高动画性能。这是因为这些属性可以在合成层上进行处理，避免了重排（reflow）和重绘（repaint）。</p>
+      
+      <pre><code>.optimized-animation {
+  /* 触发GPU加速 */
+  will-change: transform, opacity;
+  transform: translateZ(0);
+}
+</code></pre>
+      
+      <h3>2. 减少重排和重绘</h3>
+      <p>避免在动画过程中修改会导致重排的CSS属性，如width、height、margin等。如果必须修改这些属性，可以考虑使用transform替代。</p>
+      
+      <h3>3. 使用requestAnimationFrame</h3>
+      <p>如前所述，requestAnimationFrame可以确保动画与浏览器的刷新率同步，避免不必要的渲染，提高动画的流畅度。</p>
+      
+      <h3>4. 适当使用动画</h3>
+      <p>虽然动画可以增强用户体验，但过度使用会导致性能问题和用户疲劳。应该只在必要的地方使用动画，并确保动画的时长和缓动函数合适。</p>
+      
+      <h2>现代动画技术</h2>
+      
+      <h3>1. Web Animations API</h3>
+      <p>Web Animations API是浏览器原生提供的动画API，它结合了CSS动画的性能优势和JavaScript动画的灵活性，允许我们直接在JavaScript中创建和控制动画。</p>
+      
+      <pre><code>const element = document.querySelector('.element');
+const animation = element.animate([
+  { transform: 'scale(1)', opacity: 1 },
+  { transform: 'scale(1.5)', opacity: 0.5 },
+  { transform: 'scale(1)', opacity: 1 }
+], {
+  duration: 2000,
+  iterations: Infinity,
+  easing: 'ease-in-out'
+});</code></pre>
+      
+      <h3>2. Lottie动画</h3>
+      <p>Lottie是Airbnb开发的一个库，它允许我们使用Adobe After Effects创建动画，并将其导出为JSON格式，然后在网页上使用JavaScript播放。这使得设计师可以直接创建复杂的动画，而无需开发者手动实现。</p>
+      
+      <h2>实践案例</h2>
+      <p>在我们的网站中，我们在<a href="/animation">示例栏目</a>中展示了各种前端动画效果，包括CSS动画、过渡动画和数据可视化动画。你可以访问该栏目查看这些示例的实际效果。</p>
+      
+      <p>这些示例包括：</p>
+      <ul>
+        <li>使用Animate.css实现的CSS动画效果</li>
+        <li>Vue Transition组件实现的过渡动画</li>
+        <li>使用ECharts实现的数据可视化动画</li>
+      </ul>
+      
+      <h2>总结</h2>
+      <p>前端动画是现代Web开发中不可或缺的一部分，它可以显著提升用户体验。通过了解动画的基本原理和掌握各种动画技术，我们可以创建出高效、流畅且具有吸引力的动画效果。</p>
+      
+      <p>在选择动画技术时，我们应该根据具体需求和性能要求进行选择：</p>
+      
+      <ul>
+        <li>对于简单的过渡效果，优先使用CSS Transitions</li>
+        <li>对于复杂的关键帧动画，使用CSS Animations</li>
+        <li>对于需要复杂控制逻辑的动画，使用JavaScript结合requestAnimationFrame或动画库</li>
+        <li>对于性能要求高的动画，确保使用GPU加速和优化的属性</li>
+      </ul>
+      
+      <p>希望本文对你理解和应用前端动画有所帮助！</p>
+    `
   }
 }
 
@@ -706,7 +871,18 @@ export default {
       immediate: true,
       handler(newId) {
         this.article = articlesData[newId] || null
+        this.$nextTick(() => {
+          this.highlightCode()
+        })
       }
+    }
+  },
+  methods: {
+    highlightCode() {
+      const codeBlocks = document.querySelectorAll('.article-body pre code')
+      codeBlocks.forEach(block => {
+        this.$hljs.highlightBlock(block)
+      })
     }
   }
 }
@@ -800,17 +976,49 @@ export default {
 }
 
 .article-body pre {
-  background: #2d2d2d;
-  color: #f8f8f2;
-  padding: 1rem;
-  border-radius: 5px;
+  background: #1e1e1e;
+  color: #d4d4d4;
+  padding: 1.5rem;
+  border-radius: 8px;
   overflow-x: auto;
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  position: relative;
+}
+
+.article-body pre::before {
+  content: '';
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 12px;
+  height: 12px;
+  background: #ff5f56;
+  border-radius: 50%;
+  box-shadow: 20px 0 0 #ffbd2e, 40px 0 0 #27c93f;
+  opacity: 0.8;
 }
 
 .article-body code {
-  font-family: 'Courier New', Courier, monospace;
-  font-size: 0.9rem;
+  font-family: 'Fira Code', 'Courier New', Courier, monospace;
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.article-body pre code {
+  display: block;
+  padding: 0;
+  background: transparent;
+  color: inherit;
+  border: none;
+}
+
+.article-body code:not(pre code) {
+  background: #e9ecef;
+  color: #495057;
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
 }
 
 .article-footer {
