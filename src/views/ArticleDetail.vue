@@ -882,6 +882,33 @@ export default {
       const codeBlocks = document.querySelectorAll('.article-body pre code')
       codeBlocks.forEach(block => {
         this.$hljs.highlightBlock(block)
+        
+        // 添加复制按钮
+        const pre = block.parentElement
+        if (!pre.querySelector('.copy-btn')) {
+          const copyBtn = document.createElement('button')
+          copyBtn.className = 'copy-btn'
+          copyBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> 复制代码'
+          copyBtn.title = '复制代码'
+          copyBtn.addEventListener('click', () => this.copyCode(block))
+          pre.appendChild(copyBtn)
+        }
+      })
+    },
+    copyCode(codeElement) {
+      const text = codeElement.textContent
+      navigator.clipboard.writeText(text).then(() => {
+        const copyBtn = codeElement.parentElement.querySelector('.copy-btn')
+        const originalContent = copyBtn.innerHTML
+        copyBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> 复制成功'
+        copyBtn.classList.add('copied')
+        
+        setTimeout(() => {
+          copyBtn.innerHTML = originalContent
+          copyBtn.classList.remove('copied')
+        }, 2000)
+      }).catch(err => {
+        console.error('复制失败:', err)
       })
     }
   }
@@ -997,6 +1024,50 @@ export default {
   border-radius: 50%;
   box-shadow: 20px 0 0 #ffbd2e, 40px 0 0 #27c93f;
   opacity: 0.8;
+}
+
+/* 复制按钮样式 */
+.article-body pre {
+  position: relative;
+}
+
+.article-body pre .copy-btn {
+  position: absolute;
+  top: 12px;
+  right: 60px;
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: #fff;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.3s ease;
+  opacity: 0;
+  visibility: hidden;
+}
+
+.article-body pre:hover .copy-btn {
+  opacity: 1;
+  visibility: visible;
+}
+
+.article-body pre .copy-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+}
+
+.article-body pre .copy-btn.copied {
+  background: rgba(46, 204, 113, 0.7);
+  color: #fff;
+}
+
+.article-body pre .copy-btn svg {
+  display: inline-block;
+  vertical-align: middle;
 }
 
 .article-body code {
