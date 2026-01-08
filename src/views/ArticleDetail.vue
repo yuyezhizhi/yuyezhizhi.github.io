@@ -143,7 +143,6 @@ export default {
 <style scoped>
 .article-detail {
   min-height: 100vh;
-  background: #f8f9fa;
 }
 
 .container {

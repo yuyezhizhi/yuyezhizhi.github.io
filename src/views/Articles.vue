@@ -116,6 +116,14 @@ export default {
           category: '动画',
           date: '2024-01-25',
           readTime: '18分钟阅读'
+        },
+        {
+          id: 9,
+          title: 'Next.js + React 项目实战指南',
+          description: '从项目初始化到部署上线，全面讲解Next.js与React结合开发的最佳实践和核心功能。',
+          category: 'React',
+          date: '2024-01-30',
+          readTime: '20分钟阅读'
         }
       ]
     }
@@ -139,7 +147,6 @@ export default {
 <style scoped>
 .articles {
   min-height: 100vh;
-  background: #f8f9fa;
 }
 
 .container {

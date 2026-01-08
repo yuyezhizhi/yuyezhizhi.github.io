@@ -147,6 +147,12 @@ export default {
     return {
       recentArticles: [
         {
+          id: 9,
+          title: "Next.js + React 项目实战指南",
+          description: "从项目初始化到部署上线，全面讲解Next.js与React结合开发的最佳实践和核心功能。",
+          date: "2024-01-30",
+        },
+        {
           id: 1,
           title: "Vue 3 Composition API 详解",
           description: "深入理解Vue 3的Composition API及其优势",
@@ -157,12 +163,6 @@ export default {
           title: "Vite vs Webpack 性能对比",
           description: "现代构建工具的性能分析和选择建议",
           date: "2024-01-10",
-        },
-        {
-          id: 3,
-          title: "JavaScript ES6+ 新特性实践",
-          description: "掌握现代JavaScript开发必备特性",
-          date: "2024-01-05",
         },
       ],
       githubTrending: [
@@ -264,12 +264,14 @@ export default {
 .hero-content h1 {
   font-size: 3rem;
   margin-bottom: 1rem;
+  color: #333;
 }
 
 .hero-content p {
   font-size: 1.2rem;
   margin-bottom: 2rem;
   opacity: 0.9;
+  color: #555;
 }
 
 .cta-button {
@@ -313,7 +315,6 @@ export default {
 }
 
 .feature-card {
-  background: #f8f9fa;
   padding: 2rem;
   border-radius: 10px;
   text-align: center;
@@ -645,7 +646,6 @@ export default {
   /* 推荐资源样式 */
   .resources {
     padding: 4rem 0;
-    background: #f8f9fa;
   }
 
   .resources h2 {

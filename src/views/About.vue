@@ -18,15 +18,16 @@
             <div class="skills">
               <h2>技术栈</h2>
               <div class="skill-tags">
-                <span class="skill-tag">Vue.js</span>
-                <span class="skill-tag">React</span>
-                <span class="skill-tag">JavaScript</span>
-                <span class="skill-tag">TypeScript</span>
                 <span class="skill-tag">CSS3</span>
                 <span class="skill-tag">HTML5</span>
-                <span class="skill-tag">Node.js</span>
+                <span class="skill-tag">JavaScript</span>
+                <span class="skill-tag">TypeScript</span>
+                <span class="skill-tag">Vue</span>
+                <span class="skill-tag">React</span>
                 <span class="skill-tag">Vite</span>
                 <span class="skill-tag">Webpack</span>
+                <span class="skill-tag">Next.js</span>
+                <span class="skill-tag">Node.js</span>
               </div>
             </div>
             
@@ -84,7 +85,6 @@ export default {
 <style scoped>
 .about {
   min-height: 100vh;
-  background: #f8f9fa;
 }
 
 .container {
