@@ -79,7 +79,7 @@ body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   line-height: 1.6;
   color: #333;
-  background-color: #f8f9fa;
+  background-color: #fff5f5;
 }
 
 #app {
@@ -89,9 +89,16 @@ body {
 }
 
 .navbar {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
   padding: 1rem 0;
   box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  z-index: 1000;
+  transition: background-color 0.3s ease;
+  backdrop-filter: saturate(180%) blur(6px);
+  background: rgba(255, 255, 255, 0.9);
 }
 
 .nav-container {
@@ -99,12 +106,13 @@ body {
   margin: 0 auto;
   padding: 0 2rem;
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: center;
+  gap: 3rem;
 }
 
 .logo a {
-  color: white;
+  color: #333;
   text-decoration: none;
   font-size: 1.8rem;
   font-weight: bold;
@@ -117,7 +125,7 @@ body {
 }
 
 .nav-link {
-  color: white;
+  color: #333;
   text-decoration: none;
   padding: 0.5rem 1rem;
   border-radius: 5px;
@@ -133,7 +141,7 @@ body {
   flex: 1;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 8rem 2rem 2rem;
   width: 100%;
 }
 
@@ -162,7 +170,7 @@ body {
   }
   
   .main-content {
-    padding: 1rem;
+    padding: 8rem 1rem 1rem;
   }
 }
 
@@ -174,7 +182,7 @@ body {
   width: 3rem;
   height: 3rem;
   border-radius: 50%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: rgba(248, 120, 132, 0.9);
   color: white;
   border: none;
   font-size: 1.5rem;

@@ -252,17 +252,17 @@ export default {
 }
 
 /* 复制按钮样式 */
-.article-body pre {
+.article-body :deep(pre) {
   position: relative;
 }
 
-.article-body pre .copy-btn {
+.article-body :deep(pre .copy-btn) {
   position: absolute;
-  top: 12px;
-  right: 60px;
-  background: rgba(255, 255, 255, 0.2);
-  border: none;
+  top: 10px;
+  right: 10px;
+  background: #aaa;
   color: #fff;
+  border: none;
   padding: 6px 12px;
   border-radius: 4px;
   font-size: 0.8rem;
@@ -270,27 +270,13 @@ export default {
   display: flex;
   align-items: center;
   gap: 4px;
-  transition: all 0.3s ease;
-  opacity: 0;
-  visibility: hidden;
 }
 
-.article-body pre:hover .copy-btn {
-  opacity: 1;
-  visibility: visible;
+.article-body :deep(pre .copy-btn.copied) {
+  background: rgb(46, 204, 113);
 }
 
-.article-body pre .copy-btn:hover {
-  background: rgba(255, 255, 255, 0.3);
-  transform: translateY(-2px);
-}
-
-.article-body pre .copy-btn.copied {
-  background: rgba(46, 204, 113, 0.7);
-  color: #fff;
-}
-
-.article-body pre .copy-btn svg {
+.article-body :deep(pre .copy-btn svg) {
   display: inline-block;
   vertical-align: middle;
 }
