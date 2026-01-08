@@ -192,6 +192,9 @@ export default {
     
     // 初始化所有图表
     async initCharts() {
+      // 先销毁已存在的图表实例
+      this.destroyCharts()
+      
       const echarts = await this.loadECharts()
       
       // 保存echarts实例供后续使用
@@ -201,6 +204,22 @@ export default {
       this.initRepoChart(echarts)
       this.initToolChart(echarts)
       this.initAiChart(echarts)
+    },
+    
+    // 销毁所有图表实例
+    destroyCharts() {
+      if (this.repoChart) {
+        this.repoChart.dispose()
+        this.repoChart = null
+      }
+      if (this.toolChart) {
+        this.toolChart.dispose()
+        this.toolChart = null
+      }
+      if (this.aiChart) {
+        this.aiChart.dispose()
+        this.aiChart = null
+      }
     },
     
     // 触发动画效果

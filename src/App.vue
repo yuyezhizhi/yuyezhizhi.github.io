@@ -132,9 +132,14 @@ body {
   transition: background-color 0.3s;
 }
 
-.nav-link:hover,
+.nav-link:hover {
+  background-color: rgba(248, 120, 132, 0.1);
+}
+
 .nav-link.router-link-active {
-  background-color: rgba(255,255,255,0.2);
+  background-color: rgba(248, 120, 132, 0.2);
+  color: #f87884;
+  font-weight: 600;
 }
 
 .main-content {
