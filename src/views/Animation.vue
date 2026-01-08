@@ -139,7 +139,6 @@
 </template>
 
 <script>
-import * as echarts from 'echarts'
 import 'animate.css'
 
 export default {
@@ -157,18 +156,14 @@ export default {
     }
   },
   mounted() {
-    this.initRepoChart()
-    this.initToolChart()
-    this.initAiChart()
+    this.initCharts()
     
     // 监听分类切换，重新初始化图表
     this.$watch('activeCategory', (newCategory) => {
       if (newCategory === 1) {
         // 延迟初始化图表，确保DOM已渲染
         setTimeout(() => {
-          this.initRepoChart()
-          this.initToolChart()
-          this.initAiChart()
+          this.initCharts()
         }, 100)
       }
     })
@@ -186,6 +181,28 @@ export default {
     }
   },
   methods: {
+    // 动态加载echarts
+    async loadECharts() {
+      if (!window.echarts) {
+        const echartsModule = await import('echarts')
+        window.echarts = echartsModule.default || echartsModule
+      }
+      return window.echarts
+    },
+    
+    // 初始化所有图表
+    async initCharts() {
+      const echarts = await this.loadECharts()
+      
+      // 保存echarts实例供后续使用
+      this.echarts = echarts
+      
+      // 初始化各个图表
+      this.initRepoChart(echarts)
+      this.initToolChart(echarts)
+      this.initAiChart(echarts)
+    },
+    
     // 触发动画效果
     triggerAnimation(event, animationClass) {
       const element = event.currentTarget;
@@ -205,7 +222,7 @@ export default {
       // 监听动画结束事件
       element.addEventListener('animationend', handleAnimationEnd);
     },
-    initRepoChart() {
+    initRepoChart(echarts) {
       // 前端开发仓库排名数据
       const repoData = {
         names: ['Vue.js', 'React', 'Angular', 'Svelte', 'Next.js', 'Nuxt.js', 'Vite', 'Webpack'],
@@ -268,7 +285,7 @@ export default {
       })
     },
     
-    initToolChart() {
+    initToolChart(echarts) {
       // 前端开发工具使用率数据
       const toolData = [
         { value: 45, name: 'Visual Studio Code' },
@@ -339,7 +356,7 @@ export default {
       })
     },
     
-    initAiChart() {
+    initAiChart(echarts) {
       // AI工具使用率趋势数据
       const aiData = {
         months: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'],

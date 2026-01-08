@@ -259,13 +259,7 @@ export default {
           this.markdownContent = marked(content)
           this.loading = false
           
-          // 等待DOM更新后高亮代码
-          this.$nextTick(() => {
-            const codeBlocks = document.querySelectorAll('.markdown-content pre code')
-            codeBlocks.forEach(block => {
-              hljs.highlightBlock(block)
-            })
-          })
+          // 代码已经在marked的highlight配置中被高亮处理，无需再次调用highlightBlock
         } catch (err) {
           this.error = err.message
           this.loading = false
