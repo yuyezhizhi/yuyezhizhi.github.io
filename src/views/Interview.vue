@@ -1,7 +1,6 @@
 <template>
   <div class="interview-container">
     <div class="hero-section">
-      <h1>前端面试题</h1>
       <p>收集了100道前端常见面试题，涵盖HTML、CSS、JavaScript、Vue、React等多个领域</p>
     </div>
 

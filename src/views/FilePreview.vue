@@ -1,11 +1,6 @@
 <template>
   <div class="file-preview">
     <div class="container">
-      <h1>文件预览</h1>
-      <div class="breadcrumb">
-        <router-link to="/">首页</router-link> &gt; 文件预览
-      </div>
-      
       <div v-if="loading" class="loading">
         <p>加载中...</p>
       </div>

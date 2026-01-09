@@ -1,7 +1,6 @@
 <template>
   <div class="articles">
     <div class="container">
-      <h1>前端开发文章</h1>
       <div class="filter-section">
         <input 
           v-model="searchQuery" 
