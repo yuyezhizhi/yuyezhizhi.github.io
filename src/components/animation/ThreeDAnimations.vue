@@ -46,6 +46,9 @@
               <div class="sphere-layer"></div>
               <div class="sphere-layer layer2"></div>
               <div class="sphere-layer layer3"></div>
+              <div class="sphere-layer layer4"></div>
+              <div class="sphere-layer layer5"></div>
+              <div class="sphere-layer layer6"></div>
             </div>
           </div>
         </div>
@@ -82,7 +85,7 @@
       <!-- 3D金字塔 -->
       <div class="example-item animate__animated animate__zoomIn" style="animation-delay: 0.9s">
         <div class="example-header">
-          <h3>3D金字塔</h3>
+          <h3>3D金字塔粒子</h3>
           <div class="header-right">
             <span class="example-type">pyramid</span>
             <button @click="toggleFullscreen('pyramid')" class="fullscreen-btn">
@@ -93,13 +96,7 @@
         </div>
         <div class="animation-demo">
           <div ref="pyramidContainer" class="pyramid-container">
-            <div class="pyramid">
-              <div class="pyramid-face front"></div>
-              <div class="pyramid-face back"></div>
-              <div class="pyramid-face right"></div>
-              <div class="pyramid-face left"></div>
-              <div class="pyramid-base"></div>
-            </div>
+            <GoldTempAnimation ref="pyramid"/>
           </div>
         </div>
       </div>
@@ -108,8 +105,13 @@
 </template>
 
 <script>
+import GoldTempAnimation from './GoldTempAnimation.vue'
+
 export default {
   name: 'ThreeDAnimations',
+  components: {
+    GoldTempAnimation
+  },
   data() {
     return {
       cardFlipped: false,
@@ -284,17 +286,42 @@ export default {
 }
 </script>
 
-<style scoped>
+<style scoped lang="less">
+// 变量定义
+@text-color: #333;
+@bg-color: #ffffff;
+@border-radius: 8px;
+@transition: all 0.3s ease;
+@cube-size: 120px;
+@sphere-size: 120px;
+@card-width: 150px;
+@card-height: 100px;
+
 /* 3D动画容器 */
 .category-section {
   width: 100%;
+  
+  .section-title {
+    color: @text-color;
+    margin-bottom: 2rem;
+    font-size: 1.8rem;
+    font-weight: 600;
+  }
 }
 
-.section-title {
-  color: #333;
-  margin-bottom: 2rem;
-  font-size: 1.8rem;
-  font-weight: 600;
+// 全屏样式混入
+.fullscreen-container() {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.9);
+}
+
+// 全屏元素缩放混入
+.fullscreen-element(@scale: 3) {
+  transform: scale(@scale);
 }
 
 .examples-container {
@@ -306,129 +333,181 @@ export default {
 
 /* 动画示例项 */
 .example-item {
-  background: white;
-  border-radius: 8px;
+  background: @bg-color;
+  border-radius: @border-radius;
   padding: 1.5rem;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.example-item:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15);
-}
-
-.example-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
-}
-
-.header-right {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.example-header h3 {
-  color: #333;
-  font-size: 1.2rem;
-  margin: 0;
-}
-
-.example-type {
-  background-color: #f0f0f0;
-  color: #666;
-  padding: 4px 12px;
-  border-radius: 4px;
-  font-size: 0.8rem;
-}
-
-/* 全屏按钮 */
-.fullscreen-btn {
-  padding: 6px 12px;
-  background-color: #42b883;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-  font-size: 0.8rem;
-}
-
-.fullscreen-btn:hover {
-  background-color: #35495e;
-}
-
-/* 动画演示区域 */
-.animation-demo {
-  height: 200px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  perspective: 1000px;
-  perspective-origin: center;
+  transition: @transition;
+  
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15);
+  }
+  
+  .example-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    
+    h3 {
+      color: @text-color;
+      font-size: 1.2rem;
+      margin: 0;
+    }
+    
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      
+      .example-type {
+        background-color: #f0f0f0;
+        color: #666;
+        padding: 4px 12px;
+        border-radius: 4px;
+        font-size: 0.8rem;
+      }
+      
+      /* 全屏按钮 */
+      .fullscreen-btn {
+        padding: 6px 12px;
+        background-color: #42b883;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: @transition;
+        font-size: 0.8rem;
+        
+        &:hover {
+          background-color: #35495e;
+        }
+      }
+    }
+  }
+  
+  /* 动画演示区域 */
+  .animation-demo {
+    height: 200px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    perspective: 1000px;
+    perspective-origin: center;
+  }
 }
 
 /* 立方体样式 */
 .cube-container {
-  width: 120px;
-  height: 120px;
+  width: @cube-size;
+  height: @cube-size;
   position: relative;
   transform-style: preserve-3d;
   animation: rotateCube 10s infinite linear;
+  
+  .cube {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    transform-style: preserve-3d;
+    
+    .cube-face {
+      position: absolute;
+      width: @cube-size;
+      height: @cube-size;
+      border: 2px solid @text-color;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 1.5rem;
+      font-weight: bold;
+      opacity: 0.8;
+      
+      &.front {
+        background-color: #ff6b6b;
+        transform: translateZ(@cube-size / 2);
+      }
+      
+      &.back {
+        background-color: #4ecdc4;
+        transform: rotateY(180deg) translateZ(@cube-size / 2);
+      }
+      
+      &.right {
+        background-color: #45b7d1;
+        transform: rotateY(90deg) translateZ(@cube-size / 2);
+      }
+      
+      &.left {
+        background-color: #ffe66d;
+        transform: rotateY(-90deg) translateZ(@cube-size / 2);
+      }
+      
+      &.top {
+        background-color: #96ceb4;
+        transform: rotateX(90deg) translateZ(@cube-size / 2);
+      }
+      
+      &.bottom {
+        background-color: #feca57;
+        transform: rotateX(-90deg) translateZ(@cube-size / 2);
+      }
+    }
+  }
 }
 
-.cube {
-  width: 100%;
-  height: 100%;
-  position: absolute;
+/* 球体样式 */
+.sphere-container {
+  width: @sphere-size;
+  height: @sphere-size;
+  position: relative;
   transform-style: preserve-3d;
+  animation: rotateSphere 8s infinite linear;
+  
+  .sphere {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    transform-style: preserve-3d;
+    
+    .sphere-layer {
+      position: absolute;
+      width: @sphere-size;
+      height: @sphere-size;
+      border: 3px solid #3498db;
+      border-radius: 50%;
+      opacity: 0.7;
+      
+      &.layer2 {
+        transform: rotateY(30deg);
+      }
+      &.layer3 {
+        transform: rotateY(60deg);
+      }
+      &.layer4 {
+        transform: rotateY(90deg);
+      }
+      &.layer5 {
+        transform: rotateY(120deg);
+      }
+      &.layer6 {
+        transform: rotateY(150deg);
+      }
+    }
+  }
 }
 
-.cube-face {
-  position: absolute;
-  width: 120px;
-  height: 120px;
-  border: 2px solid #333;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 1.5rem;
-  font-weight: bold;
-  opacity: 0.8;
-}
-
-.front {
-  background-color: #ff6b6b;
-  transform: translateZ(60px);
-}
-
-.back {
-  background-color: #4ecdc4;
-  transform: rotateY(180deg) translateZ(60px);
-}
-
-.right {
-  background-color: #45b7d1;
-  transform: rotateY(90deg) translateZ(60px);
-}
-
-.left {
-  background-color: #ffe66d;
-  transform: rotateY(-90deg) translateZ(60px);
-}
-
-.top {
-  background-color: #96ceb4;
-  transform: rotateX(90deg) translateZ(60px);
-}
-
-.bottom {
-  background-color: #feca57;
-  transform: rotateX(-90deg) translateZ(60px);
-}
+/* @keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.5;
+  }
+} */
 
 @keyframes rotateCube {
   from {
@@ -437,42 +516,6 @@ export default {
   to {
     transform: rotateX(360deg) rotateY(360deg);
   }
-}
-
-/* 球体样式 */
-.sphere-container {
-  width: 120px;
-  height: 120px;
-  position: relative;
-  transform-style: preserve-3d;
-  animation: rotateSphere 8s infinite linear;
-}
-
-.sphere {
-  width: 100%;
-  height: 100%;
-  position: absolute;
-  transform-style: preserve-3d;
-}
-
-.sphere-layer {
-  position: absolute;
-  width: 120px;
-  height: 120px;
-  border: 3px solid #3498db;
-  border-radius: 50%;
-  opacity: 0.7;
-  animation: pulse 3s infinite ease-in-out;
-}
-
-.layer2 {
-  transform: rotateY(45deg);
-  animation-delay: 1s;
-}
-
-.layer3 {
-  transform: rotateY(90deg);
-  animation-delay: 2s;
 }
 
 @keyframes rotateSphere {
@@ -484,207 +527,98 @@ export default {
   }
 }
 
-@keyframes pulse {
-  0%, 100% {
-    transform: scale(1);
-    opacity: 0.7;
-  }
-  50% {
-    transform: scale(1.1);
-    opacity: 0.5;
-  }
-}
-
 /* 翻转卡片样式 */
 .card-container {
-  width: 150px;
-  height: 100px;
+  width: @card-width;
+  height: @card-height;
   position: relative;
   perspective: 1000px;
   cursor: pointer;
+  
+  .card {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    transform-style: preserve-3d;
+    transition: transform 0.6s ease;
+    
+    &.flipped {
+      transform: rotateY(180deg);
+    }
+    
+    .card-front, .card-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      border-radius: @border-radius;
+      color: white;
+      font-weight: bold;
+      
+      h4 {
+        margin: 0 0 5px 0;
+        font-size: 1rem;
+      }
+      
+      p {
+        margin: 0;
+        font-size: 0.8rem;
+        opacity: 0.9;
+      }
+    }
+    
+    .card-front {
+      background-color: #2ecc71;
+    }
+    
+    .card-back {
+      background-color: #e74c3c;
+      transform: rotateY(180deg);
+    }
+  }
 }
 
-.card {
-  width: 100%;
-  height: 100%;
-  position: absolute;
-  transform-style: preserve-3d;
-  transition: transform 0.6s ease;
-}
-
-.card.flipped {
-  transform: rotateY(180deg);
-}
-
-.card-front, .card-back {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  backface-visibility: hidden;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  border-radius: 8px;
-  color: white;
-  font-weight: bold;
-}
-
-.card-front {
-  background-color: #2ecc71;
-}
-
-.card-back {
-  background-color: #e74c3c;
-  transform: rotateY(180deg);
-}
-
-.card h4 {
-  margin: 0 0 5px 0;
-  font-size: 1rem;
-}
-
-.card p {
-  margin: 0;
-  font-size: 0.8rem;
-  opacity: 0.9;
-}
-
-/* 金字塔样式 */
+/* 金字塔容器样式 */
 .pyramid-container {
-  width: 120px;
-  height: 120px;
-  position: relative;
-  transform-style: preserve-3d;
-  animation: rotatePyramid 12s infinite linear;
-}
-
-.pyramid {
   width: 100%;
   height: 100%;
-  position: absolute;
-  transform-style: preserve-3d;
-}
-
-.pyramid-face {
-  position: absolute;
-  width: 0;
-  height: 0;
-  border-left: 60px solid transparent;
-  border-right: 60px solid transparent;
-  border-bottom: 104px solid rgba(231, 76, 60, 0.8);
-  transform-origin: 50% 0%;
-}
-
-.pyramid-face.front {
-  transform: translateZ(52px) rotateX(-30deg);
-}
-
-.pyramid-face.back {
-  transform: translateZ(-52px) rotateX(30deg) rotateY(180deg);
-}
-
-.pyramid-face.right {
-  transform: translateX(30px) rotateY(90deg) rotateX(-30deg);
-}
-
-.pyramid-face.left {
-  transform: translateX(-30px) rotateY(-90deg) rotateX(-30deg);
-}
-
-.pyramid-base {
-  position: absolute;
-  width: 120px;
-  height: 120px;
-  background-color: rgba(155, 89, 182, 0.6);
-  transform: translateY(52px) rotateX(90deg);
-}
-
-@keyframes rotatePyramid {
-  from {
-    transform: rotateY(0deg) rotateX(0deg);
-  }
-  to {
-    transform: rotateY(360deg) rotateX(360deg);
-  }
+  position: relative;
 }
 
 /* 全屏模式样式 */
-.cube-container:fullscreen, 
-.sphere-container:fullscreen, 
-.card-container:fullscreen, 
-.pyramid-container:fullscreen {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: rgba(0, 0, 0, 0.9);
-}
-
-.cube-container:fullscreen .cube, 
-.sphere-container:fullscreen .sphere, 
-.card-container:fullscreen .card, 
-.pyramid-container:fullscreen .pyramid {
-  transform: scale(2); /* 放大3D元素 */
-}
-
-/* 浏览器前缀支持 */
-.cube-container:-webkit-full-screen, 
-.sphere-container:-webkit-full-screen, 
-.card-container:-webkit-full-screen, 
-.pyramid-container:-webkit-full-screen {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: rgba(0, 0, 0, 0.9);
-}
-
-.cube-container:-webkit-full-screen .cube, 
-.sphere-container:-webkit-full-screen .sphere, 
-.card-container:-webkit-full-screen .card, 
-.pyramid-container:-webkit-full-screen .pyramid {
-  transform: scale(2);
-}
-
-.cube-container:-moz-full-screen, 
-.sphere-container:-moz-full-screen, 
-.card-container:-moz-full-screen, 
-.pyramid-container:-moz-full-screen {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: rgba(0, 0, 0, 0.9);
-}
-
-.cube-container:-moz-full-screen .cube, 
-.sphere-container:-moz-full-screen .sphere, 
-.card-container:-moz-full-screen .card, 
-.pyramid-container:-moz-full-screen .pyramid {
-  transform: scale(2);
-}
-
-.cube-container:-ms-fullscreen, 
-.sphere-container:-ms-fullscreen, 
-.card-container:-ms-fullscreen, 
-.pyramid-container:-ms-fullscreen {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: rgba(0, 0, 0, 0.9);
-}
-
-.cube-container:-ms-fullscreen .cube, 
-.sphere-container:-ms-fullscreen .sphere, 
-.card-container:-ms-fullscreen .card, 
-.pyramid-container:-ms-fullscreen .pyramid {
-  transform: scale(2);
+.cube-container,
+.sphere-container,
+.card-container,
+.pyramid-container {
+  &:fullscreen, 
+  &:-webkit-full-screen, 
+  &:-moz-full-screen, 
+  &:-ms-fullscreen {
+    .fullscreen-container();
+  }
+  
+  &:fullscreen .cube, 
+  &:-webkit-full-screen .cube, 
+  &:-moz-full-screen .cube, 
+  &:-ms-fullscreen .cube,
+  &:fullscreen .sphere, 
+  &:-webkit-full-screen .sphere, 
+  &:-moz-full-screen .sphere, 
+  &:-ms-fullscreen .sphere,
+  &:fullscreen .card, 
+  &:-webkit-full-screen .card, 
+  &:-moz-full-screen .card, 
+  &:-ms-fullscreen .card,
+  &:fullscreen .pyramid-container, 
+  &:-webkit-full-screen .pyramid-container, 
+  &:-moz-full-screen .pyramid-container, 
+  &:-ms-fullscreen .pyramid-container {
+    .fullscreen-element();
+  }
 }
 
 /* 响应式设计 */
@@ -693,23 +627,28 @@ export default {
     grid-template-columns: 1fr;
   }
   
-  .cube-container:fullscreen .cube, 
-  .sphere-container:fullscreen .sphere, 
-  .card-container:fullscreen .card, 
-  .pyramid-container:fullscreen .pyramid,
-  .cube-container:-webkit-full-screen .cube, 
-  .sphere-container:-webkit-full-screen .sphere, 
-  .card-container:-webkit-full-screen .card, 
-  .pyramid-container:-webkit-full-screen .pyramid,
-  .cube-container:-moz-full-screen .cube, 
-  .sphere-container:-moz-full-screen .sphere, 
-  .card-container:-moz-full-screen .card, 
-  .pyramid-container:-moz-full-screen .pyramid,
-  .cube-container:-ms-fullscreen .cube, 
-  .sphere-container:-ms-fullscreen .sphere, 
-  .card-container:-ms-fullscreen .card, 
-  .pyramid-container:-ms-fullscreen .pyramid {
-    transform: scale(1.5); /* 移动设备上适当缩小放大比例 */
+  .cube-container,
+  .sphere-container,
+  .card-container,
+  .pyramid-container {
+    &:fullscreen .cube, 
+    &:-webkit-full-screen .cube, 
+    &:-moz-full-screen .cube, 
+    &:-ms-fullscreen .cube,
+    &:fullscreen .sphere, 
+    &:-webkit-full-screen .sphere, 
+    &:-moz-full-screen .sphere, 
+    &:-ms-fullscreen .sphere,
+    &:fullscreen .card, 
+    &:-webkit-full-screen .card, 
+    &:-moz-full-screen .card, 
+    &:-ms-fullscreen .card,
+    &:fullscreen .pyramid-container, 
+    &:-webkit-full-screen .pyramid-container, 
+    &:-moz-full-screen .pyramid-container, 
+    &:-ms-fullscreen .pyramid-container {
+      .fullscreen-element(1.5);
+    }
   }
 }
 </style>

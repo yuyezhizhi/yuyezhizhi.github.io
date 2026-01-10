@@ -69,7 +69,18 @@ export default {
 }
 </script>
 
-<style>
+<style lang="less">
+// 变量定义
+@primary-color: #f87884;
+@bg-color: #fff5f5;
+@text-color: #333;
+@white: #ffffff;
+@dark-gray: #343a40;
+@container-width: 1200px;
+@border-radius: 5px;
+@transition: all 0.3s ease;
+
+// 重置样式
 * {
   margin: 0;
   padding: 0;
@@ -79,16 +90,18 @@ export default {
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   line-height: 1.6;
-  color: #333;
-  background-color: #fff5f5;
+  color: @text-color;
+  background-color: @bg-color;
 }
 
+// 主应用容器
 #app {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
 }
 
+// 导航栏
 .navbar {
   position: fixed;
   top: 0;
@@ -97,82 +110,87 @@ body {
   padding: 1rem 0;
   box-shadow: 0 2px 10px rgba(0,0,0,0.1);
   z-index: 1000;
-  transition: background-color 0.3s ease;
+  transition: @transition;
   backdrop-filter: saturate(180%) blur(6px);
   background: rgba(255, 255, 255, 0.9);
+  
+  .nav-container {
+    max-width: @container-width;
+    margin: 0 auto;
+    padding: 0 2rem;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 3rem;
+    
+    .logo a {
+      color: @text-color;
+      text-decoration: none;
+      font-size: 1.8rem;
+      font-weight: bold;
+    }
+    
+    .nav-menu {
+      display: flex;
+      list-style: none;
+      gap: 2rem;
+      
+      .nav-link {
+        color: @text-color;
+        text-decoration: none;
+        padding: 0.5rem 1rem;
+        border-radius: @border-radius;
+        transition: @transition;
+        
+        &:hover {
+          background-color: rgba(@primary-color, 0.1);
+        }
+        
+        &.router-link-active {
+          background-color: rgba(@primary-color, 0.2);
+          color: @primary-color;
+          font-weight: 600;
+        }
+      }
+    }
+  }
 }
 
-.nav-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 2rem;
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-  gap: 3rem;
-}
-
-.logo a {
-  color: #333;
-  text-decoration: none;
-  font-size: 1.8rem;
-  font-weight: bold;
-}
-
-.nav-menu {
-  display: flex;
-  list-style: none;
-  gap: 2rem;
-}
-
-.nav-link {
-  color: #333;
-  text-decoration: none;
-  padding: 0.5rem 1rem;
-  border-radius: 5px;
-  transition: background-color 0.3s;
-}
-
-.nav-link:hover {
-  background-color: rgba(248, 120, 132, 0.1);
-}
-
-.nav-link.router-link-active {
-  background-color: rgba(248, 120, 132, 0.2);
-  color: #f87884;
-  font-weight: 600;
-}
-
+// 主要内容区域
 .main-content {
   flex: 1;
-  max-width: 1200px;
+  max-width: @container-width;
   margin: 0 auto;
   padding: 8rem 2rem 2rem;
   width: 100%;
 }
 
+// 页脚
 .footer {
-  background-color: #343a40;
-  color: white;
+  background-color: @dark-gray;
+  color: @white;
   text-align: center;
   padding: 1.5rem 0;
   margin-top: auto;
-}
-
-.footer-content {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 2rem;
-}
-
-@media (max-width: 768px) {
-  .nav-container {
-    flex-direction: column;
-    gap: 1rem;
-  }
   
-  .nav-menu {
-    gap: 1rem;
+  .footer-content {
+    max-width: @container-width;
+    margin: 0 auto;
+    padding: 0 2rem;
+  }
+}
+
+// 响应式设计
+@media (max-width: 768px) {
+  .navbar {
+    .nav-container {
+      flex-direction: column;
+      gap: 1rem;
+      
+      .nav-menu {
+        gap: 1rem;
+      }
+    }
   }
   
   .main-content {
@@ -180,7 +198,7 @@ body {
   }
 }
 
-/* 回到顶部按钮样式 */
+// 回到顶部按钮
 .back-to-top-btn {
   position: fixed;
   bottom: 2rem;
@@ -188,19 +206,19 @@ body {
   width: 3rem;
   height: 3rem;
   border-radius: 50%;
-  background: rgba(248, 120, 132, 0.9);
-  color: white;
+  background: rgba(@primary-color, 0.9);
+  color: @white;
   border: none;
   font-size: 1.5rem;
   cursor: pointer;
   opacity: 0.8;
-  transition: opacity 0.3s, transform 0.3s;
+  transition: @transition;
   z-index: 999;
   box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-}
-
-.back-to-top-btn:hover {
-  opacity: 1;
-  transform: translateY(-5px);
+  
+  &:hover {
+    opacity: 1;
+    transform: translateY(-5px);
+  }
 }
 </style>

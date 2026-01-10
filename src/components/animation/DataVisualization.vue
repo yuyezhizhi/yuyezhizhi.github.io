@@ -292,75 +292,82 @@ export default {
 }
 </script>
 
-<style scoped>
+<style scoped lang="less">
+// 变量定义
+@text-color: #333;
+@bg-color: #ffffff;
+@border-radius: 8px;
+@transition: all 0.3s ease;
+@chart-height: 300px;
+@chart-height-mobile: 250px;
+
 /* 数据可视化容器 */
 .category-section {
   width: 100%;
-}
-
-.section-title {
-  color: #333;
-  margin-bottom: 2rem;
-  font-size: 1.8rem;
-  font-weight: 600;
-}
-
-.examples-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 2rem;
-  margin: 2rem 0;
-}
-
-/* 图表示例项 */
-.example-item {
-  background: white;
-  border-radius: 8px;
-  padding: 1.5rem;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.example-item:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15);
-}
-
-.example-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
-}
-
-.example-header h3 {
-  color: #333;
-  font-size: 1.2rem;
-  margin: 0;
-}
-
-.example-type {
-  background-color: #f0f0f0;
-  color: #666;
-  padding: 4px 12px;
-  border-radius: 4px;
-  font-size: 0.8rem;
-}
-
-/* 图表容器 */
-.chart {
-  height: 300px;
-  margin-top: 1rem;
-}
-
-/* 响应式设计 */
-@media (max-width: 768px) {
-  .examples-container {
-    grid-template-columns: 1fr;
+  
+  .section-title {
+    color: @text-color;
+    margin-bottom: 2rem;
+    font-size: 1.8rem;
+    font-weight: 600;
   }
   
-  .chart {
-    height: 250px;
+  .examples-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 2rem;
+    margin: 2rem 0;
+    
+    /* 响应式设计 */
+    @media (max-width: 768px) {
+      grid-template-columns: 1fr;
+    }
+  }
+  
+  /* 图表示例项 */
+  .example-item {
+    background: @bg-color;
+    border-radius: @border-radius;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: @transition;
+    
+    &:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15);
+    }
+    
+    .example-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      
+      h3 {
+        color: @text-color;
+        font-size: 1.2rem;
+        margin: 0;
+      }
+      
+      .example-type {
+        background-color: #f0f0f0;
+        color: #666;
+        padding: 4px 12px;
+        border-radius: 4px;
+        font-size: 0.8rem;
+      }
+    }
+    
+    /* 图表容器 */
+    .chart {
+      height: @chart-height;
+      margin-top: 1rem;
+      
+      /* 响应式设计 */
+      @media (max-width: 768px) {
+        height: @chart-height-mobile;
+      }
+    }
   }
 }
 </style>
