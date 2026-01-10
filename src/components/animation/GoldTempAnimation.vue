@@ -231,17 +231,7 @@ onUnmounted(() => {
 </script>
 
 <style scoped lang="less">
-// 变量定义
-@container-height: 200px;
-
 .pyramid-container {
-  height: @container-height;
-  min-height: @container-height;
-  max-height: @container-height;
-  width: 100%;
-  position: relative;
-  overflow: hidden;
-  
   canvas {
     display: block;
     width: 100% !important;

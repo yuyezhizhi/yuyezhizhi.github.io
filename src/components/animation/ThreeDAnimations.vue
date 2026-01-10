@@ -27,9 +27,12 @@
           </div>
         </div>
       </div>
-      
+
       <!-- 3D球体旋转 -->
-      <div class="example-item animate__animated animate__zoomIn" style="animation-delay: 0.3s">
+      <div
+        class="example-item animate__animated animate__zoomIn"
+        style="animation-delay: 0.3s"
+      >
         <div class="example-header">
           <h3>3D球体旋转</h3>
           <div class="header-right">
@@ -53,9 +56,12 @@
           </div>
         </div>
       </div>
-      
+
       <!-- 3D翻转卡片 -->
-      <div class="example-item animate__animated animate__zoomIn" style="animation-delay: 0.6s">
+      <div
+        class="example-item animate__animated animate__zoomIn"
+        style="animation-delay: 0.6s"
+      >
         <div class="example-header">
           <h3>3D翻转卡片</h3>
           <div class="header-right">
@@ -68,7 +74,7 @@
         </div>
         <div class="animation-demo">
           <div ref="cardContainer" class="card-container" @click="flipCard">
-            <div class="card" :class="{ 'flipped': cardFlipped }">
+            <div class="card" :class="{ flipped: cardFlipped }">
               <div class="card-front">
                 <h4>卡片正面</h4>
                 <p>点击翻转</p>
@@ -81,9 +87,12 @@
           </div>
         </div>
       </div>
-      
+
       <!-- 3D金字塔 -->
-      <div class="example-item animate__animated animate__zoomIn" style="animation-delay: 0.9s">
+      <div
+        class="example-item animate__animated animate__zoomIn"
+        style="animation-delay: 0.9s"
+      >
         <div class="example-header">
           <h3>3D金字塔粒子</h3>
           <div class="header-right">
@@ -96,7 +105,7 @@
         </div>
         <div class="animation-demo">
           <div ref="pyramidContainer" class="pyramid-container">
-            <GoldTempAnimation ref="pyramid"/>
+            <GoldTempAnimation ref="pyramid" />
           </div>
         </div>
       </div>
@@ -105,50 +114,71 @@
 </template>
 
 <script>
-import GoldTempAnimation from './GoldTempAnimation.vue'
+import GoldTempAnimation from "./GoldTempAnimation.vue";
 
 export default {
-  name: 'ThreeDAnimations',
+  name: "ThreeDAnimations",
   components: {
-    GoldTempAnimation
+    GoldTempAnimation,
   },
   data() {
     return {
       cardFlipped: false,
       fullscreenElements: {},
-      originalStyles: {} // 保存原始样式
-    }
+      originalStyles: {}, // 保存原始样式
+    };
   },
-  
+
   mounted() {
     // 监听所有全屏变化事件
-    document.addEventListener('fullscreenchange', this.handleFullscreenChange);
-    document.addEventListener('webkitfullscreenchange', this.handleFullscreenChange);
-    document.addEventListener('mozfullscreenchange', this.handleFullscreenChange);
-    document.addEventListener('msfullscreenchange', this.handleFullscreenChange);
+    document.addEventListener("fullscreenchange", this.handleFullscreenChange);
+    document.addEventListener(
+      "webkitfullscreenchange",
+      this.handleFullscreenChange
+    );
+    document.addEventListener(
+      "mozfullscreenchange",
+      this.handleFullscreenChange
+    );
+    document.addEventListener(
+      "msfullscreenchange",
+      this.handleFullscreenChange
+    );
   },
-  
+
   beforeUnmount() {
     // 清理所有全屏事件监听
-    document.removeEventListener('fullscreenchange', this.handleFullscreenChange);
-    document.removeEventListener('webkitfullscreenchange', this.handleFullscreenChange);
-    document.removeEventListener('mozfullscreenchange', this.handleFullscreenChange);
-    document.removeEventListener('msfullscreenchange', this.handleFullscreenChange);
-    
+    document.removeEventListener(
+      "fullscreenchange",
+      this.handleFullscreenChange
+    );
+    document.removeEventListener(
+      "webkitfullscreenchange",
+      this.handleFullscreenChange
+    );
+    document.removeEventListener(
+      "mozfullscreenchange",
+      this.handleFullscreenChange
+    );
+    document.removeEventListener(
+      "msfullscreenchange",
+      this.handleFullscreenChange
+    );
+
     // 确保退出所有全屏
     this.exitAllFullscreen();
   },
-  
+
   methods: {
     flipCard() {
       this.cardFlipped = !this.cardFlipped;
     },
-    
+
     // 检查是否处于全屏状态
     isFullscreen(type) {
       return !!this.fullscreenElements[type];
     },
-    
+
     // 切换全屏
     async toggleFullscreen(type) {
       if (this.isFullscreen(type)) {
@@ -157,15 +187,15 @@ export default {
         await this.enterFullscreen(type);
       }
     },
-    
+
     // 进入全屏
     async enterFullscreen(type) {
       // 先退出其他可能的全屏
       await this.exitAllFullscreen();
-      
+
       const containerRef = this.$refs[`${type}Container`];
       if (!containerRef) return;
-      
+
       try {
         // 保存原始样式
         this.originalStyles[type] = {
@@ -175,18 +205,27 @@ export default {
           width: containerRef.style.width,
           height: containerRef.style.height,
           backgroundColor: containerRef.style.backgroundColor,
-          zIndex: containerRef.style.zIndex
+          zIndex: containerRef.style.zIndex,
         };
-        
+
         // 应用全屏样式
-        containerRef.style.position = 'fixed';
-        containerRef.style.top = '0';
-        containerRef.style.left = '0';
-        containerRef.style.width = '100vw';
-        containerRef.style.height = '100vh';
-        containerRef.style.backgroundColor = 'rgba(0, 0, 0, 0.9)';
-        containerRef.style.zIndex = '9999';
-        
+        containerRef.style.position = "fixed";
+        containerRef.style.top = "0";
+        containerRef.style.left = "0";
+        containerRef.style.width = "100vw";
+        containerRef.style.height = "100vh";
+        containerRef.style.backgroundColor = "rgba(0, 0, 0, 0.9)";
+        containerRef.style.zIndex = "9999";
+        containerRef.style.display = "flex";
+        containerRef.style.justifyContent = "center";
+        containerRef.style.alignItems = "center";
+        containerRef.style.perspective = "1000px";
+        containerRef.style.perspectiveOrigin = "center";
+        containerRef.style.transformStyle = "preserve-3d";
+
+        // 添加全屏激活类
+        containerRef.classList.add("fullscreen-active");
+
         // 尝试进入浏览器全屏
         if (containerRef.requestFullscreen) {
           await containerRef.requestFullscreen();
@@ -197,22 +236,21 @@ export default {
         } else if (containerRef.msRequestFullscreen) {
           await containerRef.msRequestFullscreen();
         }
-        
+
         // 记录全屏元素
         this.fullscreenElements[type] = containerRef;
-        
       } catch (error) {
-        console.error('进入全屏失败:', error);
+        console.error("进入全屏失败:", error);
         // 恢复原始样式
         this.restoreOriginalStyles(type);
       }
     },
-    
+
     // 退出全屏
     async exitFullscreen(type) {
       const fullscreenElement = this.fullscreenElements[type];
       if (!fullscreenElement) return;
-      
+
       try {
         // 退出浏览器全屏
         if (document.exitFullscreen) {
@@ -224,30 +262,32 @@ export default {
         } else if (document.msExitFullscreen) {
           await document.msExitFullscreen();
         }
-        
+
         // 恢复原始样式
         this.restoreOriginalStyles(type);
-        
+
         // 清除记录
         delete this.fullscreenElements[type];
         delete this.originalStyles[type];
-        
       } catch (error) {
-        console.error('退出全屏失败:', error);
+        console.error("退出全屏失败:", error);
         // 强制恢复原始样式
         this.restoreOriginalStyles(type);
         delete this.fullscreenElements[type];
         delete this.originalStyles[type];
       }
     },
-    
+
     // 恢复原始样式
     restoreOriginalStyles(type) {
       if (!this.originalStyles[type]) return;
-      
+
       const containerRef = this.fullscreenElements[type];
       if (!containerRef) return;
-      
+
+      // 移除全屏激活类
+      containerRef.classList.remove("fullscreen-active");
+
       const originalStyle = this.originalStyles[type];
       containerRef.style.position = originalStyle.position;
       containerRef.style.top = originalStyle.top;
@@ -257,7 +297,7 @@ export default {
       containerRef.style.backgroundColor = originalStyle.backgroundColor;
       containerRef.style.zIndex = originalStyle.zIndex;
     },
-    
+
     // 退出所有全屏
     async exitAllFullscreen() {
       const types = Object.keys(this.fullscreenElements);
@@ -265,25 +305,28 @@ export default {
         await this.exitFullscreen(type);
       }
     },
-    
+
     // 处理全屏变化事件
     handleFullscreenChange() {
       // 如果没有任何元素处于全屏状态，清除所有记录并恢复样式
-      if (!document.fullscreenElement && !document.webkitFullscreenElement && 
-          !document.mozFullScreenElement && !document.msFullscreenElement) {
-        
+      if (
+        !document.fullscreenElement &&
+        !document.webkitFullscreenElement &&
+        !document.mozFullScreenElement &&
+        !document.msFullscreenElement
+      ) {
         // 恢复所有原始样式
-        Object.keys(this.originalStyles).forEach(type => {
+        Object.keys(this.originalStyles).forEach((type) => {
           this.restoreOriginalStyles(type);
         });
-        
+
         // 清除所有记录
         this.fullscreenElements = {};
         this.originalStyles = {};
       }
-    }
-  }
-}
+    },
+  },
+};
 </script>
 
 <style scoped lang="less">
@@ -300,28 +343,13 @@ export default {
 /* 3D动画容器 */
 .category-section {
   width: 100%;
-  
+
   .section-title {
     color: @text-color;
     margin-bottom: 2rem;
     font-size: 1.8rem;
     font-weight: 600;
   }
-}
-
-// 全屏样式混入
-.fullscreen-container() {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: rgba(0, 0, 0, 0.9);
-}
-
-// 全屏元素缩放混入
-.fullscreen-element(@scale: 3) {
-  transform: scale(@scale);
 }
 
 .examples-container {
@@ -338,29 +366,29 @@ export default {
   padding: 1.5rem;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   transition: @transition;
-  
+
   &:hover {
     transform: translateY(-5px);
     box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15);
   }
-  
+
   .example-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 1rem;
-    
+
     h3 {
       color: @text-color;
       font-size: 1.2rem;
       margin: 0;
     }
-    
+
     .header-right {
       display: flex;
       align-items: center;
       gap: 10px;
-      
+
       .example-type {
         background-color: #f0f0f0;
         color: #666;
@@ -368,7 +396,7 @@ export default {
         border-radius: 4px;
         font-size: 0.8rem;
       }
-      
+
       /* 全屏按钮 */
       .fullscreen-btn {
         padding: 6px 12px;
@@ -379,14 +407,14 @@ export default {
         cursor: pointer;
         transition: @transition;
         font-size: 0.8rem;
-        
+
         &:hover {
           background-color: #35495e;
         }
       }
     }
   }
-  
+
   /* 动画演示区域 */
   .animation-demo {
     height: 200px;
@@ -405,13 +433,13 @@ export default {
   position: relative;
   transform-style: preserve-3d;
   animation: rotateCube 10s infinite linear;
-  
+
   .cube {
     width: 100%;
     height: 100%;
     position: absolute;
     transform-style: preserve-3d;
-    
+
     .cube-face {
       position: absolute;
       width: @cube-size;
@@ -423,35 +451,35 @@ export default {
       font-size: 1.5rem;
       font-weight: bold;
       opacity: 0.8;
-      
+
       &.front {
         background-color: #ff6b6b;
-        transform: translateZ(@cube-size / 2);
+        transform: translateZ((@cube-size / 2));
       }
-      
+
       &.back {
         background-color: #4ecdc4;
-        transform: rotateY(180deg) translateZ(@cube-size / 2);
+        transform: translateZ((-@cube-size / 2)) rotateY(180deg);
       }
-      
+
       &.right {
         background-color: #45b7d1;
-        transform: rotateY(90deg) translateZ(@cube-size / 2);
+        transform: translateX((@cube-size / 2)) rotateY(90deg);
       }
-      
+
       &.left {
         background-color: #ffe66d;
-        transform: rotateY(-90deg) translateZ(@cube-size / 2);
+        transform: translateX((-@cube-size / 2)) rotateY(-90deg);
       }
-      
+
       &.top {
         background-color: #96ceb4;
-        transform: rotateX(90deg) translateZ(@cube-size / 2);
+        transform: translateY((-@cube-size / 2)) rotateX(90deg);
       }
-      
+
       &.bottom {
         background-color: #feca57;
-        transform: rotateX(-90deg) translateZ(@cube-size / 2);
+        transform: translateY((@cube-size / 2)) rotateX(-90deg);
       }
     }
   }
@@ -464,13 +492,13 @@ export default {
   position: relative;
   transform-style: preserve-3d;
   animation: rotateSphere 8s infinite linear;
-  
+
   .sphere {
     width: 100%;
     height: 100%;
     position: absolute;
     transform-style: preserve-3d;
-    
+
     .sphere-layer {
       position: absolute;
       width: @sphere-size;
@@ -478,7 +506,7 @@ export default {
       border: 3px solid #3498db;
       border-radius: 50%;
       opacity: 0.7;
-      
+
       &.layer2 {
         transform: rotateY(30deg);
       }
@@ -498,17 +526,6 @@ export default {
   }
 }
 
-/* @keyframes pulse {
-  0%, 100% {
-    transform: scale(1);
-    opacity: 0.7;
-  }
-  50% {
-    transform: scale(1.1);
-    opacity: 0.5;
-  }
-} */
-
 @keyframes rotateCube {
   from {
     transform: rotateX(0deg) rotateY(0deg);
@@ -520,10 +537,10 @@ export default {
 
 @keyframes rotateSphere {
   from {
-    transform: rotateY(0deg);
+    transform: rotateX(0deg) rotateY(0deg);
   }
   to {
-    transform: rotateY(360deg);
+    transform: rotateX(360deg) rotateY(360deg);
   }
 }
 
@@ -534,19 +551,20 @@ export default {
   position: relative;
   perspective: 1000px;
   cursor: pointer;
-  
+
   .card {
     width: 100%;
     height: 100%;
     position: absolute;
     transform-style: preserve-3d;
     transition: transform 0.6s ease;
-    
+
     &.flipped {
       transform: rotateY(180deg);
     }
-    
-    .card-front, .card-back {
+
+    .card-front,
+    .card-back {
       position: absolute;
       width: 100%;
       height: 100%;
@@ -558,23 +576,23 @@ export default {
       border-radius: @border-radius;
       color: white;
       font-weight: bold;
-      
+
       h4 {
         margin: 0 0 5px 0;
         font-size: 1rem;
       }
-      
+
       p {
         margin: 0;
         font-size: 0.8rem;
         opacity: 0.9;
       }
     }
-    
+
     .card-front {
       background-color: #2ecc71;
     }
-    
+
     .card-back {
       background-color: #e74c3c;
       transform: rotateY(180deg);
@@ -590,35 +608,94 @@ export default {
 }
 
 /* 全屏模式样式 */
-.cube-container,
-.sphere-container,
-.card-container,
-.pyramid-container {
-  &:fullscreen, 
-  &:-webkit-full-screen, 
-  &:-moz-full-screen, 
-  &:-ms-fullscreen {
-    .fullscreen-container();
-  }
-  
-  &:fullscreen .cube, 
-  &:-webkit-full-screen .cube, 
-  &:-moz-full-screen .cube, 
-  &:-ms-fullscreen .cube,
-  &:fullscreen .sphere, 
-  &:-webkit-full-screen .sphere, 
-  &:-moz-full-screen .sphere, 
-  &:-ms-fullscreen .sphere,
-  &:fullscreen .card, 
-  &:-webkit-full-screen .card, 
-  &:-moz-full-screen .card, 
-  &:-ms-fullscreen .card,
-  &:fullscreen .pyramid-container, 
-  &:-webkit-full-screen .pyramid-container, 
-  &:-moz-full-screen .pyramid-container, 
-  &:-ms-fullscreen .pyramid-container {
-    .fullscreen-element();
-  }
+/* 直接应用到容器类上，确保全屏时样式能正确应用 */
+:deep(.cube-container:fullscreen),
+:deep(.sphere-container:fullscreen),
+:deep(.card-container:fullscreen),
+:deep(.pyramid-container:fullscreen),
+:deep(.cube-container:-webkit-full-screen),
+:deep(.sphere-container:-webkit-full-screen),
+:deep(.card-container:-webkit-full-screen),
+:deep(.pyramid-container:-webkit-full-screen),
+:deep(.cube-container:-moz-full-screen),
+:deep(.sphere-container:-moz-full-screen),
+:deep(.card-container:-moz-full-screen),
+:deep(.pyramid-container:-moz-full-screen),
+:deep(.cube-container:-ms-fullscreen),
+:deep(.sphere-container:-ms-fullscreen),
+:deep(.card-container:-ms-fullscreen),
+:deep(.pyramid-container:-ms-fullscreen) {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.9);
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 9999;
+  perspective: 1000px;
+  perspective-origin: center;
+  transform-style: preserve-3d;
+}
+
+/* 自定义全屏激活类 */
+:deep(.cube-container.fullscreen-active),
+:deep(.sphere-container.fullscreen-active),
+:deep(.card-container.fullscreen-active),
+:deep(.pyramid-container.fullscreen-active) {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.9);
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 9999;
+  perspective: 1000px;
+  perspective-origin: center;
+  transform-style: preserve-3d;
+}
+
+/* 立方体全屏样式 - 应用在容器上以保持与旋转动画一致 */
+:deep(.cube-container:fullscreen),
+:deep(.cube-container:-webkit-full-screen),
+:deep(.cube-container:-moz-full-screen),
+:deep(.cube-container:-ms-fullscreen),
+:deep(.cube-container.fullscreen-active) {
+  transform: scale(3);
+  animation: rotateCube 10s infinite linear;
+}
+
+/* 球体全屏样式 - 应用在容器上以保持与旋转动画一致 */
+:deep(.sphere-container:fullscreen),
+:deep(.sphere-container:-webkit-full-screen),
+:deep(.sphere-container:-moz-full-screen),
+:deep(.sphere-container:-ms-fullscreen),
+:deep(.sphere-container.fullscreen-active) {
+  transform: scale(3);
+  animation: rotateSphere 8s infinite linear;
+}
+
+/* 卡片全屏样式 */
+:deep(.card-container:fullscreen .card),
+:deep(.card-container:-webkit-full-screen .card),
+:deep(.card-container:-moz-full-screen .card),
+:deep(.card-container:-ms-fullscreen .card),
+:deep(.card-container.fullscreen-active .card) {
+  transform: scale(3);
+}
+
+/* 金字塔全屏样式 */
+:deep(.pyramid-container:fullscreen .pyramid),
+:deep(.pyramid-container:-webkit-full-screen .pyramid),
+:deep(.pyramid-container:-moz-full-screen .pyramid),
+:deep(.pyramid-container:-ms-fullscreen .pyramid),
+:deep(.pyramid-container.fullscreen-active .pyramid) {
+  transform: scale(3);
 }
 
 /* 响应式设计 */
@@ -626,29 +703,29 @@ export default {
   .examples-container {
     grid-template-columns: 1fr;
   }
-  
-  .cube-container,
-  .sphere-container,
-  .card-container,
-  .pyramid-container {
-    &:fullscreen .cube, 
-    &:-webkit-full-screen .cube, 
-    &:-moz-full-screen .cube, 
-    &:-ms-fullscreen .cube,
-    &:fullscreen .sphere, 
-    &:-webkit-full-screen .sphere, 
-    &:-moz-full-screen .sphere, 
-    &:-ms-fullscreen .sphere,
-    &:fullscreen .card, 
-    &:-webkit-full-screen .card, 
-    &:-moz-full-screen .card, 
-    &:-ms-fullscreen .card,
-    &:fullscreen .pyramid-container, 
-    &:-webkit-full-screen .pyramid-container, 
-    &:-moz-full-screen .pyramid-container, 
-    &:-ms-fullscreen .pyramid-container {
-      .fullscreen-element(1.5);
-    }
+  :deep(.cube-container:fullscreen),
+  :deep(.cube-container:-webkit-full-screen),
+  :deep(.cube-container:-moz-full-screen),
+  :deep(.cube-container:-ms-fullscreen) {
+    transform: scale(1.5);
+  }
+  :deep(.sphere-container:fullscreen),
+  :deep(.sphere-container:-webkit-full-screen),
+  :deep(.sphere-container:-moz-full-screen),
+  :deep(.sphere-container:-ms-fullscreen) {
+    transform: scale(1.5);
+  }
+  :deep(.card-container:fullscreen .card),
+  :deep(.card-container:-webkit-full-screen .card),
+  :deep(.card-container:-moz-full-screen .card),
+  :deep(.card-container:-ms-fullscreen .card) {
+    transform: scale(1.5);
+  }
+  :deep(.pyramid-container:fullscreen .pyramid),
+  :deep(.pyramid-container:-webkit-full-screen .pyramid),
+  :deep(.pyramid-container:-moz-full-screen .pyramid),
+  :deep(.pyramid-container:-ms-fullscreen .pyramid) {
+    transform: scale(1.5);
   }
 }
 </style>
