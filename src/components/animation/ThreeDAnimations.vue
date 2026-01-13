@@ -115,6 +115,7 @@
 
 <script>
 import GoldTempAnimation from "./GoldTempAnimation.vue";
+import * as THREE from 'three';
 
 export default {
   name: "ThreeDAnimations",
@@ -126,47 +127,36 @@ export default {
       cardFlipped: false,
       fullscreenElements: {},
       originalStyles: {}, // 保存原始样式
+      threeJsScenes: {}, // 保存three.js场景对象
+      handleFullscreenChangeHandler: null // 事件处理函数引用
     };
   },
 
   mounted() {
+    // 创建事件处理函数引用，确保this指向Vue组件实例
+    this.handleFullscreenChangeHandler = () => this.handleFullscreenChange();
+
     // 监听所有全屏变化事件
-    document.addEventListener("fullscreenchange", this.handleFullscreenChange);
-    document.addEventListener(
-      "webkitfullscreenchange",
-      this.handleFullscreenChange
-    );
-    document.addEventListener(
-      "mozfullscreenchange",
-      this.handleFullscreenChange
-    );
-    document.addEventListener(
-      "msfullscreenchange",
-      this.handleFullscreenChange
-    );
+    document.addEventListener("fullscreenchange", this.handleFullscreenChangeHandler);
+    document.addEventListener("webkitfullscreenchange", this.handleFullscreenChangeHandler);
+    document.addEventListener("mozfullscreenchange", this.handleFullscreenChangeHandler);
+    document.addEventListener("msfullscreenchange", this.handleFullscreenChangeHandler);
   },
 
   beforeUnmount() {
     // 清理所有全屏事件监听
-    document.removeEventListener(
-      "fullscreenchange",
-      this.handleFullscreenChange
-    );
-    document.removeEventListener(
-      "webkitfullscreenchange",
-      this.handleFullscreenChange
-    );
-    document.removeEventListener(
-      "mozfullscreenchange",
-      this.handleFullscreenChange
-    );
-    document.removeEventListener(
-      "msfullscreenchange",
-      this.handleFullscreenChange
-    );
+    document.removeEventListener("fullscreenchange", this.handleFullscreenChangeHandler);
+    document.removeEventListener("webkitfullscreenchange", this.handleFullscreenChangeHandler);
+    document.removeEventListener("mozfullscreenchange", this.handleFullscreenChangeHandler);
+    document.removeEventListener("msfullscreenchange", this.handleFullscreenChangeHandler);
 
     // 确保退出所有全屏
     this.exitAllFullscreen();
+    
+    // 清理所有Three.js场景
+    Object.keys(this.threeJsScenes).forEach(type => {
+      this.cleanup3DScene(type);
+    });
   },
 
   methods: {
@@ -190,112 +180,194 @@ export default {
 
     // 进入全屏
     async enterFullscreen(type) {
-      // 先退出其他可能的全屏
-      await this.exitAllFullscreen();
-
+      // 1. 验证输入和状态
+      if (this.isFullscreen(type)) return;
+      
       const containerRef = this.$refs[`${type}Container`];
-      if (!containerRef) return;
+      if (!containerRef) {
+        console.error(`找不到容器: ${type}Container`);
+        return;
+      }
 
       try {
-        // 保存原始样式
-        this.originalStyles[type] = {
-          position: containerRef.style.position,
-          top: containerRef.style.top,
-          left: containerRef.style.left,
-          width: containerRef.style.width,
-          height: containerRef.style.height,
-          backgroundColor: containerRef.style.backgroundColor,
-          zIndex: containerRef.style.zIndex,
-        };
+        // 2. 先退出所有其他全屏
+        await this.exitAllFullscreen();
 
-        // 应用全屏样式
-        containerRef.style.position = "fixed";
-        containerRef.style.top = "0";
-        containerRef.style.left = "0";
-        containerRef.style.width = "100vw";
-        containerRef.style.height = "100vh";
-        containerRef.style.backgroundColor = "rgba(0, 0, 0, 0.9)";
-        containerRef.style.zIndex = "9999";
-        containerRef.style.display = "flex";
-        containerRef.style.justifyContent = "center";
-        containerRef.style.alignItems = "center";
-        containerRef.style.perspective = "1000px";
-        containerRef.style.perspectiveOrigin = "center";
-        containerRef.style.transformStyle = "preserve-3d";
+        // 3. 保存原始状态
+        this.saveOriginalState(type, containerRef);
 
-        // 添加全屏激活类
-        containerRef.classList.add("fullscreen-active");
+        // 4. 尝试进入浏览器全屏
+        await this.requestBrowserFullscreen(containerRef);
 
-        // 尝试进入浏览器全屏
-        if (containerRef.requestFullscreen) {
-          await containerRef.requestFullscreen();
-        } else if (containerRef.webkitRequestFullscreen) {
-          await containerRef.webkitRequestFullscreen();
-        } else if (containerRef.mozRequestFullScreen) {
-          await containerRef.mozRequestFullScreen();
-        } else if (containerRef.msRequestFullscreen) {
-          await containerRef.msRequestFullscreen();
+        // 5. 根据类型初始化全屏内容
+        if (type === 'cube' || type === 'sphere') {
+          this.initThreeJsFullscreen(type, containerRef);
+        } else {
+          this.initDefaultFullscreen(containerRef);
         }
 
-        // 记录全屏元素
-        this.fullscreenElements[type] = containerRef;
       } catch (error) {
         console.error("进入全屏失败:", error);
-        // 恢复原始样式
-        this.restoreOriginalStyles(type);
+        // 出错时恢复原始状态
+        this.cleanupAndRestore(type);
       }
     },
 
     // 退出全屏
     async exitFullscreen(type) {
-      const fullscreenElement = this.fullscreenElements[type];
-      if (!fullscreenElement) return;
+      // 1. 验证输入和状态
+      if (!this.isFullscreen(type)) return;
+
+      const containerRef = this.fullscreenElements[type];
+      if (!containerRef) {
+        console.error(`找不到全屏元素: ${type}`);
+        this.clearFullscreenRecords(type);
+        return;
+      }
 
       try {
-        // 退出浏览器全屏
-        if (document.exitFullscreen) {
-          await document.exitFullscreen();
-        } else if (document.webkitExitFullscreen) {
-          await document.webkitExitFullscreen();
-        } else if (document.mozCancelFullScreen) {
-          await document.mozCancelFullScreen();
-        } else if (document.msExitFullscreen) {
-          await document.msExitFullscreen();
-        }
-
-        // 恢复原始样式
-        this.restoreOriginalStyles(type);
-
-        // 清除记录
-        delete this.fullscreenElements[type];
-        delete this.originalStyles[type];
+        // 2. 检查并退出浏览器全屏
+        await this.exitBrowserFullscreenIfActive();
       } catch (error) {
-        console.error("退出全屏失败:", error);
-        // 强制恢复原始样式
-        this.restoreOriginalStyles(type);
-        delete this.fullscreenElements[type];
-        delete this.originalStyles[type];
+        console.error("退出浏览器全屏失败:", error);
+        // 即使退出浏览器全屏失败，也要继续执行清理操作
+      } finally {
+        // 3. 无论如何都要清理和恢复
+        this.cleanupAndRestore(type);
       }
     },
 
-    // 恢复原始样式
-    restoreOriginalStyles(type) {
+    // 保存原始状态
+    saveOriginalState(type, containerRef) {
+      // 记录全屏元素
+      this.fullscreenElements[type] = containerRef;
+      
+      // 保存原始状态
+      this.originalStyles[type] = {
+        content: containerRef.innerHTML,
+        className: containerRef.className,
+        style: containerRef.style.cssText
+      };
+    },
+
+    // 请求浏览器全屏
+    async requestBrowserFullscreen(element) {
+      const requestMethods = [
+        'requestFullscreen',
+        'webkitRequestFullscreen',
+        'mozRequestFullScreen',
+        'msRequestFullscreen'
+      ];
+
+      for (const method of requestMethods) {
+        if (typeof element[method] === 'function') {
+          await element[method]();
+          return;
+        }
+      }
+
+      throw new Error('浏览器不支持全屏API');
+    },
+
+    // 退出浏览器全屏（如果当前处于全屏状态）
+    async exitBrowserFullscreenIfActive() {
+      if (!this.isAnyElementFullscreen()) return;
+
+      const exitMethods = [
+        'exitFullscreen',
+        'webkitExitFullscreen',
+        'mozCancelFullScreen',
+        'msExitFullscreen'
+      ];
+
+      for (const method of exitMethods) {
+        if (typeof document[method] === 'function') {
+          await document[method]();
+          return;
+        }
+      }
+
+      throw new Error('浏览器不支持退出全屏API');
+    },
+
+    // 检查是否有任何元素处于全屏状态
+    isAnyElementFullscreen() {
+      return !!(document.fullscreenElement ||
+                document.webkitFullscreenElement ||
+                document.mozFullScreenElement ||
+                document.msFullscreenElement);
+    },
+
+    // 初始化Three.js全屏内容
+    initThreeJsFullscreen(type, containerRef) {
+      // 清空容器
+      containerRef.innerHTML = '';
+      
+      // 初始化Three.js场景
+      const sceneData = this.init3DScene(type);
+      if (sceneData) {
+        // 将canvas添加到容器
+        containerRef.appendChild(sceneData.renderer.domElement);
+        
+        // 保存场景数据
+        this.threeJsScenes[type] = sceneData;
+      }
+    },
+
+    // 初始化默认全屏内容
+    initDefaultFullscreen(containerRef) {
+      containerRef.classList.add('fullscreen-active');
+    },
+
+    // 清理和恢复原始状态
+    cleanupAndRestore(type) {
+      // 清理Three.js场景
+      this.cleanup3DScene(type);
+      
+      // 恢复原始状态
+      this.restoreOriginalState(type);
+      
+      // 清除记录
+      this.clearFullscreenRecords(type);
+    },
+
+    // 恢复原始状态
+    restoreOriginalState(type) {
       if (!this.originalStyles[type]) return;
 
       const containerRef = this.fullscreenElements[type];
       if (!containerRef) return;
 
-      // 移除全屏激活类
-      containerRef.classList.remove("fullscreen-active");
+      const originalState = this.originalStyles[type];
+      
+      // 恢复原始内容、类名和样式
+      containerRef.innerHTML = originalState.content;
+      containerRef.className = originalState.className;
+      containerRef.style.cssText = originalState.style;
+      
+      // 确保非全屏动画能够正确重新应用
+      // 使用更可靠的方法强制浏览器重新触发动画
+      const animations = Array.from(containerRef.querySelectorAll('*')).filter(el => 
+        el.style.animation || window.getComputedStyle(el).animationName !== 'none'
+      );
+      
+      // 重置动画
+      animations.forEach(el => {
+        const style = window.getComputedStyle(el);
+        const animation = style.animation;
+        
+        el.style.animation = 'none';
+        void el.offsetWidth; // 强制重排
+        
+        // 恢复动画
+        el.style.animation = animation;
+      });
+    },
 
-      const originalStyle = this.originalStyles[type];
-      containerRef.style.position = originalStyle.position;
-      containerRef.style.top = originalStyle.top;
-      containerRef.style.left = originalStyle.left;
-      containerRef.style.width = originalStyle.width;
-      containerRef.style.height = originalStyle.height;
-      containerRef.style.backgroundColor = originalStyle.backgroundColor;
-      containerRef.style.zIndex = originalStyle.zIndex;
+    // 清除全屏记录
+    clearFullscreenRecords(type) {
+      delete this.fullscreenElements[type];
+      delete this.originalStyles[type];
     },
 
     // 退出所有全屏
@@ -306,6 +378,133 @@ export default {
       }
     },
 
+    // 初始化3D场景
+    init3DScene(type) {
+      if (this.threeJsScenes[type]) {
+        this.cleanup3DScene(type);
+      }
+      
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+      const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setClearColor(0x000000, 0.9);
+      
+      // 创建几何体
+      let geometry, material, mesh;
+      let animationId = null;
+      
+      if (type === 'cube') {
+        geometry = new THREE.BoxGeometry(2, 2, 2);
+        
+        // 创建带文字的材质
+        const createTextMaterial = (color, text) => {
+          // 创建canvas
+          const canvas = document.createElement('canvas');
+          canvas.width = 256;
+          canvas.height = 256;
+          const context = canvas.getContext('2d');
+          
+          // 填充背景色
+          context.fillStyle = color;
+          context.fillRect(0, 0, canvas.width, canvas.height);
+          
+          // 设置文字样式
+          context.font = 'bold 60px Arial';
+          context.fillStyle = '#000';
+          context.textAlign = 'center';
+          context.textBaseline = 'middle';
+          
+          // 绘制文字
+          context.fillText(text, canvas.width / 2, canvas.height / 2);
+          
+          // 创建纹理
+          const texture = new THREE.CanvasTexture(canvas);
+          texture.needsUpdate = true;
+          
+          // 返回材质
+          return new THREE.MeshBasicMaterial({ map: texture, side: THREE.DoubleSide, transparent: true, opacity: 0.6 });
+        };
+        
+        const materials = [
+          createTextMaterial('#ff6b6b', '前'), // 前
+          createTextMaterial('#4ecdc4', '后'), // 后
+          createTextMaterial('#45b7d1', '右'), // 右
+          createTextMaterial('#ffe66d', '左'), // 左
+          createTextMaterial('#96ceb4', '上'), // 上
+          createTextMaterial('#feca57', '下')  // 下
+        ];
+        mesh = new THREE.Mesh(geometry, materials);
+      } else if (type === 'sphere') {
+        geometry = new THREE.SphereGeometry(1.5, 32, 32);
+        material = new THREE.MeshBasicMaterial({ color: 0x3498db, wireframe: true, transparent: true, opacity: 0.7 });
+        mesh = new THREE.Mesh(geometry, material);
+      } else {
+        return null;
+      }
+      
+      scene.add(mesh);
+      camera.position.z = 5;
+      
+      // 动画循环
+      const animate = () => {
+        animationId = requestAnimationFrame(animate);
+        mesh.rotation.x += 0.03;
+        mesh.rotation.y += 0.03;
+        renderer.render(scene, camera);
+      };
+      
+      animate();
+      
+      return { scene, camera, renderer, mesh, animationId };
+    },
+    
+    // 清理3D场景
+    cleanup3DScene(type) {
+      const sceneData = this.threeJsScenes[type];
+      if (!sceneData) return;
+      
+      // 停止动画循环
+      if (sceneData.animationId) {
+        cancelAnimationFrame(sceneData.animationId);
+      }
+      
+      // 安全地清理资源，确保对象存在
+      if (sceneData.renderer) {
+        sceneData.renderer.dispose();
+        // 移除canvas元素
+        if (sceneData.renderer.domElement && sceneData.renderer.domElement.parentNode) {
+          sceneData.renderer.domElement.parentNode.removeChild(sceneData.renderer.domElement);
+        }
+      }
+      
+      if (sceneData.geometry) {
+        sceneData.geometry.dispose();
+      }
+      
+      // 清理材质和纹理
+      if (sceneData.material) {
+        // 先清理纹理
+        if (sceneData.material.map) {
+          sceneData.material.map.dispose();
+        }
+        // 再清理材质
+        sceneData.material.dispose();
+      } else if (sceneData.mesh && Array.isArray(sceneData.mesh.material)) {
+        sceneData.mesh.material.forEach(material => {
+          // 先清理每个材质的纹理
+          if (material.map) {
+            material.map.dispose();
+          }
+          // 再清理材质
+          material.dispose();
+        });
+      }
+      
+      delete this.threeJsScenes[type];
+    },
+    
     // 处理全屏变化事件
     handleFullscreenChange() {
       // 如果没有任何元素处于全屏状态，清除所有记录并恢复样式
@@ -316,9 +515,9 @@ export default {
         !document.msFullscreenElement
       ) {
         // 恢复所有原始样式
-        Object.keys(this.originalStyles).forEach((type) => {
-          this.restoreOriginalStyles(type);
-        });
+    Object.keys(this.originalStyles).forEach((type) => {
+      this.restoreOriginalState(type);
+    });
 
         // 清除所有记录
         this.fullscreenElements = {};
@@ -432,7 +631,7 @@ export default {
   height: @cube-size;
   position: relative;
   transform-style: preserve-3d;
-  animation: rotateCube 10s infinite linear;
+  animation: rotate3D 10s infinite linear;
 
   .cube {
     width: 100%;
@@ -491,7 +690,7 @@ export default {
   height: @sphere-size;
   position: relative;
   transform-style: preserve-3d;
-  animation: rotateSphere 8s infinite linear;
+  animation: rotate3D 8s infinite linear;
 
   .sphere {
     width: 100%;
@@ -523,24 +722,6 @@ export default {
         transform: rotateY(150deg);
       }
     }
-  }
-}
-
-@keyframes rotateCube {
-  from {
-    transform: rotateX(0deg) rotateY(0deg);
-  }
-  to {
-    transform: rotateX(360deg) rotateY(360deg);
-  }
-}
-
-@keyframes rotateSphere {
-  from {
-    transform: rotateX(0deg) rotateY(0deg);
-  }
-  to {
-    transform: rotateX(360deg) rotateY(360deg);
   }
 }
 
@@ -607,125 +788,14 @@ export default {
   position: relative;
 }
 
-/* 全屏模式样式 */
-/* 直接应用到容器类上，确保全屏时样式能正确应用 */
-:deep(.cube-container:fullscreen),
-:deep(.sphere-container:fullscreen),
-:deep(.card-container:fullscreen),
-:deep(.pyramid-container:fullscreen),
-:deep(.cube-container:-webkit-full-screen),
-:deep(.sphere-container:-webkit-full-screen),
-:deep(.card-container:-webkit-full-screen),
-:deep(.pyramid-container:-webkit-full-screen),
-:deep(.cube-container:-moz-full-screen),
-:deep(.sphere-container:-moz-full-screen),
-:deep(.card-container:-moz-full-screen),
-:deep(.pyramid-container:-moz-full-screen),
-:deep(.cube-container:-ms-fullscreen),
-:deep(.sphere-container:-ms-fullscreen),
-:deep(.card-container:-ms-fullscreen),
-:deep(.pyramid-container:-ms-fullscreen) {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: rgba(0, 0, 0, 0.9);
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 9999;
-  perspective: 1000px;
-  perspective-origin: center;
-  transform-style: preserve-3d;
-}
 
-/* 自定义全屏激活类 */
-:deep(.cube-container.fullscreen-active),
-:deep(.sphere-container.fullscreen-active),
-:deep(.card-container.fullscreen-active),
-:deep(.pyramid-container.fullscreen-active) {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: rgba(0, 0, 0, 0.9);
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 9999;
-  perspective: 1000px;
-  perspective-origin: center;
-  transform-style: preserve-3d;
-}
-
-/* 立方体全屏样式 - 应用在容器上以保持与旋转动画一致 */
-:deep(.cube-container:fullscreen),
-:deep(.cube-container:-webkit-full-screen),
-:deep(.cube-container:-moz-full-screen),
-:deep(.cube-container:-ms-fullscreen),
-:deep(.cube-container.fullscreen-active) {
-  transform: scale(3);
-  animation: rotateCube 10s infinite linear;
-}
-
-/* 球体全屏样式 - 应用在容器上以保持与旋转动画一致 */
-:deep(.sphere-container:fullscreen),
-:deep(.sphere-container:-webkit-full-screen),
-:deep(.sphere-container:-moz-full-screen),
-:deep(.sphere-container:-ms-fullscreen),
-:deep(.sphere-container.fullscreen-active) {
-  transform: scale(3);
-  animation: rotateSphere 8s infinite linear;
-}
-
-/* 卡片全屏样式 */
-:deep(.card-container:fullscreen .card),
-:deep(.card-container:-webkit-full-screen .card),
-:deep(.card-container:-moz-full-screen .card),
-:deep(.card-container:-ms-fullscreen .card),
-:deep(.card-container.fullscreen-active .card) {
-  transform: scale(3);
-}
-
-/* 金字塔全屏样式 */
-:deep(.pyramid-container:fullscreen .pyramid),
-:deep(.pyramid-container:-webkit-full-screen .pyramid),
-:deep(.pyramid-container:-moz-full-screen .pyramid),
-:deep(.pyramid-container:-ms-fullscreen .pyramid),
-:deep(.pyramid-container.fullscreen-active .pyramid) {
-  transform: scale(3);
-}
-
-/* 响应式设计 */
-@media (max-width: 768px) {
-  .examples-container {
-    grid-template-columns: 1fr;
+/* 通用3D旋转动画 */
+@keyframes rotate3D {
+  from {
+    transform: rotateX(0deg) rotateY(0deg);
   }
-  :deep(.cube-container:fullscreen),
-  :deep(.cube-container:-webkit-full-screen),
-  :deep(.cube-container:-moz-full-screen),
-  :deep(.cube-container:-ms-fullscreen) {
-    transform: scale(1.5);
-  }
-  :deep(.sphere-container:fullscreen),
-  :deep(.sphere-container:-webkit-full-screen),
-  :deep(.sphere-container:-moz-full-screen),
-  :deep(.sphere-container:-ms-fullscreen) {
-    transform: scale(1.5);
-  }
-  :deep(.card-container:fullscreen .card),
-  :deep(.card-container:-webkit-full-screen .card),
-  :deep(.card-container:-moz-full-screen .card),
-  :deep(.card-container:-ms-fullscreen .card) {
-    transform: scale(1.5);
-  }
-  :deep(.pyramid-container:fullscreen .pyramid),
-  :deep(.pyramid-container:-webkit-full-screen .pyramid),
-  :deep(.pyramid-container:-moz-full-screen .pyramid),
-  :deep(.pyramid-container:-ms-fullscreen .pyramid) {
-    transform: scale(1.5);
+  to {
+    transform: rotateX(360deg) rotateY(360deg);
   }
 }
 </style>
