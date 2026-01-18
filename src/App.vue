@@ -1,5 +1,6 @@
 <template>
   <div id="app">
+    <DynamicBackground />
     <nav class="navbar">
       <div class="nav-container">
         <h1 class="logo">
@@ -38,8 +39,13 @@
 </template>
 
 <script>
+import DynamicBackground from './components/DynamicBackground.vue';
+
 export default {
   name: 'App',
+  components: {
+    DynamicBackground
+  },
   data() {
     return {
       showBackToTop: false

@@ -2,12 +2,12 @@
   <div class="about">
     <div class="container">
       <div class="about-content">
+        <!-- 3D头像区域 -->
+        <div class="avatar-section">
+          <PersonalAvatar3D />
+        </div>
+        
         <div class="profile-section">
-          <div class="profile-image">
-            <div class="avatar">
-              <span>Y</span>
-            </div>
-          </div>
           <div class="profile-info">
             <h1>关于我</h1>
             <p class="intro">
@@ -15,19 +15,15 @@
               这个博客是我分享前端开发知识和学习心得的地方。
             </p>
             
+            <!-- 技术栈可视化 -->
             <div class="skills">
               <h2>技术栈</h2>
+              <div class="skills-visualization">
+                <div ref="skillsChart" class="skills-chart"></div>
+              </div>
+              
               <div class="skill-tags">
-                <span class="skill-tag">CSS3</span>
-                <span class="skill-tag">HTML5</span>
-                <span class="skill-tag">JavaScript</span>
-                <span class="skill-tag">TypeScript</span>
-                <span class="skill-tag">Vue</span>
-                <span class="skill-tag">React</span>
-                <span class="skill-tag">Vite</span>
-                <span class="skill-tag">Webpack</span>
-                <span class="skill-tag">Next.js</span>
-                <span class="skill-tag">Node.js</span>
+                <span class="skill-tag" v-for="skill in skills" :key="skill.name">{{ skill.name }}</span>
               </div>
             </div>
             
@@ -71,26 +67,149 @@
             </ul>
           </div>
         </div>
+        
+        <!-- 学习路径时间线 -->
+        <div class="timeline-section">
+          <LearningTimeline />
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script>
+import * as echarts from 'echarts';
+import PersonalAvatar3D from '@/components/PersonalAvatar3D.vue';
+import LearningTimeline from '@/components/LearningTimeline.vue';
+
 export default {
-  name: 'About'
+  name: 'About',
+  components: {
+    PersonalAvatar3D,
+    LearningTimeline
+  },
+  data() {
+    return {
+      skills: [
+        { name: 'CSS3', value: 90 },
+        { name: 'HTML5', value: 95 },
+        { name: 'JavaScript', value: 88 },
+        { name: 'TypeScript', value: 80 },
+        { name: 'Vue', value: 92 },
+        { name: 'React', value: 85 },
+        { name: 'Vite', value: 88 },
+        { name: 'Webpack', value: 82 },
+        { name: 'Next.js', value: 75 },
+        { name: 'Node.js', value: 78 }
+      ],
+      skillsChart: null
+    };
+  },
+  mounted() {
+    this.initSkillsChart();
+  },
+  beforeUnmount() {
+    if (this.skillsChart) {
+      this.skillsChart.dispose();
+    }
+  },
+  methods: {
+    initSkillsChart() {
+      if (!this.$refs.skillsChart) return;
+      
+      this.skillsChart = echarts.init(this.$refs.skillsChart);
+      
+      const option = {
+        title: {
+          text: '技术栈熟练度',
+          left: 'center',
+          textStyle: {
+            fontSize: 16,
+            fontWeight: 'normal'
+          }
+        },
+        tooltip: {
+          trigger: 'axis',
+          axisPointer: {
+            type: 'shadow'
+          }
+        },
+        radar: {
+          indicator: this.skills.map(skill => ({
+            name: skill.name,
+            max: 100
+          })),
+          shape: 'circle',
+          splitNumber: 5,
+          axisName: {
+            color: '#333'
+          },
+          splitLine: {
+            lineStyle: {
+              color: '#e6e6e6'
+            }
+          },
+          splitArea: {
+            show: true,
+            areaStyle: {
+              color: ['rgba(78, 205, 196, 0.1)', 'rgba(78, 205, 196, 0.2)']
+            }
+          },
+          axisLine: {
+            lineStyle: {
+              color: '#ccc'
+            }
+          }
+        },
+        series: [{
+          name: '技术熟练度',
+          type: 'radar',
+          data: [{
+            value: this.skills.map(skill => skill.value),
+            name: '我的技能',
+            areaStyle: {
+              color: 'rgba(78, 205, 196, 0.3)'
+            },
+            lineStyle: {
+              color: '#4ecdc4',
+              width: 2
+            },
+            itemStyle: {
+              color: '#4ecdc4'
+            }
+          }],
+          animationType: 'scale',
+          animationEasing: 'elasticOut',
+          animationDelay: function (idx) {
+            return idx * 100;
+          }
+        }]
+      };
+      
+      this.skillsChart.setOption(option);
+      
+      // 监听窗口大小变化
+      window.addEventListener('resize', this.resizeSkillsChart);
+    },
+    resizeSkillsChart() {
+      if (this.skillsChart) {
+        this.skillsChart.resize();
+      }
+    }
+  }
 }
 </script>
 
-<style scoped>
+<style scoped lang="less">
 .about {
   min-height: 100vh;
+  padding: 2rem 0;
 }
 
 .container {
   max-width: 1000px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 0 2rem;
 }
 
 .about-content {
@@ -100,36 +219,28 @@ export default {
   box-shadow: 0 4px 20px rgba(0,0,0,0.1);
 }
 
+/* 3D头像区域 */
+.avatar-section {
+  text-align: center;
+  margin-bottom: 3rem;
+  padding: 2rem;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 15px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
 .profile-section {
-  display: grid;
-  grid-template-columns: 200px 1fr;
-  gap: 3rem;
+  display: flex;
+  justify-content: center;
   margin-bottom: 3rem;
   align-items: start;
-}
-
-.profile-image {
-  display: flex;
-  justify-content: center;
-}
-
-.avatar {
-  width: 150px;
-  height: 150px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 4rem;
-  color: white;
-  font-weight: bold;
 }
 
 .profile-info h1 {
   color: #333;
   font-size: 2.5rem;
   margin-bottom: 1rem;
+  text-align: center;
 }
 
 .intro {
@@ -137,6 +248,7 @@ export default {
   line-height: 1.6;
   color: #666;
   margin-bottom: 2rem;
+  text-align: center;
 }
 
 .skills {
@@ -147,151 +259,128 @@ export default {
   color: #333;
   margin-bottom: 1rem;
   font-size: 1.5rem;
+  text-align: center;
+}
+
+/* 技能可视化图表 */
+.skills-visualization {
+  margin-bottom: 2rem;
+  height: 300px;
+}
+
+.skills-chart {
+  width: 100%;
+  height: 100%;
 }
 
 .skill-tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.8rem;
+  gap: 0.5rem;
+  justify-content: center;
 }
 
 .skill-tag {
-  background: #e3f2fd;
-  color: #1976d2;
+  background: #f0f0f0;
+  color: #333;
   padding: 0.5rem 1rem;
   border-radius: 20px;
   font-size: 0.9rem;
-  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.skill-tag:hover {
+  background: #4ecdc4;
+  color: white;
+  transform: translateY(-2px);
+}
+
+.contact-info {
+  margin-bottom: 2rem;
 }
 
 .contact-info h2 {
   color: #333;
   margin-bottom: 1rem;
   font-size: 1.5rem;
+  text-align: center;
 }
 
 .contact-links {
   display: flex;
-  gap: 1.5rem;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: center;
 }
 
 .contact-link {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  color: #667eea;
   text-decoration: none;
-  padding: 0.8rem 1.5rem;
-  border: 2px solid #667eea;
-  border-radius: 25px;
-  transition: all 0.3s;
-  font-weight: 500;
+  color: #333;
+  font-size: 1rem;
+  transition: color 0.3s ease;
 }
 
 .contact-link:hover {
-  background: #667eea;
-  color: white;
-  transform: translateY(-2px);
+  color: #4ecdc4;
 }
 
-.icon {
+.contact-link .icon {
   font-size: 1.2rem;
 }
 
 .blog-info {
-  border-top: 1px solid #eee;
-  padding-top: 2rem;
+  margin-top: 3rem;
 }
 
 .blog-info h2 {
   color: #333;
-  font-size: 2rem;
   margin-bottom: 2rem;
+  font-size: 1.8rem;
   text-align: center;
 }
 
-.tech-stack,
-.features {
+.tech-stack, .features {
   margin-bottom: 2rem;
+  background: #f9f9f9;
+  padding: 1.5rem;
+  border-radius: 10px;
 }
 
-.tech-stack h3,
-.features h3 {
-  color: #555;
-  font-size: 1.3rem;
+.tech-stack h3, .features h3 {
+  color: #333;
   margin-bottom: 1rem;
+  font-size: 1.3rem;
 }
 
-.tech-stack ul,
-.features ul {
-  list-style: none;
-  padding: 0;
-}
-
-.tech-stack li,
-.features li {
-  padding: 0.8rem 0;
-  border-bottom: 1px solid #f0f0f0;
+.tech-stack ul, .features ul {
+  list-style-type: disc;
+  padding-left: 1.5rem;
   color: #666;
 }
 
-.tech-stack li:last-child,
-.features li:last-child {
-  border-bottom: none;
+.tech-stack li, .features li {
+  margin-bottom: 0.5rem;
 }
 
 .tech-stack strong {
   color: #333;
 }
 
+/* 响应式设计 */
 @media (max-width: 768px) {
-  .container {
-    padding: 1rem;
-  }
-  
   .about-content {
-    padding: 2rem;
-  }
-  
-  .profile-section {
-    grid-template-columns: 1fr;
-    gap: 2rem;
-    text-align: center;
-  }
-  
-  .avatar {
-    width: 120px;
-    height: 120px;
-    font-size: 3rem;
+    padding: 1.5rem;
   }
   
   .profile-info h1 {
     font-size: 2rem;
   }
   
-  .contact-links {
-    justify-content: center;
-  }
-  
-  .skill-tags {
-    justify-content: center;
-  }
-}
-
-@media (max-width: 480px) {
-  .about-content {
-    padding: 1.5rem;
-  }
-  
-  .contact-links {
-    flex-direction: column;
-    align-items: center;
-  }
-  
-  .contact-link {
-    width: 100%;
-    justify-content: center;
+  .skills-visualization {
+    height: 250px;
   }
 }
 </style>
