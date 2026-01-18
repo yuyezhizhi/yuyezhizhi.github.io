@@ -69,21 +69,25 @@ const createAvatar = () => {
   const hairColor = 0x3c2f2f;
   const eyeWhiteColor = 0xffffff;
   const eyePupilColor = 0x47378F;
-  const shirtColor = 0x1180c7;
-  const pantsColor = 0x462066;
-  const shoeColor = 0x333333;
+  const shirtColor = 0x03A1B5;
+  const pantsColor = 0x3E36AC;
+  const shoeColor = 0x5B616D;
+  
+  // 整体向上移动的距离，使旋转中心点在身体中部
+  const moveUpDistance = 1.8;
   
   // 1. 创建头部
   const headGeometry = new THREE.BoxGeometry(3, 2, 2);
   const headMaterial = new THREE.MeshStandardMaterial({ color: skinColor });
   const head = new THREE.Mesh(headGeometry, headMaterial);
+  head.position.set(0, moveUpDistance, 0);
   avatarGroup.add(head);
   
   // 2. 创建头发
   const hairGeometry = new THREE.BoxGeometry(3, 0.8, 2);
   const hairMaterial = new THREE.MeshStandardMaterial({ color: hairColor });
   const hair = new THREE.Mesh(hairGeometry, hairMaterial);
-  hair.position.set(0, 1.4, 0);
+  hair.position.set(0, moveUpDistance + 1.4, 0);
   avatarGroup.add(hair);
   
   // 添加侧边头发
@@ -91,18 +95,18 @@ const createAvatar = () => {
   
   // 左侧头发
   const leftSideHair = new THREE.Mesh(sideHairGeometry, hairMaterial);
-  leftSideHair.position.set(-1.55, 1.0, 0);
+  leftSideHair.position.set(-1.55, moveUpDistance + 1.0, 0);
   avatarGroup.add(leftSideHair);
   
   // 右侧头发
   const rightSideHair = new THREE.Mesh(sideHairGeometry, hairMaterial);
-  rightSideHair.position.set(1.55, 1.0, 0);
+  rightSideHair.position.set(1.55, moveUpDistance + 1.0, 0);
   avatarGroup.add(rightSideHair);
   
   // 前面头发
   const frontHairGeometry = new THREE.BoxGeometry(1.8, 0.2, 0.8);
   const frontHair = new THREE.Mesh(frontHairGeometry, hairMaterial);
-  frontHair.position.set(0, 1.3, -0.6);
+  frontHair.position.set(0, moveUpDistance + 1.3, -0.6);
   avatarGroup.add(frontHair);
   
   // 3. 创建面部特征
@@ -111,11 +115,11 @@ const createAvatar = () => {
   const eyeWhiteMaterial = new THREE.MeshStandardMaterial({ color: eyeWhiteColor });
   
   const leftEyeWhite = new THREE.Mesh(eyeWhiteGeometry, eyeWhiteMaterial);
-  leftEyeWhite.position.set(-0.8, 0.5, 1.1);
+  leftEyeWhite.position.set(-0.8, moveUpDistance + 0.5, 1.1);
   avatarGroup.add(leftEyeWhite);
   
   const rightEyeWhite = new THREE.Mesh(eyeWhiteGeometry, eyeWhiteMaterial);
-  rightEyeWhite.position.set(0.8, 0.5, 1.1);
+  rightEyeWhite.position.set(0.8, moveUpDistance + 0.5, 1.1);
   avatarGroup.add(rightEyeWhite);
   
   // 瞳孔
@@ -123,79 +127,101 @@ const createAvatar = () => {
   const pupilMaterial = new THREE.MeshStandardMaterial({ color: eyePupilColor });
   
   const leftPupil = new THREE.Mesh(pupilGeometry, pupilMaterial);
-  leftPupil.position.set(-0.5, 0.5, 1.1);
+  leftPupil.position.set(-0.5, moveUpDistance + 0.5, 1.1);
   avatarGroup.add(leftPupil);
   
   const rightPupil = new THREE.Mesh(pupilGeometry, pupilMaterial);
-  rightPupil.position.set(0.5, 0.5, 1.1);
+  rightPupil.position.set(0.5, moveUpDistance + 0.5, 1.1);
   avatarGroup.add(rightPupil);
   
   // 添加鼻子
   const noseGeometry = new THREE.BoxGeometry(0.6, 0.3, 0.1);
   const noseMaterial = new THREE.MeshStandardMaterial({ color: 0xcc8855 });
   const nose = new THREE.Mesh(noseGeometry, noseMaterial);
-  nose.position.set(0, 0.1, 1.1);
+  nose.position.set(0, moveUpDistance + 0.1, 1.1);
   avatarGroup.add(nose);
   
   // 嘴巴
   const mouthGeometry = new THREE.BoxGeometry(1, 0.4, 0.1);
   const mouthMaterial = new THREE.MeshStandardMaterial({ color: 0x8b4513 });
   const mouth = new THREE.Mesh(mouthGeometry, mouthMaterial);
-  mouth.position.set(0, -0.3, 1.1);
+  mouth.position.set(0, moveUpDistance - 0.3, 1.1);
   avatarGroup.add(mouth);
   
-  // 4. 创建身体
-  const bodyGeometry = new THREE.BoxGeometry(2.4, 2.8, 1.2);
+  // 添加胡须
+  const beardMaterialLeft = new THREE.MeshStandardMaterial({ color: 0xa17663 });
+  const beardMaterialRight = new THREE.MeshStandardMaterial({ color: 0x906C5A });
+  
+  // 下巴胡须
+  const beardGeometry = new THREE.BoxGeometry(1.2, 0.46, 0.1);
+  const beard = new THREE.Mesh(beardGeometry, beardMaterialRight);
+  beard.position.set(0, moveUpDistance - 0.76, 1.1);
+  avatarGroup.add(beard);
+  
+  // 左侧胡须
+  const leftBeardGeometry = new THREE.BoxGeometry(0.6, 0.8, 0.1);
+  const leftBeard = new THREE.Mesh(leftBeardGeometry, beardMaterialLeft);
+  leftBeard.position.set(-0.9, moveUpDistance - 0.6, 1.1);
+  avatarGroup.add(leftBeard);
+  
+  // 右侧胡须
+  const rightBeardGeometry = new THREE.BoxGeometry(0.6, 0.8, 0.1);
+  const rightBeard = new THREE.Mesh(rightBeardGeometry, beardMaterialRight);
+  rightBeard.position.set(0.9, moveUpDistance - 0.6, 1.1);
+  avatarGroup.add(rightBeard);
+  
+  // 4. 创建肩部
+  const bodyGeometry = new THREE.BoxGeometry(4.4, 1.36, 1);
   const bodyMaterial = new THREE.MeshStandardMaterial({ color: shirtColor });
   const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
-  body.position.set(0, -3.2, 0);
+  body.position.set(0, moveUpDistance - 1.66, 0);
   avatarGroup.add(body);
   
   // 5. 创建手臂
-  const armGeometry = new THREE.BoxGeometry(0.8, 2.8, 0.8);
+  const armGeometry = new THREE.BoxGeometry(0.68, 2.9, 0.98);
   const armMaterial = new THREE.MeshStandardMaterial({ color: skinColor });
   
   const leftArm = new THREE.Mesh(armGeometry, armMaterial);
-  leftArm.position.set(-1.9, -3.2, 0);
+  leftArm.position.set(-1.78, moveUpDistance - 3, 0);
   avatarGroup.add(leftArm);
   
   const rightArm = new THREE.Mesh(armGeometry, armMaterial);
-  rightArm.position.set(1.9, -3.2, 0);
+  rightArm.position.set(1.78, moveUpDistance - 3, 0);
   avatarGroup.add(rightArm);
   
-  // 6. 创建裤子
-  const pantsGeometry = new THREE.BoxGeometry(2.4, 2.4, 1.2);
-  const pantsMaterial = new THREE.MeshStandardMaterial({ color: pantsColor });
+  // 6. 创建身体
+  const pantsGeometry = new THREE.BoxGeometry(3, 2.2, 1);
+  const pantsMaterial = new THREE.MeshStandardMaterial({ color: shirtColor });
   const pants = new THREE.Mesh(pantsGeometry, pantsMaterial);
-  pants.position.set(0, -5.0, 0);
+  pants.position.set(0, moveUpDistance - 3.4, 0);
   avatarGroup.add(pants);
   
   // 7. 创建腿部
-  const legGeometry = new THREE.BoxGeometry(0.8, 2.4, 0.8);
+  const legGeometry = new THREE.BoxGeometry(1.38, 2.4, 0.8);
   const legMaterial = new THREE.MeshStandardMaterial({ color: pantsColor });
   
   const leftLeg = new THREE.Mesh(legGeometry, legMaterial);
-  leftLeg.position.set(-0.8, -5.2, 0);
+  leftLeg.position.set(-0.8, moveUpDistance - 5.2, 0);
   avatarGroup.add(leftLeg);
   
   const rightLeg = new THREE.Mesh(legGeometry, legMaterial);
-  rightLeg.position.set(0.8, -5.2, 0);
+  rightLeg.position.set(0.8, moveUpDistance - 5.2, 0);
   avatarGroup.add(rightLeg);
   
   // 8. 创建鞋子
-  const shoeGeometry = new THREE.BoxGeometry(0.9, 0.6, 0.9);
+  const shoeGeometry = new THREE.BoxGeometry(1.4, 0.6, 0.9);
   const shoeMaterial = new THREE.MeshStandardMaterial({ color: shoeColor });
   
   const leftShoe = new THREE.Mesh(shoeGeometry, shoeMaterial);
-  leftShoe.position.set(-0.8, -6.5, 0);
+  leftShoe.position.set(-0.8, moveUpDistance - 6.5, 0);
   avatarGroup.add(leftShoe);
   
   const rightShoe = new THREE.Mesh(shoeGeometry, shoeMaterial);
-  rightShoe.position.set(0.8, -6.5, 0);
+  rightShoe.position.set(0.8, moveUpDistance - 6.5, 0);
   avatarGroup.add(rightShoe);
   
-  // 9. 创建旋转光环
-  const ringGeometry = new THREE.TorusGeometry(6, 0.2, 16, 100);
+  // 9. 创建旋转光环 - 移动到头顶
+  const ringGeometry = new THREE.TorusGeometry(1.4, 0.2, 16, 100);
   const ringMaterial = new THREE.MeshBasicMaterial({
     color: 0x4ecdc4,
     transparent: true,
@@ -203,6 +229,7 @@ const createAvatar = () => {
     side: THREE.DoubleSide
   });
   const ring = new THREE.Mesh(ringGeometry, ringMaterial);
+  ring.position.set(0, moveUpDistance + 2.6, 0); // 移动到头顶位置
   ring.rotation.x = Math.PI / 2;
   avatarGroup.add(ring);
   
