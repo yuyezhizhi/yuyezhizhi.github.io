@@ -10,6 +10,7 @@
           <li><router-link to="/" class="nav-link">首页</router-link></li>
           <li><router-link to="/articles" class="nav-link">文章</router-link></li>
           <li><router-link to="/interview" class="nav-link">面试题</router-link></li>
+          <li><router-link to="/ai" class="nav-link">AI工具</router-link></li>
           <li><router-link to="/animation" class="nav-link">示例</router-link></li>
           <li><router-link to="/file" class="nav-link">文件预览</router-link></li>
           <li><router-link to="/about" class="nav-link">关于</router-link></li>

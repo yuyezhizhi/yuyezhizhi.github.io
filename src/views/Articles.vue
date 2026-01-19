@@ -44,103 +44,37 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'Articles',
-  data() {
+<script setup>
+import { ref, computed } from 'vue'
+import articlesData from '../data/articles.js'
+
+// 将对象转换为数组，并添加description字段（使用content的前150个字符作为描述）
+const articles = computed(() => {
+  return Object.values(articlesData).map(article => {
+    // 从content中提取纯文本作为description
+    const contentText = article.content.replace(/<[^>]+>/g, '').trim()
     return {
-      searchQuery: '',
-      selectedCategory: '',
-      articles: [
-        {
-          id: 1,
-          title: 'Vue 3 Composition API 详解',
-          description: '深入理解Vue 3的Composition API及其优势，包括setup函数、ref、reactive等核心概念的使用方法和最佳实践。',
-          category: 'Vue',
-          date: '2024-01-15',
-          readTime: '10分钟阅读'
-        },
-        {
-          id: 2,
-          title: 'Vite vs Webpack 性能对比',
-          description: '详细对比Vite和Webpack在开发环境、构建速度、热更新等方面的性能差异，帮助你选择合适的构建工具。',
-          category: '构建工具',
-          date: '2024-01-10',
-          readTime: '8分钟阅读'
-        },
-        {
-          id: 3,
-          title: 'JavaScript ES6+ 新特性实践',
-          description: '全面介绍ES6及后续版本的新特性，包括箭头函数、解构赋值、模板字符串、Promise等实用功能。',
-          category: 'JavaScript',
-          date: '2024-01-05',
-          readTime: '12分钟阅读'
-        },
-        {
-          id: 4,
-          title: 'CSS Grid 布局完全指南',
-          description: '掌握CSS Grid布局的核心概念和实用技巧，创建复杂的响应式网页布局。',
-          category: 'CSS',
-          date: '2024-01-03',
-          readTime: '15分钟阅读'
-        },
-        {
-          id: 5,
-          title: 'TypeScript 类型系统深入',
-          description: '深入学习TypeScript的类型系统，包括泛型、接口、类型别名等高级特性。',
-          category: 'TypeScript',
-          date: '2023-12-28',
-          readTime: '20分钟阅读'
-        },
-        {
-          id: 6,
-          title: 'React Hooks 最佳实践',
-          description: '分享React Hooks的使用技巧和最佳实践，避免常见的陷阱和错误。',
-          category: 'React',
-          date: '2023-12-25',
-          readTime: '14分钟阅读'
-        },
-        {
-          id: 7,
-          title: 'ECharts 入门指南',
-          description: '学习ECharts的基本使用方法，包括图表配置、动画效果和常见图表类型的实现。',
-          category: '数据可视化',
-          date: '2024-01-20',
-          readTime: '12分钟阅读'
-        },
-        {
-          id: 8,
-          title: '前端动画原理详解',
-          description: '深入探讨前端动画的原理和实现技术，包括CSS动画、JavaScript动画和性能优化。',
-          category: '动画',
-          date: '2024-01-25',
-          readTime: '18分钟阅读'
-        },
-        {
-          id: 9,
-          title: 'Next.js + React 项目实战指南',
-          description: '从项目初始化到部署上线，全面讲解Next.js与React结合开发的最佳实践和核心功能。',
-          category: 'React',
-          date: '2024-01-30',
-          readTime: '20分钟阅读'
-        }
-      ]
+      ...article,
+      description: contentText.length > 150 ? contentText.substring(0, 150) + '...' : contentText
     }
-  },
-  computed: {
-    categories() {
-      return [...new Set(this.articles.map(article => article.category))]
-    },
-    filteredArticles() {
-      return this.articles.filter(article => {
-        const matchesSearch = article.title.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-                            article.description.toLowerCase().includes(this.searchQuery.toLowerCase())
-        const matchesCategory = !this.selectedCategory || article.category === this.selectedCategory
-        return matchesSearch && matchesCategory
-      })
-    }
-  }
-}
+  })
+})
+
+const searchQuery = ref('')
+const selectedCategory = ref('')
+
+const categories = computed(() => {
+  return [...new Set(articles.value.map(article => article.category))]
+})
+
+const filteredArticles = computed(() => {
+  return articles.value.filter(article => {
+    const matchesSearch = article.title.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+                        article.description.toLowerCase().includes(searchQuery.value.toLowerCase())
+    const matchesCategory = !selectedCategory.value || article.category === selectedCategory.value
+    return matchesSearch && matchesCategory
+  })
+})
 </script>
 
 <style scoped>

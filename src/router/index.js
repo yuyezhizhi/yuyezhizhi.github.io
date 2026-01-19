@@ -35,6 +35,11 @@ const routes = [
     path: '/file/:fileName?',
     name: 'FilePreview',
     component: () => import('../views/FilePreview.vue')
+  },
+  {
+    path: '/ai',
+    name: 'AI',
+    component: () => import('../views/AI.vue')
   }
 ]
 

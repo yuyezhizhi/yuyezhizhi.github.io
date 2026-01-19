@@ -24,6 +24,8 @@
         <TransitionAnimations v-if="activeCategory === 3" />
         <!-- 3D动画示例 - 戴森球 -->
         <ThreeDAnimations v-if="activeCategory === 4" />
+        <!-- AI聊天示例 -->
+        <AIChat v-if="activeCategory === 5" />
       </div>
     </div>
   </div>
@@ -35,13 +37,15 @@ import DataVisualization from '@/components/animation/DataVisualization.vue'
 import CSSAnimations from '@/components/animation/CSSAnimations.vue'
 import TransitionAnimations from '@/components/animation/TransitionAnimations.vue'
 import ThreeDAnimations from '@/components/animation/ThreeDAnimations.vue'
+import AIChat from '@/components/animation/AIChat.vue'
 export default {
   name: 'Animation',
   components: {
     DataVisualization,
     CSSAnimations,
     TransitionAnimations,
-    ThreeDAnimations
+    ThreeDAnimations,
+    AIChat
   },
   data() {
     return {
@@ -49,7 +53,8 @@ export default {
         { id: 1, name: '数据可视化' },
         { id: 2, name: 'CSS动画' },
         { id: 3, name: '过渡动画' },
-        { id: 4, name: '3D动画' }
+        { id: 4, name: '3D动画' },
+        { id: 5, name: 'AI聊天' }
       ],
       activeCategory: 1
     }
