@@ -1,5 +1,46 @@
 <template>
   <div class="home">
+    <!-- 实时状态展示区 -->
+    <section class="status-section">
+      <div class="container">
+        <div class="status-grid">
+          <!-- 学习状态卡片 -->
+          <div class="status-card fade-in">
+            <div class="status-icon study">
+              <i class="study-icon"></i>
+            </div>
+            <h3>学习状态</h3>
+            <div class="status-info">
+              <p class="status-text">{{ studyStatus }}</p>
+              <div class="progress-bar">
+                <div class="progress-fill" :style="{ width: studyProgress + '%' }"></div>
+              </div>
+              <p class="progress-text">今日学习进度: {{ studyProgress }}%</p>
+            </div>
+          </div>
+          
+          <!-- 天气信息卡片 -->
+          <div class="status-card fade-in">
+            <div class="status-icon weather">
+              <i class="weather-icon"></i>
+            </div>
+            <h3>当前天气</h3>
+            <div class="status-info">
+              <p class="weather-location">{{ weather.city }}, {{ weather.country }}</p>
+              <div class="weather-main">
+                <span class="weather-temp">{{ weather.temperature }}°C</span>
+                <span class="weather-desc">{{ weather.description }}</span>
+              </div>
+              <div class="weather-details">
+                <span>湿度: {{ weather.humidity }}%</span>
+                <span>风速: {{ weather.windSpeed }} m/s</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    
     <section class="hero">
       <div class="hero-content">
         <h1>欢迎来到前端知识库</h1>
@@ -145,6 +186,21 @@ export default {
   name: "Home",
   data() {
     return {
+      // 学习状态数据
+      studyStatus: '学习中',
+      studyProgress: 65,
+      
+      // 天气数据 (初始模拟数据)
+      weather: {
+        city: '北京',
+        country: 'CN',
+        temperature: 22,
+        description: '晴',
+        humidity: 45,
+        windSpeed: 2.5,
+        icon: '☀️'
+      },
+      
       recentArticles: [
         {
           id: 9,
@@ -241,6 +297,81 @@ export default {
         this.observer.observe(element);
       });
     });
+    
+    // 获取天气数据
+    this.fetchWeatherData();
+    
+    // 模拟学习状态更新
+    this.startStudyProgressUpdate();
+  },
+  methods: {
+    // 获取天气数据
+    fetchWeatherData() {
+      // 使用OpenWeatherMap API获取天气数据
+      // 注意：需要替换为自己的API密钥
+      const apiKey = 'YOUR_API_KEY'; // 请注册OpenWeatherMap获取免费API密钥
+      const city = 'Beijing';
+      const countryCode = 'CN';
+      
+      // 真实API调用（需要替换API密钥才能工作）
+      /*
+      fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city},${countryCode}&appid=${apiKey}&units=metric`)
+        .then(response => response.json())
+        .then(data => {
+          this.weather = {
+            city: data.name,
+            country: data.sys.country,
+            temperature: Math.round(data.main.temp),
+            description: data.weather[0].description,
+            humidity: data.main.humidity,
+            windSpeed: data.wind.speed,
+            icon: `http://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png`
+          };
+        })
+        .catch(error => {
+          console.error('获取天气数据失败:', error);
+          // 使用模拟数据
+          this.weather = {
+            city: '北京',
+            country: 'CN',
+            temperature: 22,
+            description: '晴',
+            humidity: 45,
+            windSpeed: 2.5
+          };
+        });
+      */
+      
+      // 模拟天气数据更新
+      setTimeout(() => {
+        const weatherData = [
+          { city: '北京', country: 'CN', temperature: 22, description: '晴', humidity: 45, windSpeed: 2.5 },
+          { city: '上海', country: 'CN', temperature: 26, description: '多云', humidity: 60, windSpeed: 3.2 },
+          { city: '广州', country: 'CN', temperature: 30, description: '小雨', humidity: 75, windSpeed: 1.8 }
+        ];
+        this.weather = weatherData[Math.floor(Math.random() * weatherData.length)];
+      }, 1000);
+    },
+    
+    // 模拟学习进度更新
+    startStudyProgressUpdate() {
+      // 随机更新学习进度
+      setInterval(() => {
+        const increment = Math.random() * 5;
+        this.studyProgress = Math.min(100, this.studyProgress + increment);
+        
+        // 根据进度更新学习状态文本
+        if (this.studyProgress < 30) {
+          this.studyStatus = '刚开始学习';
+        } else if (this.studyProgress < 70) {
+          this.studyStatus = '学习进行中';
+        } else if (this.studyProgress < 100) {
+          this.studyStatus = '即将完成今日学习';
+        } else {
+          this.studyStatus = '今日学习已完成！';
+        }
+      }, 5000);
+    }
   },
   beforeUnmount() {
     // 清理Observer
@@ -259,6 +390,153 @@ export default {
 .hero {
   padding: 4rem 0;
   text-align: center;
+}
+
+/* 实时状态展示样式 */
+.status-section {
+  padding: 2rem 0;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.status-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+}
+
+.status-card {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  padding: 2rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+}
+
+.status-card:hover {
+  transform: translateY(-5px);
+  background: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+}
+
+.status-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+  font-size: 2rem;
+}
+
+.status-icon.study {
+  background: rgba(255, 206, 86, 0.3);
+}
+
+.status-icon.weather {
+  background: rgba(54, 162, 235, 0.3);
+}
+
+.status-icon::before {
+  font-size: 1.8rem;
+}
+
+.status-icon.study::before {
+  content: "📚";
+}
+
+.status-icon.weather::before {
+  content: "🌤️";
+}
+
+.status-card h3 {
+  margin: 0 0 1.5rem 0;
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: white;
+}
+
+.status-info {
+  text-align: left;
+}
+
+.status-text {
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+  font-weight: 500;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #ffd93d, #ff6b6b);
+  border-radius: 4px;
+  transition: width 0.5s ease;
+}
+
+.progress-text {
+  font-size: 0.9rem;
+  opacity: 0.9;
+  margin: 0;
+}
+
+.weather-location {
+  font-size: 1rem;
+  opacity: 0.9;
+  margin-bottom: 1rem;
+}
+
+.weather-main {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.weather-temp {
+  font-size: 2.5rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.weather-desc {
+  font-size: 1.1rem;
+  text-transform: capitalize;
+}
+
+.weather-details {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .status-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .weather-main {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .weather-details {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
 }
 
 .hero-content h1 {

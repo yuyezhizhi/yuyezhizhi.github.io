@@ -7,7 +7,7 @@
           v-for="category in categories" 
           :key="category.id"
           :class="['example-btn', { active: activeCategory === category.id }]"
-          @click="changeCategory(category.id)"
+          @click="activeCategory = category.id"
           class="animate__animated animate__fadeIn"
           :style="{ animationDelay: `${category.id * 0.1}s` }"
         >
@@ -57,13 +57,6 @@ export default {
         { id: 5, name: 'AI聊天' }
       ],
       activeCategory: 1
-    }
-  },
-  methods: {
-    // 切换分类时滚动到顶部
-    changeCategory(categoryId) {
-      this.activeCategory = categoryId;
-      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   },
   mounted() {
