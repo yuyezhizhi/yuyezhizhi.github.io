@@ -34,7 +34,31 @@
       @click="backToTop"
       class="back-to-top-btn"
     >
-      ↑
+      <svg width="24" height="24" viewBox="0 0 24 24" class="progress-ring">
+        <circle 
+          cx="12" 
+          cy="12" 
+          r="10" 
+          fill="none" 
+          stroke="rgba(255, 255, 255, 0.3)" 
+          stroke-width="2"
+        />
+        <circle 
+          cx="12" 
+          cy="12" 
+          r="10" 
+          fill="none" 
+          stroke="#f87884" 
+          stroke-width="2"
+          stroke-linecap="round"
+          :style="{ 
+            strokeDasharray: ringCircumference, 
+            strokeDashoffset: ringDashoffset 
+          }"
+          class="progress-ring-circle"
+        />
+      </svg>
+      <span class="back-to-top-arrow">↑</span>
     </button>
   </div>
 </template>
@@ -49,10 +73,21 @@ export default {
   },
   data() {
     return {
-      showBackToTop: false
+      showBackToTop: false,
+      scrollProgress: 0,
+      ringRadius: 10,
+      ringCircumference: 0
+    }
+  },
+  computed: {
+    ringDashoffset() {
+      return this.ringCircumference - (this.scrollProgress / 100) * this.ringCircumference
     }
   },
   mounted() {
+    // 计算圆环周长
+    this.ringCircumference = 2 * Math.PI * this.ringRadius
+    
     // 监听滚动事件
     window.addEventListener('scroll', this.handleScroll)
   },
@@ -64,6 +99,11 @@ export default {
     handleScroll() {
       // 当滚动超过200px时显示回到顶部按钮
       this.showBackToTop = window.scrollY > 200
+      
+      // 计算页面滚动进度
+      const totalHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight
+      const progress = (window.scrollY / totalHeight) * 100
+      this.scrollProgress = Math.min(Math.max(progress, 0), 100)
     },
     backToTop() {
       // 平滑滚动到顶部
@@ -213,19 +253,43 @@ body {
   width: 3rem;
   height: 3rem;
   border-radius: 50%;
-  background: rgba(@primary-color, 0.9);
-  color: @white;
+  background: rgba(255, 255, 255, 0.95);
+  color: @primary-color;
   border: none;
-  font-size: 1.5rem;
   cursor: pointer;
-  opacity: 0.8;
+  opacity: 0.9;
   transition: @transition;
   z-index: 999;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0;
   
   &:hover {
     opacity: 1;
-    transform: translateY(-5px);
+    transform: translateY(-5px) scale(1.05);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  }
+  
+  .progress-ring {
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform: rotate(-90deg);
+    width: 100%;
+    height: 100%;
+  }
+  
+  .progress-ring-circle {
+    transition: stroke-dashoffset 0.3s ease;
+  }
+  
+  .back-to-top-arrow {
+    font-size: 1.2rem;
+    font-weight: bold;
+    position: relative;
+    z-index: 1;
   }
 }
 </style>
