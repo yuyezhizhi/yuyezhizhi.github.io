@@ -99,15 +99,16 @@ const createParticles = () => {
 const addEventListeners = () => {
   window.addEventListener('resize', resizeCanvas);
   
-  // 鼠标移动事件
-  canvas.addEventListener('mousemove', (e) => {
-    const rect = canvas.getBoundingClientRect();
-    mouse.x = e.clientX - rect.left;
-    mouse.y = e.clientY - rect.top;
+  // 鼠标移动事件 - 监听window对象以确保能捕获到事件
+  window.addEventListener('mousemove', (e) => {
+    // 使用window坐标，因为画布是全屏的
+    mouse.x = e.clientX;
+    mouse.y = e.clientY;
   });
   
-  // 鼠标离开事件
-  canvas.addEventListener('mouseleave', () => {
+  // 鼠标离开事件 - 监听window对象
+  window.addEventListener('mouseleave', () => {
+    // 当鼠标离开窗口时，将鼠标位置重置到画布中心
     mouse.x = canvas.width / 2;
     mouse.y = canvas.height / 2;
   });
@@ -165,10 +166,9 @@ onUnmounted(() => {
   
   window.removeEventListener('resize', resizeCanvas);
   
-  if (canvas) {
-    canvas.removeEventListener('mousemove', () => {});
-    canvas.removeEventListener('mouseleave', () => {});
-  }
+  // 移除window对象上的事件监听器
+  window.removeEventListener('mousemove', () => {});
+  window.removeEventListener('mouseleave', () => {});
 });
 </script>
 
