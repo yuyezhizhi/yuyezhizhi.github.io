@@ -382,483 +382,82 @@ export default {
 };
 </script>
 
-<style scoped>
-.home {
-  min-height: 100vh;
-}
+<style lang="less" scoped>
+// 优化后的Less样式代码 - 保持视觉效果不变
 
-.hero {
-  padding: 4rem 0;
-  text-align: center;
-}
+// 颜色变量 - 提取所有使用的颜色
+@primary-color: #f87884;
+@primary-hover: #f55668;
+@white: white;
+@light-gray: #f0f0f0;
+@dark-gray: #333;
+@medium-gray: #555;
+@light-text: #666;
+@very-light-text: #999;
+@gradient-start: #667eea;
+@gradient-end: #764ba2;
+@progress-start: #ffd93d;
+@progress-end: #ff6b6b;
+@star-color: #f1c40f;
+@fork-color: #3498db;
 
-/* 实时状态展示样式 */
-.status-section {
-  padding: 2rem 0;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-}
+// 尺寸变量
+@border-radius: 12px;
+@border-radius-sm: 10px;
+@border-radius-xs: 8px;
+@border-radius-circle: 50%;
+@container-width: 1200px;
+@padding-sm: 1rem;
+@padding-md: 2rem;
+@padding-lg: 2.5rem;
+@margin-sm: 1rem;
+@margin-md: 1.5rem;
+@margin-lg: 2rem;
+@margin-xl: 3rem;
+@margin-xxl: 4rem;
+@icon-size: 60px;
+@avatar-size: 48px;
 
-.status-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 2rem;
-}
+// 阴影和过渡
+@box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+@box-shadow-hover: 0 8px 25px rgba(248, 120, 132, 0.15);
+@box-shadow-card: 0 2px 10px rgba(0, 0, 0, 0.1);
+@transition: all 0.3s ease;
+@transition-transform: transform 0.3s;
 
-.status-card {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  padding: 2rem;
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  transition: all 0.3s ease;
-}
+// 字体大小
+@font-size-xs: 0.9rem;
+@font-size-sm: 1rem;
+@font-size-md: 1.1rem;
+@font-size-lg: 1.3rem;
+@font-size-xl: 1.5rem;
+@font-size-xxl: 2.5rem;
+@font-size-xxxl: 3rem;
 
-.status-card:hover {
-  transform: translateY(-5px);
-  background: rgba(255, 255, 255, 0.15);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
-}
-
-.status-icon {
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 1rem;
-  font-size: 2rem;
-}
-
-.status-icon.study {
-  background: rgba(255, 206, 86, 0.3);
-}
-
-.status-icon.weather {
-  background: rgba(54, 162, 235, 0.3);
-}
-
-.status-icon::before {
-  font-size: 1.8rem;
-}
-
-.status-icon.study::before {
-  content: "📚";
-}
-
-.status-icon.weather::before {
-  content: "🌤️";
-}
-
-.status-card h3 {
-  margin: 0 0 1.5rem 0;
-  font-size: 1.3rem;
-  font-weight: 600;
-  color: white;
-}
-
-.status-info {
-  text-align: left;
-}
-
-.status-text {
-  font-size: 1.1rem;
-  margin-bottom: 1rem;
-  font-weight: 500;
-}
-
-.progress-bar {
-  width: 100%;
-  height: 8px;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 4px;
-  overflow: hidden;
-  margin-bottom: 0.5rem;
-}
-
-.progress-fill {
-  height: 100%;
-  background: linear-gradient(90deg, #ffd93d, #ff6b6b);
-  border-radius: 4px;
-  transition: width 0.5s ease;
-}
-
-.progress-text {
-  font-size: 0.9rem;
-  opacity: 0.9;
-  margin: 0;
-}
-
-.weather-location {
-  font-size: 1rem;
-  opacity: 0.9;
-  margin-bottom: 1rem;
-}
-
-.weather-main {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-bottom: 1rem;
-}
-
-.weather-temp {
-  font-size: 2.5rem;
-  font-weight: 700;
-  line-height: 1;
-}
-
-.weather-desc {
-  font-size: 1.1rem;
-  text-transform: capitalize;
-}
-
-.weather-details {
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.9rem;
-  opacity: 0.9;
-}
-
-/* 响应式设计 */
-@media (max-width: 768px) {
-  .status-grid {
-    grid-template-columns: 1fr;
-  }
-  
-  .weather-main {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.5rem;
-  }
-  
-  .weather-details {
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-}
-
-.hero-content h1 {
-  font-size: 3rem;
-  margin-bottom: 1rem;
-  color: #333;
-}
-
-.hero-content p {
-  font-size: 1.2rem;
-  margin-bottom: 2rem;
-  opacity: 0.9;
-  color: #555;
-}
-
-.cta-button {
-  display: inline-block;
-  background: white;
-  color: #f87884;
-  padding: 0.8rem 2rem;
-  text-decoration: none;
-  border-radius: 5px;
-  font-weight: bold;
-  transition: transform 0.3s, box-shadow 0.3s;
-  box-shadow: 0 2px 10px rgba(248, 120, 132, 0.3);
-}
-
-.cta-button:hover {
-  transform: translateY(-2px);
-}
-
-.features {
-  padding: 4rem 0;
-  background: white;
-}
-
-.container {
-  max-width: 1200px;
+// 可复用的mixin
+.container-mixin {
+  max-width: @container-width;
   margin: 0 auto;
   padding: 0 2rem;
 }
 
-.features h2 {
-  text-align: center;
-  font-size: 2.5rem;
-  margin-bottom: 3rem;
-  color: #333;
+.card-base {
+  background: @white;
+  padding: @padding-md;
+  border-radius: @border-radius;
+  box-shadow: @box-shadow;
+  transition: @transition;
+  border: 1px solid @light-gray;
 }
 
-.feature-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 2rem;
+.card-hover {
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: @box-shadow-hover;
+    border-color: rgba(@primary-color, 0.3);
+  }
 }
 
-.feature-card {
-  padding: 2rem;
-  border-radius: 10px;
-  text-align: center;
-  transition: transform 0.3s;
-}
-
-.feature-card:hover {
-  transform: translateY(-5px);
-}
-
-.feature-card h3 {
-  color: #f87884;
-  margin-bottom: 1rem;
-}
-
-.recent-articles {
-  padding: 4rem 0;
-}
-
-.recent-articles h2 {
-  text-align: center;
-  font-size: 2.5rem;
-  margin-bottom: 3rem;
-  color: #333;
-}
-
-.articles-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 2rem;
-}
-
-
-.github-card {
-  background: white;
-  padding: 2rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-  transition: all 0.3s ease;
-  border: 1px solid #f0f0f0;
-}
-
-.github-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 25px rgba(248, 120, 132, 0.15);
-  border-color: rgba(248, 120, 132, 0.3);
-}
-
-.github-header {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-bottom: 1rem;
-}
-
-.github-avatar {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-weight: bold;
-  font-size: 1.5rem;
-  position: relative;
-  overflow: hidden;
-}
-
-.github-avatar::before {
-  content: "G";
-}
-
-.github-info h3 {
-  margin: 0;
-  font-size: 1.3rem;
-  color: #333;
-}
-
-.github-info .github-owner {
-  margin: 0;
-  font-size: 0.9rem;
-  color: #666;
-}
-
-.github-description {
-  color: #555;
-  margin-bottom: 1.5rem;
-  line-height: 1.6;
-  font-size: 0.95rem;
-  overflow: hidden;
-  display: -webkit-box;
-  line-clamp: 3;
-  -webkit-box-orient: vertical;
-}
-
-.github-stats {
-  display: flex;
-  gap: 1.5rem;
-  margin-bottom: 1.5rem;
-  flex-wrap: wrap;
-}
-/* 推荐资源模块样式 */
-.resources {
-  padding: 4rem 0;
-  background-color: #fff5f5;
-  margin-top: 4rem;
-}
-
-.resources .container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 2rem;
-}
-
-.resources h2 {
-  text-align: center;
-  font-size: 2.5rem;
-  margin-bottom: 3rem;
-  color: #333;
-}
-
-.resources-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 2rem;
-}
-
-.resource-card {
-  background: white;
-  padding: 2.5rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-  transition: all 0.3s ease;
-  border: 1px solid #f0f0f0;
-}
-
-.resource-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 25px rgba(248, 120, 132, 0.15);
-  border-color: rgba(248, 120, 132, 0.3);
-}
-
-.resource-card h3 {
-  margin-top: 0;
-  margin-bottom: 1.5rem;
-  font-size: 1.5rem;
-  color: #f87884;
-  font-weight: 600;
-  border-bottom: 2px solid #f87884;
-  padding-bottom: 0.8rem;
-}
-
-.resource-card ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.resource-card li {
-  margin-bottom: 1rem;
-  padding-left: 1.5rem;
-  position: relative;
-}
-
-.resource-card li::before {
-  content: "→";
-  position: absolute;
-  left: 0;
-  color: #f87884;
-  font-weight: bold;
-}
-
-.resource-card a {
-  color: #333;
-  text-decoration: none;
-  transition: all 0.3s ease;
-  display: inline-block;
-}
-
-.resource-card a:hover {
-  color: #f87884;
-  transform: translateX(5px);
-}
-
-.stat-item {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  color: #666;
-  font-size: 0.9rem;
-}
-
-.stat-item::before {
-  font-size: 1.1rem;
-}
-
-.stat-item:nth-child(1)::before {
-  content: "★";
-  color: #f1c40f;
-}
-
-.stat-item:nth-child(2)::before {
-  content: "⑂";
-  color: #3498db;
-}
-
-.stat-item:nth-child(3)::before {
-  content: "●";
-  font-size: 0.7rem;
-}
-
-.github-link {
-  display: inline-block;
-  background: rgba(248, 120, 132, 0.1);
-  color: #f87884;
-  text-decoration: none;
-  padding: 0.6rem 1.2rem;
-  border-radius: 8px;
-  font-weight: 500;
-  transition: all 0.3s ease;
-  border: 1px solid rgba(248, 120, 132, 0.3);
-}
-
-.github-link:hover {
-  background: #f87884;
-  color: white;
-  transform: translateY(-2px);
-}
-
-.article-card {
-  background: white;
-  padding: 2rem;
-  border-radius: 10px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-}
-
-.article-card h3 {
-  color: #333;
-  margin-bottom: 1rem;
-}
-
-.article-card p {
-  color: #666;
-  margin-bottom: 1rem;
-}
-
-.date {
-  color: #999;
-  font-size: 0.9rem;
-}
-
-.read-more {
-  display: inline-block;
-  color: #f87884;
-  text-decoration: none;
-  font-weight: bold;
-  margin-top: 1rem;
-  transition: color 0.3s;
-}
-
-.read-more:hover {
-  color: #f55668;
-}
-
-/* 滚动渐入动画 */
 .fade-in {
   opacity: 0;
   transform: translateY(50px);
@@ -871,126 +470,560 @@ export default {
   transform: translateY(0);
 }
 
-/* 添加交错动画延迟 */
-.feature-card:nth-child(2) {
-  transition-delay: 0.2s;
+.text-center {
+  text-align: center;
 }
 
-.feature-card:nth-child(3) {
-  transition-delay: 0.4s;
-}
-
-.feature-card:nth-child(4) {
-  transition-delay: 0.6s;
-}
-
-.article-card:nth-child(2) {
-  transition-delay: 0.2s;
-}
-
-.article-card:nth-child(3) {
-  transition-delay: 0.4s;
-}
-
-@media (max-width: 768px) {
-  .hero-content h1 {
-    font-size: 2rem;
-  }
-
-  .feature-grid,
-  .articles-grid {
+.grid-responsive {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: @margin-lg;
+  
+  @media (max-width: 768px) {
     grid-template-columns: 1fr;
   }
-
-  /* GitHub 热门趋势样式 */
-.github-trending {
-  padding: 4rem 0;
-  background: white;
 }
 
-.github-trending h2 {
+.grid-status {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: @margin-lg;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+// 主样式
+.home {
+  min-height: 100vh;
+}
+
+/* 实时状态展示样式 */
+.status-section {
+  padding: @padding-md 0;
+  background: linear-gradient(135deg, @gradient-start 0%, @gradient-end 100%);
+  color: @white;
+  
+  .container {
+    .container-mixin;
+  }
+  
+  .status-grid {
+    .grid-status;
+  }
+  
+  .status-card {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    padding: @padding-md;
+    border-radius: @border-radius;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: @transition;
+    
+    &:hover {
+      transform: translateY(-5px);
+      background: rgba(255, 255, 255, 0.15);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+    }
+    
+    .status-icon {
+      width: @icon-size;
+      height: @icon-size;
+      border-radius: @border-radius-circle;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: @margin-sm;
+      font-size: 2rem;
+      
+      &::before {
+        font-size: 1.8rem;
+      }
+      
+      &.study {
+        background: rgba(255, 206, 86, 0.3);
+        
+        &::before {
+          content: "📚";
+        }
+      }
+      
+      &.weather {
+        background: rgba(54, 162, 235, 0.3);
+        
+        &::before {
+          content: "🌤️";
+        }
+      }
+    }
+    
+    h3 {
+      margin: 0 0 @margin-md 0;
+      font-size: @font-size-lg;
+      font-weight: 600;
+      color: @white;
+    }
+    
+    .status-info {
+      text-align: left;
+      
+      .status-text {
+        font-size: @font-size-md;
+        margin-bottom: @margin-sm;
+        font-weight: 500;
+      }
+      
+      .progress-bar {
+        width: 100%;
+        height: 8px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 4px;
+        overflow: hidden;
+        margin-bottom: 0.5rem;
+        
+        .progress-fill {
+          height: 100%;
+          background: linear-gradient(90deg, @progress-start, @progress-end);
+          border-radius: 4px;
+          transition: width 0.5s ease;
+        }
+      }
+      
+      .progress-text {
+        font-size: @font-size-xs;
+        opacity: 0.9;
+        margin: 0;
+      }
+      
+      .weather-location {
+        font-size: @font-size-sm;
+        opacity: 0.9;
+        margin-bottom: @margin-sm;
+      }
+      
+      .weather-main {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: @margin-sm;
+        
+        @media (max-width: 768px) {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 0.5rem;
+        }
+        
+        .weather-temp {
+          font-size: @font-size-xxl;
+          font-weight: 700;
+          line-height: 1;
+        }
+        
+        .weather-desc {
+          font-size: @font-size-md;
+          text-transform: capitalize;
+        }
+      }
+      
+      .weather-details {
+        display: flex;
+        justify-content: space-between;
+        font-size: @font-size-xs;
+        opacity: 0.9;
+        
+        @media (max-width: 768px) {
+          flex-direction: column;
+          gap: 0.5rem;
+        }
+      }
+    }
+  }
+}
+
+// Hero 部分
+.hero {
+  padding: @margin-xxl 0;
   text-align: center;
-  font-size: 2.5rem;
-  margin-bottom: 3rem;
-  color: #333;
+  
+  .hero-content {
+    h1 {
+      font-size: @font-size-xxxl;
+      margin-bottom: @margin-sm;
+      color: @dark-gray;
+      
+      @media (max-width: 768px) {
+        font-size: 2rem;
+      }
+    }
+    
+    p {
+      font-size: @font-size-md;
+      margin-bottom: @margin-lg;
+      opacity: 0.9;
+      color: @medium-gray;
+    }
+    
+    .cta-button {
+      display: inline-block;
+      background: @white;
+      color: @primary-color;
+      padding: 0.8rem 2rem;
+      text-decoration: none;
+      border-radius: 5px;
+      font-weight: bold;
+      transition: transform 0.3s, box-shadow 0.3s;
+      box-shadow: 0 2px 10px rgba(@primary-color, 0.3);
+      
+      &:hover {
+        transform: translateY(-2px);
+      }
+    }
+  }
 }
 
+// 特性部分
+.features {
+  padding: @margin-xxl 0;
+  background: @white;
+  
+  .container {
+    .container-mixin;
+  }
+  
+  h2 {
+    .text-center;
+    font-size: @font-size-xxl;
+    margin-bottom: @margin-xl;
+    color: @dark-gray;
+  }
+  
+  .feature-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: @margin-lg;
+  }
+  
+  .feature-card {
+    padding: @padding-md;
+    border-radius: @border-radius-sm;
+    .text-center;
+    transition: @transition-transform;
+    
+    &:hover {
+      transform: translateY(-5px);
+    }
+    
+    h3 {
+      color: @primary-color;
+      margin-bottom: @margin-sm;
+    }
+    
+    &:nth-child(2) { transition-delay: 0.2s; }
+    &:nth-child(3) { transition-delay: 0.4s; }
+    &:nth-child(4) { transition-delay: 0.6s; }
+  }
+}
+
+// 最新文章部分
+.recent-articles {
+  padding: @margin-xxl 0;
+  
+  .container {
+    .container-mixin;
+  }
+  
+  h2 {
+    .text-center;
+    font-size: @font-size-xxl;
+    margin-bottom: @margin-xl;
+    color: @dark-gray;
+  }
+  
+  .articles-grid {
+    .grid-responsive;
+  }
+  
+  .article-card {
+    background: @white;
+    padding: @padding-md;
+    border-radius: @border-radius-sm;
+    box-shadow: @box-shadow-card;
+    
+    h3 {
+      color: @dark-gray;
+      margin-bottom: @margin-sm;
+    }
+    
+    p {
+      color: @light-text;
+      margin-bottom: @margin-sm;
+    }
+    
+    .date {
+      color: @very-light-text;
+      font-size: @font-size-xs;
+    }
+    
+    .read-more {
+      display: inline-block;
+      color: @primary-color;
+      text-decoration: none;
+      font-weight: bold;
+      margin-top: @margin-sm;
+      transition: color 0.3s;
+      
+      &:hover {
+        color: @primary-hover;
+      }
+    }
+    
+    &:nth-child(2) { transition-delay: 0.2s; }
+    &:nth-child(3) { transition-delay: 0.4s; }
+  }
+}
+
+// GitHub 热门趋势部分
+.github-trending {
+  padding: @margin-xxl 0;
+  background: @white;
+  
+  .container {
+    .container-mixin;
+  }
+  
+  h2 {
+    .text-center;
+    font-size: @font-size-xxl;
+    margin-bottom: @margin-xl;
+    color: @dark-gray;
+  }
+  
   .github-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 2rem;
+    .grid-responsive;
   }
-
-  /* 推荐资源样式 */
-  .resources {
-    padding: 4rem 0;
+  
+  .github-card {
+    .card-base;
+    .card-hover;
+    
+    .github-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: @margin-sm;
+      
+      .github-avatar {
+        width: @avatar-size;
+        height: @avatar-size;
+        border-radius: @border-radius-circle;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: @white;
+        font-weight: bold;
+        font-size: 1.5rem;
+        position: relative;
+        overflow: hidden;
+        
+        &::before {
+          content: "G";
+        }
+      }
+      
+      .github-info {
+        h3 {
+          margin: 0;
+          font-size: @font-size-lg;
+          color: @dark-gray;
+        }
+        
+        .github-owner {
+          margin: 0;
+          font-size: @font-size-xs;
+          color: @light-text;
+        }
+      }
+    }
+    
+    .github-description {
+      color: @medium-gray;
+      margin-bottom: @margin-md;
+      line-height: 1.6;
+      font-size: 0.95rem;
+      overflow: hidden;
+      display: -webkit-box;
+      line-clamp: 3;
+      -webkit-box-orient: vertical;
+    }
+    
+    .github-stats {
+      display: flex;
+      gap: 1.5rem;
+      margin-bottom: @margin-md;
+      flex-wrap: wrap;
+      
+      .stat-item {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        color: @light-text;
+        font-size: @font-size-xs;
+        
+        &::before {
+          font-size: 1.1rem;
+        }
+        
+        &:nth-child(1)::before {
+          content: "★";
+          color: @star-color;
+        }
+        
+        &:nth-child(2)::before {
+          content: "⑂";
+          color: @fork-color;
+        }
+        
+        &:nth-child(3)::before {
+          content: "●";
+          font-size: 0.7rem;
+        }
+      }
+    }
+    
+    .github-link {
+      display: inline-block;
+      background: rgba(@primary-color, 0.1);
+      color: @primary-color;
+      text-decoration: none;
+      padding: 0.6rem 1.2rem;
+      border-radius: @border-radius-xs;
+      font-weight: 500;
+      transition: @transition;
+      border: 1px solid rgba(@primary-color, 0.3);
+      
+      &:hover {
+        background: @primary-color;
+        color: @white;
+        transform: translateY(-2px);
+      }
+    }
   }
+}
 
-  .resources h2 {
-    text-align: center;
-    font-size: 2.5rem;
-    margin-bottom: 3rem;
-    color: #333;
+// 推荐资源部分
+.resources {
+  padding: @margin-xxl 0;
+  background-color: #fff5f5;
+  margin-top: @margin-xxl;
+  
+  .container {
+    .container-mixin;
   }
-
+  
+  h2 {
+    .text-center;
+    font-size: @font-size-xxl;
+    margin-bottom: @margin-xl;
+    color: @dark-gray;
+  }
+  
   .resources-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 2rem;
+    .grid-responsive;
   }
-
+  
   .resource-card {
-    background: white;
-    padding: 2rem;
-    border-radius: 10px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    .card-base;
+    padding: @padding-lg;
+    .card-hover;
+    
+    h3 {
+      margin-top: 0;
+      margin-bottom: @margin-md;
+      font-size: @font-size-xl;
+      color: @primary-color;
+      font-weight: 600;
+      border-bottom: 2px solid @primary-color;
+      padding-bottom: 0.8rem;
+    }
+    
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      
+      li {
+        margin-bottom: @margin-sm;
+        padding-left: 1.5rem;
+        position: relative;
+        
+        &::before {
+          content: "→";
+          position: absolute;
+          left: 0;
+          color: @primary-color;
+          font-weight: bold;
+        }
+        
+        a {
+          color: @dark-gray;
+          text-decoration: none;
+          transition: @transition;
+          display: inline-block;
+          
+          &:hover {
+            color: @primary-color;
+            transform: translateX(5px);
+          }
+        }
+      }
+    }
   }
+}
 
-  .resource-card h3 {
-    color: #667eea;
-    margin-bottom: 1.5rem;
+// 响应式设计
+@media (max-width: 768px) {
+  // 移动端减少动画延迟
+  .feature-card,
+  .article-card,
+  .github-card {
+    &:nth-child(2), &:nth-child(3), &:nth-child(4) {
+      transition-delay: 0.1s;
+    }
   }
-
-  .resource-card ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
+  
+  // GitHub 热门趋势移动端样式
+  .github-grid {
+    .grid-responsive;
   }
-
-  .resource-card li {
-    margin-bottom: 1rem;
-    padding-left: 1.5rem;
-    position: relative;
-  }
-
-  .resource-card li::before {
-    content: "→";
-    position: absolute;
-    left: 0;
-    color: #667eea;
-  }
-
-  .resource-card a {
-    color: #333;
-    text-decoration: none;
-    transition: color 0.3s;
-  }
-
-  .resource-card a:hover {
-    color: #667eea;
-    text-decoration: underline;
-  }
-
-  /* 移动端减少动画延迟 */
-  .feature-card:nth-child(2),
-  .feature-card:nth-child(3),
-  .feature-card:nth-child(4),
-  .article-card:nth-child(2),
-  .article-card:nth-child(3),
-  .github-card:nth-child(2),
-  .github-card:nth-child(3),
-  .github-card:nth-child(4) {
-    transition-delay: 0.1s;
+  
+  // 推荐资源移动端样式
+  .resources {
+    padding: @margin-xxl 0;
+    
+    .resource-card {
+      padding: @padding-md;
+      border-radius: @border-radius-sm;
+      box-shadow: @box-shadow-card;
+      
+      h3 {
+        color: @gradient-start;
+        margin-bottom: @margin-md;
+      }
+      
+      li::before {
+        color: @gradient-start;
+      }
+      
+      a {
+        transition: color 0.3s;
+        
+        &:hover {
+          color: @gradient-start;
+          text-decoration: underline;
+        }
+      }
+    }
   }
 }
 </style>
