@@ -786,7 +786,6 @@ export default {
 // GitHub 热门趋势部分
 .github-trending {
   padding: @margin-xxl 0;
-  background: @white;
   
   .container {
     .container-mixin;
@@ -800,7 +799,9 @@ export default {
   }
   
   .github-grid {
-    .grid-responsive;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: @margin-lg;
   }
   
   .github-card {

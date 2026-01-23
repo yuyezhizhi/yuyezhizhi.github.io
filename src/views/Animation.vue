@@ -26,6 +26,8 @@
         <ThreeDAnimations v-if="activeCategory === 4" />
         <!-- AI聊天示例 -->
         <AIChat v-if="activeCategory === 5" />
+        <!-- 排序算法可视化示例 -->
+        <SortingVisualizations v-if="activeCategory === 6" />
       </div>
     </div>
   </div>
@@ -38,6 +40,7 @@ import CSSAnimations from '@/components/animation/CSSAnimations.vue'
 import TransitionAnimations from '@/components/animation/TransitionAnimations.vue'
 import ThreeDAnimations from '@/components/animation/ThreeDAnimations.vue'
 import AIChat from '@/components/animation/AIChat.vue'
+import SortingVisualizations from '@/components/animation/SortingVisualizations.vue'
 export default {
   name: 'Animation',
   components: {
@@ -45,7 +48,8 @@ export default {
     CSSAnimations,
     TransitionAnimations,
     ThreeDAnimations,
-    AIChat
+    AIChat,
+    SortingVisualizations
   },
   data() {
     return {
@@ -54,7 +58,8 @@ export default {
         { id: 2, name: 'CSS动画' },
         { id: 3, name: '过渡动画' },
         { id: 4, name: '3D动画' },
-        { id: 5, name: 'AI聊天' }
+        { id: 5, name: 'AI聊天' },
+        { id: 6, name: '排序算法' }
       ],
       activeCategory: 1
     }
