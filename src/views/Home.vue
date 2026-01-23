@@ -3,38 +3,26 @@
     <!-- 实时状态展示区 -->
     <section class="status-section">
       <div class="container">
-        <div class="status-grid">
+        <div class="status-flex">
           <!-- 学习状态卡片 -->
           <div class="status-card fade-in">
-            <div class="status-icon study">
-              <i class="study-icon"></i>
-            </div>
-            <h3>学习状态</h3>
-            <div class="status-info">
-              <p class="status-text">{{ studyStatus }}</p>
+            <div class="status-icon study"></div>
+            <div class="status-content">
+              <h3>学习</h3>
               <div class="progress-bar">
                 <div class="progress-fill" :style="{ width: studyProgress + '%' }"></div>
               </div>
-              <p class="progress-text">今日学习进度: {{ studyProgress }}%</p>
+              <p>{{ studyStatus }}</p>
             </div>
           </div>
           
           <!-- 天气信息卡片 -->
           <div class="status-card fade-in">
-            <div class="status-icon weather">
-              <i class="weather-icon"></i>
-            </div>
-            <h3>当前天气</h3>
-            <div class="status-info">
-              <p class="weather-location">{{ weather.city }}, {{ weather.country }}</p>
-              <div class="weather-main">
-                <span class="weather-temp">{{ weather.temperature }}°C</span>
-                <span class="weather-desc">{{ weather.description }}</span>
-              </div>
-              <div class="weather-details">
-                <span>湿度: {{ weather.humidity }}%</span>
-                <span>风速: {{ weather.windSpeed }} m/s</span>
-              </div>
+            <div class="status-icon weather"></div>
+            <div class="status-content">
+              <h3>天气</h3>
+              <p class="weather-temp">{{ weather.temperature }}°C</p>
+              <p class="weather-desc">{{ weather.description }}</p>
             </div>
           </div>
         </div>
@@ -499,46 +487,51 @@ export default {
   min-height: 100vh;
 }
 
-/* 实时状态展示样式 */
+/* 实时状态展示样式 - 进一步缩小视觉占比 */
 .status-section {
-  padding: @padding-md 0;
-  background: linear-gradient(135deg, @gradient-start 0%, @gradient-end 100%);
+  padding: 0.2rem 0; /* 进一步减小上下内边距 */
   color: @white;
   
   .container {
     .container-mixin;
+    padding: 0;
   }
   
-  .status-grid {
-    .grid-status;
+  .status-flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
   }
   
   .status-card {
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    padding: @padding-md;
-    border-radius: @border-radius;
+    background: linear-gradient(135deg, @gradient-start 0%, @gradient-end 100%);
+    padding: 0.4rem 0.5rem; /* 进一步减小内边距 */
+    border-radius: @border-radius-xs; /* 使用最小边框半径 */
     border: 1px solid rgba(255, 255, 255, 0.2);
     transition: @transition;
+    min-height: auto;
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    width: auto;
     
     &:hover {
-      transform: translateY(-5px);
-      background: rgba(255, 255, 255, 0.15);
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+      transform: scale(1.2); 
+      background: linear-gradient(135deg, @gradient-start 0%, @gradient-end 100%);
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03); 
     }
     
     .status-icon {
-      width: @icon-size;
-      height: @icon-size;
+      width: 20px; 
+      height: 20px;
       border-radius: @border-radius-circle;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-bottom: @margin-sm;
-      font-size: 2rem;
+      flex-shrink: 0;
       
       &::before {
-        font-size: 1.8rem;
+        font-size: 0.7rem; 
       }
       
       &.study {
@@ -558,84 +551,49 @@ export default {
       }
     }
     
-    h3 {
-      margin: 0 0 @margin-md 0;
-      font-size: @font-size-lg;
-      font-weight: 600;
-      color: @white;
-    }
-    
-    .status-info {
-      text-align: left;
+    .status-content {
+      flex: 0 0 auto;
+      min-width: 0;
       
-      .status-text {
-        font-size: @font-size-md;
-        margin-bottom: @margin-sm;
-        font-weight: 500;
+      h3 {
+        margin: 0 0 0.2rem 0; /* 进一步减小间距 */
+        font-size: 0.75rem; /* 进一步减小标题字体 */
+        font-weight: 500; /* 降低字重 */
+        color: @white;
+      }
+      
+      p {
+        font-size: 0.65rem; /* 进一步减小文本大小 */
+        margin: 0;
+        opacity: 0.9;
       }
       
       .progress-bar {
-        width: 100%;
-        height: 8px;
+        width: 70px; /* 减小进度条宽度 */
+        height: 3px; /* 进一步减小进度条高度 */
         background: rgba(255, 255, 255, 0.2);
-        border-radius: 4px;
+        border-radius: 2px;
         overflow: hidden;
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.2rem; /* 进一步减小间距 */
         
         .progress-fill {
           height: 100%;
           background: linear-gradient(90deg, @progress-start, @progress-end);
-          border-radius: 4px;
+          border-radius: 2px;
           transition: width 0.5s ease;
         }
       }
       
-      .progress-text {
-        font-size: @font-size-xs;
-        opacity: 0.9;
-        margin: 0;
+      .weather-temp {
+        font-size: 0.7rem; /* 进一步减小温度字体 */
+        font-weight: 600; /* 降低字重 */
+        line-height: 1;
+        margin-bottom: 0.1rem;
       }
       
-      .weather-location {
-        font-size: @font-size-sm;
-        opacity: 0.9;
-        margin-bottom: @margin-sm;
-      }
-      
-      .weather-main {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        margin-bottom: @margin-sm;
-        
-        @media (max-width: 768px) {
-          flex-direction: column;
-          align-items: flex-start;
-          gap: 0.5rem;
-        }
-        
-        .weather-temp {
-          font-size: @font-size-xxl;
-          font-weight: 700;
-          line-height: 1;
-        }
-        
-        .weather-desc {
-          font-size: @font-size-md;
-          text-transform: capitalize;
-        }
-      }
-      
-      .weather-details {
-        display: flex;
-        justify-content: space-between;
-        font-size: @font-size-xs;
-        opacity: 0.9;
-        
-        @media (max-width: 768px) {
-          flex-direction: column;
-          gap: 0.5rem;
-        }
+      .weather-desc {
+        font-size: 0.6rem; /* 进一步减小描述字体 */
+        text-transform: capitalize;
       }
     }
   }
@@ -682,48 +640,7 @@ export default {
   }
 }
 
-// 特性部分
-.features {
-  padding: @margin-xxl 0;
-  background: @white;
-  
-  .container {
-    .container-mixin;
-  }
-  
-  h2 {
-    .text-center;
-    font-size: @font-size-xxl;
-    margin-bottom: @margin-xl;
-    color: @dark-gray;
-  }
-  
-  .feature-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: @margin-lg;
-  }
-  
-  .feature-card {
-    padding: @padding-md;
-    border-radius: @border-radius-sm;
-    .text-center;
-    transition: @transition-transform;
-    
-    &:hover {
-      transform: translateY(-5px);
-    }
-    
-    h3 {
-      color: @primary-color;
-      margin-bottom: @margin-sm;
-    }
-    
-    &:nth-child(2) { transition-delay: 0.2s; }
-    &:nth-child(3) { transition-delay: 0.4s; }
-    &:nth-child(4) { transition-delay: 0.6s; }
-  }
-}
+
 
 // 最新文章部分
 .recent-articles {
@@ -985,7 +902,6 @@ export default {
 // 响应式设计
 @media (max-width: 768px) {
   // 移动端减少动画延迟
-  .feature-card,
   .article-card,
   .github-card {
     &:nth-child(2), &:nth-child(3), &:nth-child(4) {
