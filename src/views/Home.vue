@@ -190,25 +190,37 @@ export default {
       },
       
       recentArticles: [
-        {
-          id: 9,
-          title: "Next.js + React 项目实战指南",
-          description: "从项目初始化到部署上线，全面讲解Next.js与React结合开发的最佳实践和核心功能。",
-          date: "2024-01-30",
-        },
-        {
-          id: 1,
-          title: "Vue 3 Composition API 详解",
-          description: "深入理解Vue 3的Composition API及其优势",
-          date: "2024-01-15",
-        },
-        {
-          id: 2,
-          title: "Vite vs Webpack 性能对比",
-          description: "现代构建工具的性能分析和选择建议",
-          date: "2024-01-10",
-        },
-      ],
+    {
+      id: 17,
+      title: '2026年AI技术发展趋势预测',
+      description: '展望2026年AI技术的发展趋势，包括生成式AI、AI基础设施和各行业应用',
+      date: '2026-12-15'
+    },
+    {
+      id: 18,
+      title: '生成式AI在企业中的应用与实践',
+      description: '探讨生成式AI在企业中的应用价值、案例和实施建议',
+      date: '2026-11-20'
+    },
+    {
+      id: 19,
+      title: 'AI伦理与法规：全球发展与挑战',
+      description: '分析全球AI伦理与法规的发展现状、核心原则和企业应对策略',
+      date: '2026-10-08'
+    },
+    {
+      id: 20,
+      title: '量子计算与AI的融合发展',
+      description: '探讨量子计算与AI的融合发展、技术影响和应用前景',
+      date: '2026-09-12'
+    },
+    {
+      id: 21,
+      title: 'AI辅助软件开发的未来',
+      description: '展望AI辅助软件开发的演进、核心功能和对行业的影响',
+      date: '2026-08-25'
+    }
+  ],
       githubTrending: [
         {
           id: 1,

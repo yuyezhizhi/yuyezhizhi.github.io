@@ -68,12 +68,14 @@ const categories = computed(() => {
 })
 
 const filteredArticles = computed(() => {
-  return articles.value.filter(article => {
-    const matchesSearch = article.title.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-                        article.description.toLowerCase().includes(searchQuery.value.toLowerCase())
-    const matchesCategory = !selectedCategory.value || article.category === selectedCategory.value
-    return matchesSearch && matchesCategory
-  })
+  return articles.value
+    .filter(article => {
+      const matchesSearch = article.title.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+                          article.description.toLowerCase().includes(searchQuery.value.toLowerCase())
+      const matchesCategory = !selectedCategory.value || article.category === selectedCategory.value
+      return matchesSearch && matchesCategory
+    })
+    .sort((a, b) => new Date(b.date) - new Date(a.date)) // 按时间最新排序
 })
 </script>
 
