@@ -41,6 +41,11 @@ const routes = [
     name: 'AI',
     component: () => import('../views/AI.vue')
   },
+  {
+    path: '/wechat-publish',
+    name: 'WechatPublish',
+    component: () => import('../views/WechatPublish.vue')
+  },
   // 404 路由，必须放在最后
   {
     path: '/:pathMatch(.*)*',
