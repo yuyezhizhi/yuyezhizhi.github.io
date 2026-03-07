@@ -108,7 +108,7 @@ npm run build
 - 文字颜色：`#333`、`#666`、`#999`
 ## Star History
 
-[![Star History Chart](https://api.star-history.com/image?repos=openclaw/openclaw&type=date&legend=top-left)](https://www.star-history.com/)
+[![Star History Chart](https://api.star-history.com/image?repos=yuyezhizhi/yuyezhizhi.github.io&type=date&legend=top-left)](https://www.star-history.com/)
 ## 许可证
 
 MIT License
