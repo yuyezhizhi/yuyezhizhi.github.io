@@ -106,7 +106,9 @@ npm run build
 - 主色调：`#667eea` 和 `#764ba2`  
 - 背景色：`#f8f9fa`
 - 文字颜色：`#333`、`#666`、`#999`
+## Star History
 
+[![Star History Chart](https://api.star-history.com/image?repos=yuyezhizhi/yuyezhizhi.github.io&type=date&legend=top-left)](https://www.star-history.com/)
 ## 许可证
 
 MIT License
