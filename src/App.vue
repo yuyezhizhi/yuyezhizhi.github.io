@@ -4,11 +4,20 @@
     <nav class="navbar">
       <div class="nav-container">
         <h1 class="logo">
-          <router-link to="/">前端知识库</router-link>
+          <router-link to="/" class="animated-text">
+            <span class="letter" style="color: #ff6b6b;">好</span>
+            <span class="letter" style="color: #4ecdc4;">玩</span>
+            <span class="letter" style="color: #45b7d1;">的</span>
+            <span class="letter" style="color: #96ceb4;">动</span>
+            <span class="letter" style="color: #ffeaa7;">画</span>
+          </router-link>
         </h1>
         <ul class="nav-menu">
-          <li><router-link to="/" class="nav-link">首页</router-link></li>
-          <li><router-link to="/about" class="nav-link">关于</router-link></li>
+          <li><router-link to="/about" class="nav-link animated-text">
+            <span class="letter" style="color: #ff6b6b;">关</span>
+            <span class="letter" style="color: #4ecdc4;">于</span>
+            <span class="letter" style="color: #45b7d1;">我</span>
+          </router-link></li>
         </ul>
       </div>
     </nav>
@@ -17,7 +26,7 @@
       <router-view />
     </main>
     
-    <footer class="footer">
+    <footer v-if="showFooter" class="footer">
       <div class="footer-content">
         <p>&copy; 2024 yuyezhizhi 的前端博客. 保留所有权利.</p>
       </div>
@@ -75,6 +84,10 @@ export default {
     }
   },
   computed: {
+    showFooter() {
+      // 首页和关于页面不显示页脚
+      return this.$route.path !== '/' && this.$route.path !== '/about';
+    },
     ringDashoffset() {
       return this.ringCircumference - (this.scrollProgress / 100) * this.ringCircumference
     }
@@ -149,12 +162,17 @@ body {
   top: 0;
   left: 0;
   width: 100%;
-  padding: 1rem 0;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  padding: 0.5rem 0;
+  box-shadow: none;
   z-index: 1000;
-  transition: @transition;
-  backdrop-filter: saturate(180%) blur(6px);
-  background: rgba(255, 255, 255, 0.9);
+  transition: @transition, opacity 0.3s ease;
+  backdrop-filter: none;
+  background: none;
+  opacity: 0.3;
+  
+  &:hover {
+    opacity: 1;
+  }
   
   .nav-container {
     max-width: @container-width;
@@ -168,8 +186,34 @@ body {
     .logo a {
       color: @text-color;
       text-decoration: none;
-      font-size: 1.8rem;
+      font-size: 1.5rem;
       font-weight: bold;
+    }
+    
+    .animated-text {
+      display: inline-block;
+      position: relative;
+      
+      .letter {
+        display: inline-block;
+        animation: bounce 2s infinite ease-in-out;
+        animation-delay: calc(var(--index) * 0.1s);
+        
+        &:nth-child(1) { --index: 0; }
+        &:nth-child(2) { --index: 1; }
+        &:nth-child(3) { --index: 2; }
+        &:nth-child(4) { --index: 3; }
+        &:nth-child(5) { --index: 4; }
+      }
+    }
+    
+    @keyframes bounce {
+      0%, 100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-10px);
+      }
     }
     
     .nav-menu {
@@ -183,15 +227,17 @@ body {
         padding: 0.5rem 1rem;
         border-radius: @border-radius;
         transition: @transition;
+        font-size: 1.5rem;
+        font-weight: bold;
         
         &:hover {
-          background-color: rgba(@primary-color, 0.1);
+          background-color: transparent;
         }
         
         &.router-link-active {
-          background-color: rgba(@primary-color, 0.2);
+          background-color: transparent;
           color: @primary-color;
-          font-weight: 600;
+          font-weight: bold;
         }
       }
     }
