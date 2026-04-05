@@ -7,50 +7,9 @@ const routes = [
     component: () => import('../views/Home.vue')
   },
   {
-    path: '/articles',
-    name: 'Articles',
-    component: () => import('../views/Articles.vue')
-  },
-  {
-    path: '/article/:id',
-    name: 'ArticleDetail',
-    component: () => import('../views/ArticleDetail.vue')
-  },
-  {
-    path: '/animation',
-    name: 'Animation',
-    component: () => import('../views/Animation.vue')
-  },
-  {
-    path: '/interview',
-    name: 'Interview',
-    component: () => import('../views/Interview.vue')
-  },
-  {
     path: '/about',
     name: 'About',
     component: () => import('../views/About.vue')
-  },
-  {
-    path: '/file/:fileName?',
-    name: 'FilePreview',
-    component: () => import('../views/FilePreview.vue')
-  },
-  {
-    path: '/ai',
-    name: 'AI',
-    component: () => import('../views/AI.vue')
-  },
-  {
-    path: '/wechat-publish',
-    name: 'WechatPublish',
-    component: () => import('../views/WechatPublish.vue')
-  },
-  // 404 路由，必须放在最后
-  {
-    path: '/:pathMatch(.*)*',
-    name: 'NotFound',
-    component: () => import('../views/NotFound.vue')
   }
 ]
 
