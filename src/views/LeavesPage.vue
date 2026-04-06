@@ -236,8 +236,8 @@ export default {
 
         // 在树上时的逻辑
         if (this.onTree) {
-          // 鼠标移入时，脱离大树，进入圆盘旋转模式
-          if (isMouseActive && treeOpacity < 1) {
+          // 鼠标移入时，脱离大树，进入圆盘旋转模式（只有当大树生长完成后）
+          if (isMouseActive && treeOpacity < 1 && treeGrowth >= 1) {
             this.onTree = false;
             // 初始化圆盘旋转参数
             this.circleAngle = Math.atan2(this.y - mouseY, this.x - mouseX);
@@ -363,6 +363,9 @@ export default {
     
     // 鼠标移动事件
     canvas.addEventListener('mousemove', (e) => {
+      // 大树生长过程中不响应鼠标事件
+      if (treeState.isGrowing) return;
+      
       userHasMovedMouse = true;
       mouseState.x = e.clientX;
       mouseState.y = e.clientY;
@@ -378,14 +381,14 @@ export default {
     canvas.addEventListener('mouseout', () => {
       mouseState.isActive = false;
       mouseState.leaveTime = Date.now();
-      treeState.isVisible = true; // 鼠标移出画布后，设置树为可见
+      // 鼠标移出画布后，大树消失
+      treeState.isVisible = false;
+      treeState.opacity = 0;
+      treeState.structure = null;
+      treeState.growth = 0;
       // 重置首次生长标记，允许鼠标移出后重新生长
       initialTreeStarted = false;
-      // 重置树的渐隐状态
-      treeState.opacity = 1;
-      treeState.fadeOutStartTime = 0;
-      treeState.growth = 1; // 保持树为完全生长状态
-      // 重置所有树叶状态，回到初始状态
+      // 重置所有树叶状态，初始化分散在屏幕各处
       leaves.forEach(leaf => {
         leaf.onTree = true;
         leaf.onGround = false;
@@ -395,26 +398,19 @@ export default {
         leaf.fallStartX = 0;
         leaf.fallStartY = 0;
         leaf.color = leaf.baseColor;
-        // 如果已经有 treePosition，直接回到树上位置
-        if (leaf.treePosition) {
-          leaf.x = leaf.treePosition.x;
-          leaf.y = leaf.treePosition.y;
-        } else {
-          // 如果没有 treePosition，重新设置
-          leaf.setTreePosition(1);
-        }
+        // 初始化树叶位置，分散在屏幕各处
+        leaf.reset(true);
+        // 保存初始位置
+        leaf.initialX = leaf.x;
+        leaf.initialY = leaf.y;
       });
-      // 重新生成树结构
-      if (!treeState.structure) {
-        const maxWidth = canvas.width * 0.67;
-        const fixedTrunkHeight = (200 + 400) / 2 * 1.2;
-        treeState.structure = generateTreeStructure(maxWidth, fixedTrunkHeight, canvas.height);
-        treeState.maxBranchLevel = Math.max(1, ...treeState.structure.map(b => b.level));
-      }
     });
     
     // 鼠标点击事件 - 爆开树叶并让大树消失
     canvas.addEventListener('mousedown', (e) => {
+      // 大树生长过程中不响应鼠标事件
+      if (treeState.isGrowing) return;
+      
       if (e.button === 0) { // 左键点击
         // 所有不在树上的树叶爆开并掉落
         leaves.forEach(leaf => {
@@ -675,13 +671,28 @@ export default {
         const elapsed = (Date.now() - mouseState.leaveTime) / 1000;
         if (elapsed > 5 && !treeState.isGrowing) { // 显示树苗时间调整为 5 秒
           treeState.isVisible = true;
+          treeState.opacity = 1; // 重置透明度为1，确保大树可见
           treeState.branchesGrown = false; // 重置树生长状态
           treeState.growth = 0; // 重置生长进度
+          treeState.fadeOutStartTime = 0; // 重置渐隐状态
           
           // 确保在树开始生长时就生成并缓存树枝结构
           if (!treeState.structure) {
             drawTree(0.001);
           }
+          // 重置树叶状态，让它们重新吸附到树上
+          leaves.forEach(leaf => {
+            leaf.onTree = true;
+            leaf.onGround = false;
+            leaf.isFalling = false;
+            leaf.isExploding = false;
+            leaf.fallProgress = 0;
+            leaf.fallStartX = 0;
+            leaf.fallStartY = 0;
+            leaf.color = leaf.baseColor;
+            // 为树叶设置新的树上位置
+            leaf.setTreePosition(1);
+          });
           // 无论 treeState.structure 是否存在，都开始生长树
           startGrowingTree();
           // 重置 leaveTime 防止重复触发
