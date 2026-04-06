@@ -55,10 +55,13 @@ export default {
         this.isExploding = false; // 是否正在爆开
         // 圆盘旋转相关
         this.circleAngle = Math.random() * Math.PI * 2; // 在圆盘上的角度
-        this.circleRadius = 150 + Math.random() * 100; // 圆盘半径（150-250）
+        // 计算最大环绕范围：从鼠标到目前最宽处的1倍位置（缩小一倍）
+        const maxRadius = Math.max(window.innerWidth, window.innerHeight) * 0.5 * 1;
+        // 初始化圆盘半径，使树叶均匀分布在范围内
+        this.circleRadius = Math.random() * maxRadius; // 圆盘半径（0到最大范围）
         // 掉落相关
         this.fallStartTime = 0;
-        this.fallDuration = 3000 + Math.random() * 2000;
+        this.fallDuration = 12000 + Math.random() * 8000; // 掉落动画持续时间再增加一倍，使掉落速度再减慢一倍
         this.fallProgress = 0;
         this.fallStartX = 0;
         this.fallStartY = 0;
@@ -241,7 +244,10 @@ export default {
             this.onTree = false;
             // 初始化圆盘旋转参数
             this.circleAngle = Math.atan2(this.y - mouseY, this.x - mouseX);
-            this.circleRadius = 150 + Math.random() * 100;
+            // 计算最大环绕范围：从鼠标到目前最宽处的1倍位置（缩小一倍）
+            const maxRadius = Math.max(window.innerWidth, window.innerHeight) * 0.5 * 1;
+            // 初始化圆盘半径，使树叶均匀分布在范围内
+            this.circleRadius = Math.random() * maxRadius;
           } else if (branchSegments && branchSegments.length > 0 && treeOpacity >= 0.5) {
             // 吸附在树枝上
             let bestD2 = Infinity;
@@ -269,21 +275,21 @@ export default {
 
             const dist = Math.sqrt(bestD2);
             if (best && dist < attractRadius) {
-              const pull = (1 - dist / attractRadius) * (0.14 + 0.07 * this.speed);
+              const pull = (1 - dist / attractRadius) * (0.035 + 0.0175 * this.speed); // 吸附速度减慢4倍
               this.targetX = best.x;
               this.targetY = best.y;
               this.settledOnBranch = dist < settleDist;
               this.x += (this.targetX - this.x) * pull;
               this.y += (this.targetY - this.y) * pull;
               if (!this.settledOnBranch) {
-                this.y += 0.28 * this.speed;
+                this.y += 0.07 * this.speed; // 下落速度减慢4倍
               }
             } else {
               this.settledOnBranch = false;
               this.targetX = this.initialX;
               this.targetY = this.initialY;
-              this.x += (this.targetX - this.x) * 0.05 * this.speed;
-              this.y += (this.targetY - this.y) * 0.05 * this.speed;
+              this.x += (this.targetX - this.x) * 0.0125 * this.speed; // 回到初始位置的速度减慢4倍
+              this.y += (this.targetY - this.y) * 0.0125 * this.speed; // 回到初始位置的速度减慢4倍
               this.x += Math.sin(Date.now() * 0.001 + this.initialX) * 0.1;
               this.y += Math.cos(Date.now() * 0.001 + this.initialY) * 0.1;
             }
@@ -295,6 +301,11 @@ export default {
         // 不在树上也不在地面，说明在圆盘旋转模式
         // 围绕鼠标形成大圆盘旋转
         if (isMouseActive) {
+          // 计算环绕范围：从鼠标到目前最宽处的1倍位置（缩小一倍）
+          const maxRadius = Math.max(window.innerWidth, window.innerHeight) * 0.5 * 1;
+          // 确保circleRadius在合理范围内
+          this.circleRadius = Math.min(maxRadius, this.circleRadius);
+          
           // 更新圆盘角度
           this.circleAngle += 0.02 * this.speed;
           
@@ -354,7 +365,7 @@ export default {
       growthStage: 0,
       isGrowing: false,
       growthAnimStart: 0,
-      growthAnimDuration: 10000,
+      growthAnimDuration: 40000, // 生长动画持续时间再增加一倍，使生长速度再减慢一倍
       fadeOutStartTime: 0 // 渐隐开始时间
     };
     
