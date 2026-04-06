@@ -96,10 +96,18 @@ export default {
 
     // 创建鱼群
     const fishes = [];
+    const redFishCount = 4; // 红色鱼的数量
+    const redFishIndices = new Set();
+    
+    // 随机选择4个位置来放置红色鱼
+    while (redFishIndices.size < redFishCount) {
+      redFishIndices.add(Math.floor(Math.random() * 300));
+    }
+    
     for (let i = 0; i < 300; i++) {
       const fish = new Fish();
-      // 10%的概率创建红色的鱼，比其他鱼大一倍
-      if (Math.random() < 0.1) {
+      // 如果是红色鱼的位置，创建红色的鱼，比其他鱼大一倍
+      if (redFishIndices.has(i)) {
         fish.color = `hsl(0, 80%, ${50 + Math.random() * 30}%)`; // 红色
         fish.size = fish.size * 2; // 大小翻倍
       }
