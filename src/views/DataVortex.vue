@@ -79,21 +79,24 @@ const sketch = (p) => {
       const pulse = Math.sin(p.frameCount * 0.05 + node.pulseOffset)
       const alpha = 150 + pulse * 100
       
+      // 计算到中心的距离
+      const distToCenter = Math.hypot(node.x - centerX, node.y - centerY)
+
       // 连接到附近节点
       p.stroke(255, 255, 255, alpha * 0.3)
       p.strokeWeight(0.5)
-      
+
       for (let j = i + 1; j < Math.min(i + 10, nodes.length); j++) {
         const other = nodes[j]
-        const dist = Math.hypot(node.x - other.x, node.y - other.y)
-        if (dist < 150) {
+        const distToNode = Math.hypot(node.x - other.x, node.y - other.y)
+        if (distToNode < 150) {
           p.line(node.x, node.y, other.x, other.y)
         }
       }
-      
+
       // 连线到中心
-      if (dist < 100) {
-        p.stroke(255, 255, 255, alpha * 0.5 * (1 - dist / 300))
+      if (distToCenter < 300) {
+        p.stroke(255, 255, 255, alpha * 0.5 * (1 - distToCenter / 300))
         p.line(node.x, node.y, p.width / 2, p.height / 2)
       }
       
