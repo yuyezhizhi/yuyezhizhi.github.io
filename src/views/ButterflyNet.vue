@@ -6,7 +6,7 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import p5 from 'p5'
 
-// 极简蝴蝶网 - 只保留核心动画
+// 蝴蝶网 - 交互式版本
 const canvasContainer = ref(null)
 let sketchInstance = null
 
@@ -15,13 +15,19 @@ const sketch = (p) => {
   let leaves = []
   let flowers = []
   let frame = 0
+  let netX = 0
+  let netY = 0
+  let netRadius = 80
+  let caughtCount = 0
 
   p.setup = () => {
     p.createCanvas(p.windowWidth, p.windowHeight)
     p.frameRate(60)
+    netX = p.width / 2
+    netY = p.height / 2
 
     // 蝴蝶
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 15; i++) {
       butterflies.push({
         x: Math.random() * p.width,
         y: Math.random() * p.height,
@@ -29,7 +35,8 @@ const sketch = (p) => {
         vy: Math.random() * 4 - 2,
         size: 20 + Math.random() * 20,
         color: `hsl(${Math.random() * 360}, 70%, 60%)`,
-        wingAngle: 0
+        wingAngle: 0,
+        caught: false
       })
     }
 
@@ -61,30 +68,11 @@ const sketch = (p) => {
     frame++
     p.background(250, 248, 245)
 
-    // 显示帧数
-    p.fill(0)
-    p.textSize(20)
-    p.text(`Frame: ${frame}`, 50, 50)
+    // 网圈跟随鼠标（带平滑）
+    netX += (p.mouseX - netX) * 0.1
+    netY += (p.mouseY - netY) * 0.1
 
-    // 绘制手柄
-    p.push()
-    p.translate(p.width / 2, p.height / 2 + 100)
-    p.stroke(34, 139, 34, 180)
-    p.strokeWeight(8)
-    p.line(0, 0, 0, -250)
-    p.pop()
-
-    // 绘制网圈
-    p.push()
-    p.translate(p.width / 2, p.height / 2 - 200)
-    p.rotate(frame * 0.01)
-    p.noFill()
-    p.stroke(34, 139, 34, 150)
-    p.strokeWeight(4)
-    p.circle(0, 0, 100)
-    p.pop()
-
-    // 绘制叶子
+    // 绘制叶子（在网后面）
     for (let i = 0; i < leaves.length; i++) {
       const leaf = leaves[i]
       const sway = Math.sin(frame * 0.05 + leaf.swayOffset) * 0.2
@@ -118,21 +106,40 @@ const sketch = (p) => {
     }
 
     // 绘制蝴蝶
-    for (let i = 0; i < butterflies.length; i++) {
+    for (let i = butterflies.length - 1; i >= 0; i--) {
       const b = butterflies[i]
-      b.x += b.vx
-      b.y += b.vy
       
-      if (b.x < 50) { b.x = 50; b.vx *= -1; }
-      if (b.x > p.width - 50) { b.x = p.width - 50; b.vx *= -1; }
-      if (b.y < 50) { b.y = 50; b.vy *= -1; }
-      if (b.y > p.height - 50) { b.y = p.height - 50; b.vy *= -1; }
+      if (b.caught) {
+        // 已捕捉的蝴蝶，跟随网圈
+        const angle = (i / butterflies.length) * Math.PI * 2 + frame * 0.05
+        b.x = netX + Math.cos(angle) * netRadius * 0.3
+        b.y = netY + Math.sin(angle) * netRadius * 0.3
+        b.wingAngle = Math.sin(frame * 0.15) * 0.8
+      } else {
+        // 自由飞行的蝴蝶
+        b.x += b.vx
+        b.y += b.vy
+        
+        // 边界反弹
+        if (b.x < 50) { b.x = 50; b.vx *= -1; }
+        if (b.x > p.width - 50) { b.x = p.width - 50; b.vx *= -1; }
+        if (b.y < 50) { b.y = 50; b.vy *= -1; }
+        if (b.y > p.height - 50) { b.y = p.height - 50; b.vy *= -1; }
 
-      b.wingAngle = Math.sin(frame * 0.1 + i) * 0.5
+        b.wingAngle = Math.sin(frame * 0.1 + i) * 0.5
+
+        // 检测是否被网捕捉
+        const dist = Math.hypot(b.x - netX, b.y - netY)
+        if (dist < netRadius) {
+          b.caught = true
+          caughtCount++
+          // 捕捉特效：网圈闪烁
+        }
+      }
 
       p.push()
       p.translate(b.x, b.y)
-      p.rotate(Math.atan2(b.vy, b.vx))
+      p.rotate(b.caught ? frame * 0.1 : Math.atan2(b.vy, b.vx))
       p.fill(b.color)
 
       // 左翅膀
@@ -153,6 +160,48 @@ const sketch = (p) => {
       p.ellipse(0, 0, b.size / 5, b.size)
       p.pop()
     }
+
+    // 绘制手柄
+    p.push()
+    p.translate(netX, netY + 100)
+    p.stroke(34, 139, 34, 180)
+    p.strokeWeight(8)
+    p.line(0, 0, 0, -250)
+    p.pop()
+
+    // 绘制网圈（在最上层）
+    p.push()
+    p.translate(netX, netY)
+    
+    // 捕捉时闪烁
+    if (caughtCount > 0 && frame % 30 < 15) {
+      p.stroke(255, 255, 0, 200)
+    } else {
+      p.stroke(34, 139, 34, 180)
+    }
+    p.strokeWeight(6)
+    p.circle(0, 0, netRadius * 2)
+    
+    // 绘制网纹理
+    p.stroke(34, 139, 34, 120)
+    p.strokeWeight(1)
+    for (let i = 0; i < 16; i++) {
+      const angle = (i / 16) * Math.PI * 2
+      p.line(0, 0, Math.cos(angle) * netRadius, Math.sin(angle) * netRadius)
+    }
+    
+    // 同心圆网线
+    for (let r = 0.3; r < 1; r += 0.3) {
+      p.noFill()
+      p.circle(0, 0, netRadius * 2 * r)
+    }
+    p.pop()
+
+    // 显示信息
+    p.fill(0)
+    p.textSize(16)
+    p.text(`已捕捉: ${caughtCount}/${butterflies.length}`, 20, 30)
+    p.text(`移动鼠标控制网圈`, 20, 55)
   }
 
   p.windowResized = () => {
@@ -183,6 +232,7 @@ onUnmounted(() => {
   height: 100%;
   background: #faf8f5;
   z-index: 1;
+  cursor: crosshair;
 }
 
 .fullscreen-canvas canvas {

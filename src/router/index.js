@@ -35,11 +35,6 @@ const routes = [
     path: '/butterfly',
     name: 'ButterflyNet',
     component: () => import('../views/ButterflyNet.vue')
-  },
-  {
-    path: '/test',
-    name: 'TestAnimation',
-    component: () => import('../views/TestAnimation.vue')
   }
 ]
 
