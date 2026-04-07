@@ -4,6 +4,7 @@
       <div class="menu-container">
         <router-link to="/fish" class="effect-link fish-effect">鱼群效果</router-link>
         <router-link to="/leaves" class="effect-link leaves-effect">树叶效果</router-link>
+        <router-link to="/processing2vue" class="effect-link processing2vue-effect">Processing2Vue</router-link>
       </div>
     </div>
   </div>
@@ -29,6 +30,7 @@ export default {
     .menu-container {
       display: flex;
       gap: 1rem;
+      flex-wrap: wrap;
     }
     
     .effect-link {
@@ -48,11 +50,15 @@ export default {
     }
     
     .fish-effect {
-      background: #112233; /* 鱼群效果页面的背景色 */
+      background: #112233;
     }
     
     .leaves-effect {
-      background: #4ecdc4; /* 树叶效果页面的主题色 */
+      background: #4ecdc4;
+    }
+    
+    .processing2vue-effect {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     }
   }
 }
