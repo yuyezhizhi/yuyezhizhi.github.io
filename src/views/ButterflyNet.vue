@@ -163,38 +163,71 @@ const sketch = (p) => {
 
     // 绘制手柄
     p.push()
-    p.translate(netX, netY + 100)
+    p.translate(netX, netY + netRadius)
     p.stroke(34, 139, 34, 180)
-    p.strokeWeight(8)
-    p.line(0, 0, 0, -250)
+    p.strokeWeight(6)
+    p.line(0, 0, 0, -200)
     p.pop()
 
-    // 绘制网圈（在最上层）
+    // 绘制网圈（真正的织网纹理）
     p.push()
     p.translate(netX, netY)
     
-    // 捕捉时闪烁
-    if (caughtCount > 0 && frame % 30 < 15) {
-      p.stroke(255, 255, 0, 200)
-    } else {
-      p.stroke(34, 139, 34, 180)
-    }
-    p.strokeWeight(6)
+    // 外框
+    p.stroke(34, 139, 34, 200)
+    p.strokeWeight(3)
     p.circle(0, 0, netRadius * 2)
     
-    // 绘制网纹理
-    p.stroke(34, 139, 34, 120)
+    // 网格线 - 径向线
+    p.stroke(34, 139, 34, 150)
     p.strokeWeight(1)
     for (let i = 0; i < 16; i++) {
-      const angle = (i / 16) * Math.PI * 2
+      const angle = (i / 16) * Math.PI * 2 + frame * 0.002
       p.line(0, 0, Math.cos(angle) * netRadius, Math.sin(angle) * netRadius)
     }
     
-    // 同心圆网线
-    for (let r = 0.3; r < 1; r += 0.3) {
+    // 网格线 - 同心圆
+    for (let r = 0.25; r <= 1; r += 0.25) {
       p.noFill()
       p.circle(0, 0, netRadius * 2 * r)
     }
+    
+    // 织网纹理 - 菱形网格
+    p.stroke(34, 139, 34, 100)
+    p.strokeWeight(1)
+    for (let ring = 0; ring < 4; ring++) {
+      const ringRadius = (ring + 1) * (netRadius / 4)
+      const segments = 8 + ring * 4
+      for (let i = 0; i < segments; i++) {
+        const angle1 = (i / segments) * Math.PI * 2
+        const angle2 = ((i + 1) / segments) * Math.PI * 2
+        
+        // 径向连接
+        const x1 = Math.cos(angle1) * ringRadius
+        const y1 = Math.sin(angle1) * ringRadius
+        const x2 = Math.cos(angle2) * ringRadius
+        const y2 = Math.sin(angle2) * ringRadius
+        p.line(x1, y1, x2, y2)
+        
+        // 跨圈连接（形成菱形）
+        if (ring < 3) {
+          const nextRingRadius = (ring + 2) * (netRadius / 4)
+          const midAngle = (angle1 + angle2) / 2
+          const mx = Math.cos(midAngle) * nextRingRadius
+          const my = Math.sin(midAngle) * nextRingRadius
+          p.line(x1, y1, mx, my)
+          p.line(x2, y2, mx, my)
+        }
+      }
+    }
+    
+    // 中心点
+    if (caughtCount > 0 && frame % 20 < 10) {
+      p.fill(255, 215, 0, 200)
+    } else {
+      p.fill(34, 139, 34)
+    }
+    p.circle(0, 0, 8)
     p.pop()
 
     // 显示信息
