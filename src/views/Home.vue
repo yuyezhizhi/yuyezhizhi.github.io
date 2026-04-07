@@ -5,6 +5,8 @@
         <router-link to="/fish" class="effect-link fish-effect">鱼群效果</router-link>
         <router-link to="/leaves" class="effect-link leaves-effect">树叶效果</router-link>
         <router-link to="/fishgroup" class="effect-link fishgroup-effect">鱼群效果2</router-link>
+        <router-link to="/datavortex" class="effect-link data-effect">螺旋数据</router-link>
+        <router-link to="/butterfly" class="effect-link butterfly-effect">蝴蝶网</router-link>
       </div>
     </div>
   </div>
@@ -59,6 +61,14 @@ export default {
     
     .fishgroup-effect {
       background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+    }
+    
+    .data-effect {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    
+    .butterfly-effect {
+      background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
     }
   }
 }

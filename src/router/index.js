@@ -25,6 +25,16 @@ const routes = [
     path: '/fishgroup',
     name: 'FishGroup',
     component: () => import('../views/fishGroup.vue')
+  },
+  {
+    path: '/datavortex',
+    name: 'DataVortex',
+    component: () => import('../views/DataVortex.vue')
+  },
+  {
+    path: '/butterfly',
+    name: 'ButterflyNet',
+    component: () => import('../views/ButterflyNet.vue')
   }
 ]
 
