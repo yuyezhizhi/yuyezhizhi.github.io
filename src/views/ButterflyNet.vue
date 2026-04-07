@@ -156,9 +156,9 @@ const sketch = (p) => {
       for (let i = 0; i < 30; i++) {
         const t = i / 30
         const tNext = (i + 1) / 30
-        // 使用每个柳条的独立摆动参数
-        const sway = Math.sin(frame * branch.swaySpeed + branch.swayOffset) * branch.swayAmplitude * (1 - t)
-        const swayNext = Math.sin(frame * branch.swaySpeed + branch.swayOffset) * branch.swayAmplitude * (1 - tNext)
+        // 使用每个柳条的独立摆动参数 - 顶部固定，底部摆动
+        const sway = Math.sin(frame * branch.swaySpeed + branch.swayOffset) * branch.swayAmplitude * t
+        const swayNext = Math.sin(frame * branch.swaySpeed + branch.swayOffset) * branch.swayAmplitude * tNext
         const x1 = branch.x + sway
         const y1 = branch.y + t * branch.length
         const x2 = branch.x + swayNext
@@ -177,9 +177,9 @@ const sketch = (p) => {
       const branch = willowBranches[leaf.branchIndex]
       let branchSway = 0
       if (branch) {
-        // 计算叶子位置对应的摆动
+        // 计算叶子位置对应的摆动 - 顶部固定，底部摆动
         const leafT = leaf.leafIndex / leaf.leafCount
-        branchSway = Math.sin(frame * branch.swaySpeed + branch.swayOffset) * branch.swayAmplitude * (1 - leafT)
+        branchSway = Math.sin(frame * branch.swaySpeed + branch.swayOffset) * branch.swayAmplitude * leafT
       }
       
       p.push()
