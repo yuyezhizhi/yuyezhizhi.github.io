@@ -16,24 +16,27 @@ const sketch = (p) => {
   let butterflies = []
   let leaves = []
   let flowers = []
-
-  const colors = [
-    p.color(135, 206, 250), // 浅蓝
-    p.color(255, 140, 0),   // 橙
-    p.color(255, 182, 193), // 粉
-    p.color(255, 255, 0)    // 黄
-  ]
-
-  const flowerColors = [
-    p.color(255, 105, 180), // 粉红
-    p.color(100, 149, 237), // 蓝紫
-    p.color(186, 85, 211),  // 紫
-    p.color(255, 215, 0)    // 金黄
-  ]
+  let colors = []
+  let flowerColors = []
 
   p.setup = () => {
     p.createCanvas(p.windowWidth, p.windowHeight)
     p.angleMode(p.RADIANS)
+
+    // 定义颜色
+    colors = [
+      p.color(135, 206, 250), // 浅蓝
+      p.color(255, 140, 0),   // 橙
+      p.color(255, 182, 193), // 粉
+      p.color(255, 255, 0)    // 黄
+    ]
+
+    flowerColors = [
+      p.color(255, 105, 180), // 粉红
+      p.color(100, 149, 237), // 蓝紫
+      p.color(186, 85, 211),  // 紫
+      p.color(255, 215, 0)    // 金黄
+    ]
 
     // 创建蝴蝶
     for (let i = 0; i < 15; i++) {
