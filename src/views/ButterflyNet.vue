@@ -7,7 +7,7 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import p5 from 'p5'
 
 // === 手绘蝴蝶网 ===
-// 模拟蜡笔手绘风格的蝴蝶和花朵
+// 所有元素都带动画
 
 const canvasContainer = ref(null)
 let sketchInstance = null
@@ -39,19 +39,19 @@ const sketch = (p) => {
     ]
 
     // 创建蝴蝶
-    for (let i = 0; i < 15; i++) {
+    for (let i = 0; i < 20; i++) {  // 增加蝴蝶数量
       butterflies.push({
         x: p.random(p.width),
         y: p.random(p.height),
-        vx: p.random(-2, 2),  // 增加速度
+        vx: p.random(-2, 2),
         vy: p.random(-2, 2),
-        targetX: p.random(p.width),  // 添加目标点
+        targetX: p.random(p.width),
         targetY: p.random(p.height),
         size: p.random(20, 40),
         color: colors[Math.floor(p.random(colors.length))],
         wingAngle: 0,
         wingSpeed: p.random(0.1, 0.3),
-        changeTargetTimer: 0  // 定时改变目标
+        changeTargetTimer: 0
       })
     }
 
@@ -74,9 +74,15 @@ const sketch = (p) => {
       flowers.push({
         x: leaves[leafIndex].x + p.random(-30, 30),
         y: leaves[leafIndex].y + p.random(-20, 20),
+        baseX: leaves[leafIndex].x + p.random(-30, 30),
+        baseY: leaves[leafIndex].y + p.random(-20, 20),
         size: p.random(8, 15),
         color: flowerColors[Math.floor(p.random(flowerColors.length))],
-        petals: Math.floor(p.random(5, 8))
+        petals: Math.floor(p.random(5, 8)),
+        rotationOffset: p.random(p.TWO_PI),
+        rotationSpeed: p.random(-0.02, 0.02),
+        floatOffset: p.random(p.TWO_PI),
+        floatSpeed: p.random(0.02, 0.05)
       })
     }
   }
@@ -91,9 +97,12 @@ const sketch = (p) => {
       p.point(p.random(p.width), p.random(p.height))
     }
 
-    // 绘制手柄（绿色编织）
+    // 绘制手柄（绿色编织）- 添加扭动动画
     p.push()
     p.translate(p.width / 2, p.height / 2 + 100)
+    
+    // 整体轻微扭动
+    p.rotate(Math.sin(p.frameCount * 0.01) * 0.02)
     
     // 手柄
     p.noFill()
@@ -102,35 +111,42 @@ const sketch = (p) => {
       p.strokeWeight(15 - i * 4)
       p.beginShape()
       for (let y = 0; y > -300; y -= 10) {
-        const x = Math.sin(y * 0.05 + i) * 20
+        // 添加动态波浪
+        const x = Math.sin(y * 0.05 + p.frameCount * 0.02 + i) * 20
         p.vertex(x, y)
       }
       p.endShape()
     }
     p.pop()
 
-    // 绘制网圈
+    // 绘制网圈 - 添加旋转动画
     p.push()
     p.translate(p.width / 2, p.height / 2 - 200)
     
-    // 网圈
+    // 网圈整体旋转
+    p.rotate(p.frameCount * 0.005)
+    
+    // 网圈（脉动效果）
+    const pulse = 1 + Math.sin(p.frameCount * 0.05) * 0.05
+    p.scale(pulse)
+    
     p.noFill()
     p.stroke(34, 139, 34, 180)
     p.strokeWeight(8)
     p.circle(0, 0, 120)
     
-    // 网格线
+    // 网格线（旋转）
     p.stroke(34, 139, 34, 100)
     p.strokeWeight(1)
     for (let i = 0; i < 12; i++) {
-      const angle = (i / 12) * p.TWO_PI
+      const angle = (i / 12) * p.TWO_PI + p.frameCount * 0.01
       p.line(0, 0, Math.cos(angle) * 60, Math.sin(angle) * 60)
     }
     p.pop()
 
     // 绘制叶子（带摇摆动画）
     for (let leaf of leaves) {
-      const sway = Math.sin(p.frameCount * leaf.swaySpeed + leaf.swayOffset) * 0.1
+      const sway = Math.sin(p.frameCount * leaf.swaySpeed + leaf.swayOffset) * 0.15
       
       p.push()
       p.translate(leaf.x, leaf.y)
@@ -158,27 +174,38 @@ const sketch = (p) => {
       p.pop()
     }
 
-    // 绘制花朵
+    // 绘制花朵 - 添加旋转和飘动动画
     for (let flower of flowers) {
-      p.push()
-      p.translate(flower.x, flower.y)
+      // 计算飘动位置
+      const floatX = Math.sin(p.frameCount * flower.floatSpeed + flower.floatOffset) * 3
+      const floatY = Math.cos(p.frameCount * flower.floatSpeed * 1.3 + flower.floatOffset) * 2
       
-      // 花瓣
+      p.push()
+      p.translate(flower.baseX + floatX, flower.baseY + floatY)
+      
+      // 旋转动画
+      p.rotate(p.frameCount * flower.rotationSpeed + flower.rotationOffset)
+      
+      // 花瓣（轻微摆动）
       p.noStroke()
       p.fill(flower.color)
       for (let i = 0; i < flower.petals; i++) {
         const angle = (i / flower.petals) * p.TWO_PI
         p.push()
         p.rotate(angle)
+        // 花瓣轻微摆动
+        const petalSway = Math.sin(p.frameCount * 0.03 + i) * 0.1
+        p.rotate(petalSway)
         p.beginShape()
-        const jitter = p.random(-0.5, 0.5)
+        const jitter = p.random(-0.3, 0.3)
         p.ellipse(0, flower.size / 2, flower.size / 3, flower.size)
         p.pop()
       }
       
-      // 花心
+      // 花心（脉动）
+      const centerPulse = 1 + Math.sin(p.frameCount * 0.1) * 0.1
       p.fill(255, 215, 0)
-      p.circle(0, 0, flower.size / 3)
+      p.circle(0, 0, (flower.size / 3) * centerPulse)
       p.pop()
     }
 
@@ -192,17 +219,17 @@ const sketch = (p) => {
         b.changeTargetTimer = 0
       }
 
-      // 向目标点飞（平滑转向）
+      // 向目标点飞
       const dx = b.targetX - b.x
       const dy = b.targetY - b.y
       const dist = Math.hypot(dx, dy)
       
       if (dist > 5) {
-        b.vx = (dx / dist) * 2
-        b.vy = (dy / dist) * 2
+        b.vx = (dx / dist) * 2.5  // 稍微加快速度
+        b.vy = (dy / dist) * 2.5
       }
 
-      // 添加随机摆动（更自然的飞行）
+      // 添加随机摆动
       b.vx += Math.sin(p.frameCount * 0.1 + b.size) * 0.3
       b.vy += Math.cos(p.frameCount * 0.08 + b.size) * 0.3
 
@@ -210,7 +237,7 @@ const sketch = (p) => {
       b.x += b.vx
       b.y += b.vy
 
-      // 边界检查（反弹而不是穿越）
+      // 边界反弹
       if (b.x < 50) {
         b.x = 50
         b.vx = Math.abs(b.vx)
@@ -233,7 +260,7 @@ const sketch = (p) => {
       }
 
       // 翅膀动画
-      b.wingAngle = Math.sin(p.frameCount * b.wingSpeed) * 0.5
+      b.wingAngle = Math.sin(p.frameCount * b.wingSpeed) * 0.6  // 增大翅膀扇动幅度
 
       p.push()
       p.translate(b.x, b.y)
@@ -244,7 +271,7 @@ const sketch = (p) => {
 
       p.fill(b.color)
 
-      // 左翅膀（带手绘抖动）
+      // 左翅膀
       p.push()
       p.rotate(b.wingAngle)
       p.beginShape()
