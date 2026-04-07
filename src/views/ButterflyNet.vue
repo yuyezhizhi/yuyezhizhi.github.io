@@ -43,12 +43,15 @@ const sketch = (p) => {
       butterflies.push({
         x: p.random(p.width),
         y: p.random(p.height),
-        vx: p.random(-1, 1),
-        vy: p.random(-1, 1),
+        vx: p.random(-2, 2),  // 增加速度
+        vy: p.random(-2, 2),
+        targetX: p.random(p.width),  // 添加目标点
+        targetY: p.random(p.height),
         size: p.random(20, 40),
         color: colors[Math.floor(p.random(colors.length))],
         wingAngle: 0,
-        wingSpeed: p.random(0.1, 0.3)
+        wingSpeed: p.random(0.1, 0.3),
+        changeTargetTimer: 0  // 定时改变目标
       })
     }
 
@@ -181,29 +184,61 @@ const sketch = (p) => {
 
     // 绘制蝴蝶
     for (let b of butterflies) {
+      // 每隔一段时间改变目标点
+      b.changeTargetTimer++
+      if (b.changeTargetTimer > p.random(60, 180)) {
+        b.targetX = p.random(50, p.width - 50)
+        b.targetY = p.random(50, p.height - 50)
+        b.changeTargetTimer = 0
+      }
+
+      // 向目标点飞（平滑转向）
+      const dx = b.targetX - b.x
+      const dy = b.targetY - b.y
+      const dist = Math.hypot(dx, dy)
+      
+      if (dist > 5) {
+        b.vx = (dx / dist) * 2
+        b.vy = (dy / dist) * 2
+      }
+
+      // 添加随机摆动（更自然的飞行）
+      b.vx += Math.sin(p.frameCount * 0.1 + b.size) * 0.3
+      b.vy += Math.cos(p.frameCount * 0.08 + b.size) * 0.3
+
       // 更新位置
       b.x += b.vx
       b.y += b.vy
 
-      // 飞舞模式
-      if (p.frameCount % 100 < 50) {
-        b.x += Math.sin(p.frameCount * 0.05) * 2
-        b.y += Math.cos(p.frameCount * 0.05) * 2
+      // 边界检查（反弹而不是穿越）
+      if (b.x < 50) {
+        b.x = 50
+        b.vx = Math.abs(b.vx)
+        b.targetX = p.random(p.width * 0.5, p.width - 50)
       }
-
-      // 边界检查
-      if (b.x < -50) b.x = p.width + 50
-      if (b.x > p.width + 50) b.x = -50
-      if (b.y < -50) b.y = p.height + 50
-      if (b.y > p.height + 50) b.y = -50
+      if (b.x > p.width - 50) {
+        b.x = p.width - 50
+        b.vx = -Math.abs(b.vx)
+        b.targetX = p.random(50, p.width * 0.5)
+      }
+      if (b.y < 50) {
+        b.y = 50
+        b.vy = Math.abs(b.vy)
+        b.targetY = p.random(p.height * 0.5, p.height - 50)
+      }
+      if (b.y > p.height - 50) {
+        b.y = p.height - 50
+        b.vy = -Math.abs(b.vy)
+        b.targetY = p.random(50, p.height * 0.5)
+      }
 
       // 翅膀动画
       b.wingAngle = Math.sin(p.frameCount * b.wingSpeed) * 0.5
 
       p.push()
       p.translate(b.x, b.y)
-      
-      // 飞行方向
+
+      // 朝向飞行方向旋转
       const flightAngle = Math.atan2(b.vy, b.vx)
       p.rotate(flightAngle)
 
