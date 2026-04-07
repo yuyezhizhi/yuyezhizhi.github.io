@@ -6,7 +6,7 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import p5 from 'p5'
 
-// 使用 p5 的 sin/cos 替代 Math.sin/cos
+// 简化版蝴蝶网 - 专注于动画
 const canvasContainer = ref(null)
 let sketchInstance = null
 
@@ -16,13 +16,23 @@ const sketch = (p) => {
   let flowers = []
   let colors = []
   let flowerColors = []
+  let time = 0
 
   p.setup = () => {
     p.createCanvas(p.windowWidth, p.windowHeight)
     p.frameRate(60)
     p.angleMode(p.RADIANS)
 
-    // 定义颜色
+    // 预生成随机值，减少 p.random() 调用
+    const randomValues = []
+    for (let i = 0; i < 500; i++) {
+      randomValues.push(p.random())
+    }
+    let randIndex = 0
+
+    const getNextRandom = () => randomValues[randIndex++ % randomValues.length]
+
+    // 颜色
     colors = [
       p.color(135, 206, 250),
       p.color(255, 140, 0),
@@ -37,65 +47,98 @@ const sketch = (p) => {
       p.color(255, 215, 0)
     ]
 
-    // 创建蝴蝶
-    for (let i = 0; i < 20; i++) {
+    // 蝴蝶
+    for (let i = 0; i < 15; i++) {
       butterflies.push({
-        x: p.random(p.width),
-        y: p.random(p.height),
-        vx: p.random(-2, 2),
-        vy: p.random(-2, 2),
-        size: p.random(20, 40),
-        color: colors[p.floor(p.random(colors.length))],
+        x: getNextRandom() * p.width,
+        y: getNextRandom() * p.height,
+        vx: getNextRandom() * 4 - 2,
+        vy: getNextRandom() * 4 - 2,
+        size: 20 + getNextRandom() * 20,
+        color: colors[p.floor(getNextRandom() * colors.length)],
         wingAngle: 0,
-        wingSpeed: p.random(0.1, 0.3)
+        wingSpeed: 0.1 + getNextRandom() * 0.2
       })
     }
 
-    // 创建叶子
-    for (let i = 0; i < 50; i++) {
+    // 叶子
+    for (let i = 0; i < 40; i++) {
       const side = i % 2 === 0 ? 1 : -1
       leaves.push({
-        x: p.width / 2 + side * (50 + p.random() * 100),
-        y: p.height / 2 + p.random(-200, -50),
-        length: p.random(30, 60),
-        angle: p.random(-0.3, 0.3),
-        swayOffset: p.random(p.TWO_PI),
-        swaySpeed: p.random(0.01, 0.03)
+        x: p.width / 2 + side * (50 + getNextRandom() * 100),
+        y: p.height / 2 + getNextRandom() * 150 - 200,
+        length: 30 + getNextRandom() * 30,
+        angle: getNextRandom() * 0.6 - 0.3,
+        swayOffset: getNextRandom() * p.TWO_PI,
+        swaySpeed: 0.01 + getNextRandom() * 0.02
       })
     }
 
-    // 创建花朵
-    for (let i = 0; i < 25; i++) {
-      const leafIndex = p.floor(p.random(leaves.length))
+    // 花朵
+    for (let i = 0; i < 20; i++) {
+      const leafIndex = p.floor(getNextRandom() * leaves.length)
       flowers.push({
-        x: leaves[leafIndex].x + p.random(-30, 30),
-        y: leaves[leafIndex].y + p.random(-20, 20),
-        size: p.random(8, 15),
-        color: flowerColors[p.floor(p.random(flowerColors.length))],
-        petals: p.floor(p.random(5, 8)),
-        rotationOffset: p.random(p.TWO_PI)
+        x: leaves[leafIndex].x + getNextRandom() * 60 - 30,
+        y: leaves[leafIndex].y + getNextRandom() * 40 - 20,
+        size: 8 + getNextRandom() * 7,
+        color: flowerColors[p.floor(getNextRandom() * flowerColors.length)],
+        petals: 5 + p.floor(getNextRandom() * 3)
       })
     }
   }
 
   p.draw = () => {
+    time += 0.016  // 约 60fps
+    
     p.background(250, 248, 245)
 
-    // 测试：显示帧数
+    // 显示帧数
     p.fill(0)
     p.textSize(20)
     p.text(`Frame: ${p.frameCount}`, 50, 50)
 
-    // 测试：移动的圆（使用 p5 方法）
-    const testX = (p.frameCount * 3) % (p.width + 100) - 50
-    p.noStroke()
-    p.fill(200, 100, 255)
-    p.circle(testX, 100, 30)
+    // 绘制手柄
+    p.push()
+    p.translate(p.width / 2, p.height / 2 + 100)
+    p.rotate(p.sin(time * 0.1) * 0.05)
+    
+    for (let i = 0; i < 3; i++) {
+      p.stroke(34, 139, 34, 200 - i * 50)
+      p.strokeWeight(15 - i * 4)
+      p.noFill()
+      p.beginShape()
+      for (let y = 0; y > -300; y -= 15) {
+        const wave = p.sin(y * 0.03 + time * 2 + i) * 20
+        p.vertex(wave, y)
+      }
+      p.endShape()
+    }
+    p.pop()
+
+    // 绘制网圈
+    p.push()
+    p.translate(p.width / 2, p.height / 2 - 200)
+    p.rotate(time * 0.2)
+    
+    const pulse = 1 + p.sin(time * 0.5) * 0.05
+    p.scale(pulse)
+    
+    p.noFill()
+    p.stroke(34, 139, 34, 180)
+    p.strokeWeight(8)
+    p.circle(0, 0, 120)
+    
+    p.stroke(34, 139, 34, 100)
+    p.strokeWeight(1)
+    for (let i = 0; i < 12; i++) {
+      const angle = (i / 12) * p.TWO_PI + time * 0.5
+      p.line(0, 0, p.cos(angle) * 60, p.sin(angle) * 60)
+    }
+    p.pop()
 
     // 绘制叶子
     for (let leaf of leaves) {
-      // 使用 p5 的 sin 而不是 Math.sin
-      const sway = p.sin(p.frameCount * leaf.swaySpeed + leaf.swayOffset) * 0.15
+      const sway = p.sin(time * 2 + leaf.swayOffset) * 0.2
       
       p.push()
       p.translate(leaf.x, leaf.y)
@@ -104,17 +147,13 @@ const sketch = (p) => {
       p.fill(85, 107, 47, 220)
       
       p.beginShape()
-      for (let t = 0; t <= leaf.length; t += 5) {
+      for (let t = 0; t <= leaf.length; t += 8) {
         const w = p.sin(t * 0.1) * 15 * (1 - t / leaf.length)
-        const jitterX = p.random(-1, 1)
-        const jitterY = p.random(-1, 1)
-        p.vertex(-w / 2 + jitterX, t + jitterY)
+        p.vertex(-w / 2, t)
       }
-      for (let t = leaf.length; t >= 0; t -= 5) {
+      for (let t = leaf.length; t >= 0; t -= 8) {
         const w = p.sin(t * 0.1) * 15 * (1 - t / leaf.length)
-        const jitterX = p.random(-1, 1)
-        const jitterY = p.random(-1, 1)
-        p.vertex(w / 2 + jitterX, t + jitterY)
+        p.vertex(w / 2, t)
       }
       p.endShape(p.CLOSE)
       p.pop()
@@ -124,7 +163,7 @@ const sketch = (p) => {
     for (let flower of flowers) {
       p.push()
       p.translate(flower.x, flower.y)
-      p.rotate(p.frameCount * 0.01 + flower.rotationOffset)
+      p.rotate(time * 0.3)
       
       p.noStroke()
       p.fill(flower.color)
@@ -132,7 +171,6 @@ const sketch = (p) => {
         const angle = (i / flower.petals) * p.TWO_PI
         p.push()
         p.rotate(angle)
-        p.beginShape()
         p.ellipse(0, flower.size / 2, flower.size / 3, flower.size)
         p.pop()
       }
@@ -147,20 +185,16 @@ const sketch = (p) => {
       b.x += b.vx
       b.y += b.vy
       
-      // 边界检查
       if (b.x < 50) { b.x = 50; b.vx *= -1; }
       if (b.x > p.width - 50) { b.x = p.width - 50; b.vx *= -1; }
       if (b.y < 50) { b.y = 50; b.vy *= -1; }
       if (b.y > p.height - 50) { b.y = p.height - 50; b.vy *= -1; }
 
-      b.wingAngle = p.sin(p.frameCount * b.wingSpeed) * 0.6
+      b.wingAngle = p.sin(time * 10 + b.size) * 0.6
 
       p.push()
       p.translate(b.x, b.y)
-      
-      // 使用 p5 的 atan2
-      const flightAngle = p.atan2(b.vy, b.vx)
-      p.rotate(flightAngle)
+      p.rotate(p.atan2(b.vy, b.vx))
       p.fill(b.color)
 
       // 左翅膀
@@ -168,16 +202,8 @@ const sketch = (p) => {
       p.rotate(b.wingAngle)
       p.beginShape()
       p.vertex(0, 0)
-      p.bezierVertex(
-        -b.size, -b.size / 2,
-        -b.size * 1.2, b.size / 3,
-        -b.size / 2, 0
-      )
-      p.bezierVertex(
-        -b.size * 1.2, -b.size / 3,
-        -b.size, b.size / 2,
-        0, 0
-      )
+      p.bezierVertex(-b.size, -b.size / 2, -b.size * 1.2, b.size / 3, -b.size / 2, 0)
+      p.bezierVertex(-b.size * 1.2, -b.size / 3, -b.size, b.size / 2, 0, 0)
       p.endShape()
       p.pop()
 
@@ -187,16 +213,8 @@ const sketch = (p) => {
       p.rotate(b.wingAngle)
       p.beginShape()
       p.vertex(0, 0)
-      p.bezierVertex(
-        -b.size, -b.size / 2,
-        -b.size * 1.2, b.size / 3,
-        -b.size / 2, 0
-      )
-      p.bezierVertex(
-        -b.size * 1.2, -b.size / 3,
-        -b.size, b.size / 2,
-        0, 0
-      )
+      p.bezierVertex(-b.size, -b.size / 2, -b.size * 1.2, b.size / 3, -b.size / 2, 0)
+      p.bezierVertex(-b.size * 1.2, -b.size / 3, -b.size, b.size / 2, 0, 0)
       p.endShape()
       p.pop()
 
