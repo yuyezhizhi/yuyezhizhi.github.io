@@ -22,9 +22,9 @@ const routes = [
     component: () => import('../views/LeavesPage.vue')
   },
   {
-    path: '/processing2vue',
-    name: 'Processing2Vue',
-    component: () => import('../views/Processing2VuePage.vue')
+    path: '/fishgroup',
+    name: 'FishGroup',
+    component: () => import('../views/fishGroup.vue')
   }
 ]
 

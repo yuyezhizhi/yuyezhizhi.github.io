@@ -4,7 +4,7 @@
       <div class="menu-container">
         <router-link to="/fish" class="effect-link fish-effect">鱼群效果</router-link>
         <router-link to="/leaves" class="effect-link leaves-effect">树叶效果</router-link>
-        <router-link to="/processing2vue" class="effect-link processing2vue-effect">Processing2Vue</router-link>
+        <router-link to="/fishgroup" class="effect-link fishgroup-effect">鱼群效果2</router-link>
       </div>
     </div>
   </div>
@@ -57,8 +57,8 @@ export default {
       background: #4ecdc4;
     }
     
-    .processing2vue-effect {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    .fishgroup-effect {
+      background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
     }
   }
 }
