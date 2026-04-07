@@ -3,7 +3,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, nextTick } from 'vue'
 import p5 from 'p5'
 
 // === 手绘蝴蝶网 ===
@@ -18,9 +18,11 @@ const sketch = (p) => {
   let flowers = []
   let colors = []
   let flowerColors = []
+  let animationSpeed = 1  // 动画速度控制
 
   p.setup = () => {
     p.createCanvas(p.windowWidth, p.windowHeight)
+    p.frameRate(60)  // 设置帧率
     p.angleMode(p.RADIANS)
 
     // 定义颜色
@@ -96,13 +98,25 @@ const sketch = (p) => {
       p.stroke(0, 0, 0, 10)
       p.point(p.random(p.width), p.random(p.height))
     }
+    
+    // 测试动画：移动的圆点
+    p.noStroke()
+    p.fill(200, 200, 255, 150)
+    const testX = (p.frameCount * 2) % (p.width + 100) - 50
+    p.circle(testX, 30, 20)
+    
+    // 调试：显示帧数
+    p.fill(0)
+    p.textSize(12)
+    p.text(`Frame: ${p.frameCount}`, 10, 20)
 
     // 绘制手柄（绿色编织）- 添加扭动动画
     p.push()
     p.translate(p.width / 2, p.height / 2 + 100)
     
     // 整体轻微扭动
-    p.rotate(Math.sin(p.frameCount * 0.01) * 0.02)
+    const handleSway = Math.sin(p.frameCount * 0.02) * 0.05
+    p.rotate(handleSway)
     
     // 手柄
     p.noFill()
@@ -112,7 +126,8 @@ const sketch = (p) => {
       p.beginShape()
       for (let y = 0; y > -300; y -= 10) {
         // 添加动态波浪
-        const x = Math.sin(y * 0.05 + p.frameCount * 0.02 + i) * 20
+        const waveOffset = p.frameCount * 0.03 + i * 0.5
+        const x = Math.sin(y * 0.05 + waveOffset) * 20
         p.vertex(x, y)
       }
       p.endShape()
@@ -322,14 +337,17 @@ const sketch = (p) => {
 }
 
 onMounted(() => {
-  if (canvasContainer.value) {
-    sketchInstance = new p5(sketch, canvasContainer.value)
-  }
+  nextTick(() => {
+    if (canvasContainer.value) {
+      sketchInstance = new p5(sketch, canvasContainer.value)
+    }
+  })
 })
 
 onUnmounted(() => {
   if (sketchInstance) {
     sketchInstance.remove()
+    sketchInstance = null
   }
 })
 </script>
