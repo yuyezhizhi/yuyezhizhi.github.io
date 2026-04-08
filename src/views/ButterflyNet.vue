@@ -26,6 +26,8 @@ const sketch = (p) => {
   let caughtCount = 0
   let netWobble = []
   let sparkleParticles = []
+  let gravity = 0.3 // 重力加速度
+  let friction = 0.95 // 摩擦力
 
   p.setup = () => {
     p.createCanvas(p.windowWidth, p.windowHeight)
@@ -128,18 +130,47 @@ const sketch = (p) => {
     p.drawingContext.fillStyle = gradient
     p.rect(0, 0, p.width, p.height)
 
-    // 网圈跟随鼠标 (带惯性和弹性)
+    // 网圈跟随鼠标 (带惯性和重力感应)
     netTargetX = p.mouseX
     netTargetY = p.mouseY
     
+    // 计算到目标的距离
     const dx = netTargetX - netX
     const dy = netTargetY - netY
-    netVelX += dx * 0.008
-    netVelY += dy * 0.008
-    netVelX *= 0.9
-    netVelY *= 0.9
+    
+    // 添加指向鼠标的力（弹性）
+    netVelX += dx * 0.02
+    netVelY += dy * 0.02
+    
+    // 添加重力
+    netVelY += gravity
+    
+    // 应用摩擦力
+    netVelX *= friction
+    netVelY *= friction
+    
+    // 更新位置
     netX += netVelX
     netY += netVelY
+    
+    // 边界约束（防止网飞出屏幕）
+    const margin = netRadius + 50
+    if (netX < margin) {
+      netX = margin
+      netVelX *= -0.5 // 反弹并减速
+    }
+    if (netX > p.width - margin) {
+      netX = p.width - margin
+      netVelX *= -0.5
+    }
+    if (netY < margin) {
+      netY = margin
+      netVelY *= -0.5
+    }
+    if (netY > p.height - margin) {
+      netY = p.height - margin
+      netVelY *= -0.5
+    }
 
     // 更新网的波动
     for (let i = 0; i < netWobble.length; i++) {
@@ -504,11 +535,11 @@ const sketch = (p) => {
     
     p.fill(34, 139, 34)
     p.textSize(15)
-    p.textAlign(p.LEFT, p.TOP)
-    p.text(`✨ 已捕捉：${caughtCount}/${butterflies.length}`, 20, 20)
+    p.textAlign(p.RIGHT, p.TOP)
+    p.text(`✨ 已捕捉：${caughtCount}/${butterflies.length}`, p.width - 20, 20)
     p.fill(85, 107, 47)
     p.textSize(12)
-    p.text(`移动鼠标来捕捉蝴蝶`, 20, 42)
+    p.text(`移动鼠标来捕捉蝴蝶`, p.width - 20, 42)
     p.pop()
   }
 
