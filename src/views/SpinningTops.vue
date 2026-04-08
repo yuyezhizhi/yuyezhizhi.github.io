@@ -26,6 +26,8 @@ export default {
     initP5() {
       this.p5Instance = new p5((p) => {
         let top1, top2, sparks = [];
+        let mouseTrail = []; // 鼠标拖尾
+        const maxTrailLength = 20; // 最大拖尾长度
         
         class Spark {
           constructor(x, y, vx, vy, color) {
@@ -430,13 +432,80 @@ export default {
           
           top1.display();
           top2.display();
+          
+          // 绘制鼠标效果
+          drawMouseEffect();
         };
         
         // 鼠标移动时直接碰撞陀螺，不需要按住
         p.mouseMoved = function() {
           top1.checkMouseDrag(p.mouseX, p.mouseY);
           top2.checkMouseDrag(p.mouseX, p.mouseY);
+          
+          // 记录鼠标位置到拖尾数组
+          mouseTrail.push({
+            x: p.mouseX,
+            y: p.mouseY,
+            life: 255
+          });
+          
+          // 限制拖尾长度
+          if (mouseTrail.length > maxTrailLength) {
+            mouseTrail.shift();
+          }
         };
+        
+        // 绘制鼠标效果
+        function drawMouseEffect() {
+          // 隐藏默认鼠标
+          p.noCursor();
+          
+          // 绘制拖尾
+          for (let i = 0; i < mouseTrail.length; i++) {
+            const point = mouseTrail[i];
+            const alpha = point.life * (i / mouseTrail.length);
+            const size = 8 + (i / mouseTrail.length) * 12;
+            
+            // 渐变色彩：从白色到蓝色
+            const r = 100 + (155 * (i / mouseTrail.length));
+            const g = 150 + (105 * (i / mouseTrail.length));
+            const b = 255;
+            
+            p.fill(r, g, b, alpha * 0.6);
+            p.noStroke();
+            p.ellipse(point.x, point.y, size);
+            
+            // 更新生命周期
+            point.life -= 10;
+          }
+          
+          // 清理死亡的拖尾点
+          mouseTrail = mouseTrail.filter(point => point.life > 0);
+          
+          // 绘制鼠标光晕
+          if (mouseTrail.length > 0) {
+            const lastPoint = mouseTrail[mouseTrail.length - 1];
+            
+            // 外层光晕
+            for (let i = 3; i >= 1; i--) {
+              const glowSize = 30 + i * 10;
+              const glowAlpha = 30 / i;
+              p.fill(100, 150, 255, glowAlpha);
+              p.noStroke();
+              p.ellipse(lastPoint.x, lastPoint.y, glowSize);
+            }
+            
+            // 中心亮点
+            p.fill(255, 255, 255, 200);
+            p.ellipse(lastPoint.x, lastPoint.y, 8);
+            
+            // 内层光环
+            p.noFill();
+            p.stroke(150, 200, 255, 150);
+            p.strokeWeight(2);
+            p.ellipse(lastPoint.x, lastPoint.y, 20);
+          }
+        }
         
         // 创建火花效果的函数
         function createSparks(x, y, color, count) {

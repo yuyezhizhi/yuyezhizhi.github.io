@@ -45,6 +45,11 @@ const routes = [
     path: '/spinningtops',
     name: 'SpinningTops',
     component: () => import('../views/SpinningTops.vue')
+  },
+  {
+    path: '/interactivetnet',
+    name: 'InteractiveNet',
+    component: () => import('../views/InteractiveNet.vue')
   }
 ]
 

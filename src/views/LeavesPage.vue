@@ -1,12 +1,18 @@
 <template>
   <div class="leaves-page">
     <canvas id="leavesCanvas"></canvas>
+    <div class="hint-text">{{ hintText }}</div>
   </div>
 </template>
 
 <script>
 export default {
   name: 'LeavesPage',
+  data() {
+    return {
+      hintText: '等待大树生长...'
+    };
+  },
   mounted() {
     // 获取Canvas元素和2D上下文
     const canvas = document.getElementById('leavesCanvas');
@@ -372,6 +378,40 @@ export default {
     // 首次生长标记
     let initialTreeStarted = false;
     
+    // 提示文字状态
+    const hintState = {
+      text: '等待大树生长...',
+      hasClicked: false, // 标记用户是否已经点击过
+      clickedTime: 0, // 记录点击时间
+      updateHint() {
+        const now = Date.now();
+        
+        if (treeState.isGrowing) {
+          this.text = '大树正在生长...';
+          this.hasClicked = false; // 重置点击标记
+          this.clickedTime = 0;
+        } else if (treeState.growth >= 1 && treeState.branchesGrown && !mouseState.isActive) {
+          this.text = '移动鼠标与树叶互动';
+          this.hasClicked = false; // 重置点击标记
+          this.clickedTime = 0;
+        } else if (mouseState.isActive && treeState.opacity > 0.3) {
+          // 鼠标激活且树可见时，显示组合提示
+          if (this.hasClicked && (now - this.clickedTime) < 2000) {
+            // 点击后2秒内，显示两个提示
+            this.text = '点击左键爆开树叶 | 鼠标移出屏幕，等待大树重新生长';
+          } else {
+            // 未点击或点击超过2秒，只显示点击提示
+            this.text = '点击左键爆开树叶';
+          }
+        } else if (!treeState.isVisible && !treeState.isGrowing) {
+          this.text = '鼠标移出屏幕，等待大树重新生长';
+        }
+      }
+    };
+    
+    // 用于更新Vue组件的hintText
+    const vm = this;
+    
     // 鼠标移动事件
     canvas.addEventListener('mousemove', (e) => {
       // 大树生长过程中不响应鼠标事件
@@ -390,6 +430,9 @@ export default {
     });
     
     canvas.addEventListener('mouseout', () => {
+      // 大树生长过程中不响应鼠标事件
+      if (treeState.isGrowing) return;
+      
       mouseState.isActive = false;
       mouseState.leaveTime = Date.now();
       // 鼠标移出画布后，大树消失
@@ -423,6 +466,10 @@ export default {
       if (treeState.isGrowing) return;
       
       if (e.button === 0) { // 左键点击
+        // 标记用户已点击，并记录时间
+        hintState.hasClicked = true;
+        hintState.clickedTime = Date.now();
+        
         // 所有不在树上的树叶爆开并掉落
         leaves.forEach(leaf => {
           if (!leaf.onTree && !leaf.onGround && !leaf.isFalling && !leaf.isExploding) {
@@ -676,6 +723,9 @@ export default {
     function animate() {
       ctx.fillStyle = 'rgba(255, 255, 255, 1)';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      // 更新提示文字
+      hintState.updateHint();
 
       // 更新鼠标离开时间
       if (!mouseState.isActive && mouseState.leaveTime > 0) {
@@ -752,6 +802,10 @@ export default {
       // 更新和绘制树叶
       updateAndDrawLeaves();
       
+      // 更新提示文字
+      hintState.updateHint();
+      vm.hintText = hintState.text;
+      
       // 继续动画循环
       requestAnimationFrame(animate);
     }
@@ -764,7 +818,8 @@ export default {
       if (initialTreeStarted) return;
       if (treeState.isGrowing) return;
       if (treeState.branchesGrown && treeState.growth >= 1) return;
-      if (!treeState.isVisible || userHasMovedMouse) return;
+      // 移除 userHasMovedMouse 检查，确保首次进入时能正常生长
+      if (!treeState.isVisible) return;
       if (!treeState.structure) {
         drawTree(0.001);
       }
@@ -773,6 +828,10 @@ export default {
     }
     // 只调用一次，首次进入页面时大树生长一次后不再消失
     setTimeout(tryStartInitialTree, 80);
+  },
+  beforeUnmount() {
+    // 离开页面时恢复鼠标光标
+    document.body.style.cursor = 'default';
   }
 }
 </script>
@@ -802,6 +861,25 @@ export default {
     font-family: Arial;
     padding: 20px;
     z-index: 10;
+  }
+  
+  .hint-text {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    color: rgba(139, 69, 19, 0.8);
+    font-size: 16px;
+    font-family: Arial, sans-serif;
+    pointer-events: none;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    z-index: 10;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: default;
   }
 }
 </style>

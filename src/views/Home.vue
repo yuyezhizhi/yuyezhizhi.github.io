@@ -9,6 +9,7 @@
         <router-link to="/butterfly" class="effect-link butterfly-effect">蝴蝶网</router-link>
         <router-link to="/raintext" class="effect-link rain-effect">文字雨滴</router-link>
         <router-link to="/spinningtops" class="effect-link spinning-effect">陀螺碰撞</router-link>
+        <router-link to="/interactivetnet" class="effect-link net-effect">交互网</router-link>
       </div>
     </div>
   </div>
@@ -79,6 +80,10 @@ export default {
     
     .spinning-effect {
       background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+    }
+    
+    .net-effect {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     }
   }
 }

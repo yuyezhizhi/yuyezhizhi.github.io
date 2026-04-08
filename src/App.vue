@@ -201,11 +201,19 @@ body {
     .animated-text {
       display: inline-block;
       position: relative;
+      user-select: none;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
       
       .letter {
         display: inline-block;
         animation: bounce 2s infinite ease-in-out;
         animation-delay: calc(var(--index) * 0.1s);
+        user-select: none;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
         
         &:nth-child(1) { --index: 0; }
         &:nth-child(2) { --index: 1; }
