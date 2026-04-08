@@ -35,6 +35,16 @@ const routes = [
     path: '/butterfly',
     name: 'ButterflyNet',
     component: () => import('../views/ButterflyNet.vue')
+  },
+  {
+    path: '/raintext',
+    name: 'RainText',
+    component: () => import('../views/RainText.vue')
+  },
+  {
+    path: '/spinningtops',
+    name: 'SpinningTops',
+    component: () => import('../views/SpinningTops.vue')
   }
 ]
 

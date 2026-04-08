@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <DynamicBackground />
+    <DynamicBackground v-if="!isRainTextPage" />
     <nav class="navbar">
       <div class="nav-container">
         <h1 class="logo">
@@ -22,7 +22,7 @@
       </div>
     </nav>
     
-    <main class="main-content">
+    <main :class="['main-content', { 'fullscreen': isRainTextPage || isSpinningTopsPage }]">
       <router-view />
     </main>
     
@@ -34,7 +34,7 @@
     
     <!-- 回到顶部按钮 -->
     <button 
-      v-if="showBackToTop"
+      v-if="showBackToTop && !isRainTextPage && !isSpinningTopsPage"
       @click="backToTop"
       class="back-to-top-btn"
     >
@@ -85,8 +85,16 @@ export default {
   },
   computed: {
     showFooter() {
-      // 首页和关于页面不显示页脚
-      return this.$route.path !== '/' && this.$route.path !== '/about';
+      // 首页、关于页面、文字雨滴页面和陀螺碰撞页面不显示页脚
+      return this.$route.path !== '/' && this.$route.path !== '/about' && this.$route.path !== '/raintext' && this.$route.path !== '/spinningtops';
+    },
+    isRainTextPage() {
+      // 判断是否为文字雨滴页面
+      return this.$route.path === '/raintext';
+    },
+    isSpinningTopsPage() {
+      // 判断是否为陀螺碰撞页面
+      return this.$route.path === '/spinningtops';
     },
     ringDashoffset() {
       return this.ringCircumference - (this.scrollProgress / 100) * this.ringCircumference
@@ -251,6 +259,13 @@ body {
   margin: 0 auto;
   padding: 8rem 2rem 2rem;
   width: 100%;
+  
+  &.fullscreen {
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+  }
 }
 
 // 页脚
