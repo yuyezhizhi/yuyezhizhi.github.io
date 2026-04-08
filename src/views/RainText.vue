@@ -26,6 +26,7 @@ export default {
     initP5() {
       this.p5Instance = new p5((p) => {
         let rainDrops = [];
+        let splashes = []; // 水花效果数组
         const textArray = "生活是一场旅程，每一步都值得珍惜。阳光总在风雨后，相信未来会更好。慢慢来，一切都会好起来的。生活中的小确幸，是最珍贵的财富。保持初心，热爱生活。".split('');
         const fontSizes = [16, 18, 20, 24, 28];
         const colors = [
@@ -41,21 +42,15 @@ export default {
           [99, 255, 132]    // 绿色
         ];
         
-        // 横条属性
-        let bar = {
-          x: 0,
-          y: 0,
-          width: 300,
-          height: 10,
-          visible: false
-        };
-        
-        // 鼠标位置
-        let mousePos = {
+        // 雨伞属性（跟随鼠标）
+        let umbrella = {
           x: window.innerWidth / 2,
-          y: window.innerHeight / 2
+          y: window.innerHeight / 2,
+          radius: 150,
+          handleLength: 80,  // 伞柄长度
+          visible: true  // 显示雨伞
         };
-        
+
         p.setup = () => {
           const canvas = p.createCanvas(window.innerWidth, window.innerHeight);
           canvas.parent('rain-text-canvas');
@@ -73,49 +68,144 @@ export default {
               color: color,
               opacity: p.random(0.5, 1),
               onBar: false,
-              slideDirection: 0, // -1 向左，1 向右
-              slideSpeed: 0
+              bounceTime: 0,
+              bounceDir: 0
             });
           }
         };
         
-        p.draw = () => {
-          p.background(245, 245, 245);
+        // 绘制雨伞
+        function drawUmbrella() {
+          if (!umbrella.visible) return;
           
-          // 更新横条位置，跟随鼠标
-          bar.x = mousePos.x - bar.width / 2;
-          bar.y = mousePos.y;
+          p.push();
+          p.translate(umbrella.x, umbrella.y);
           
-          // 绘制横条（可选）
-          if (bar.visible) {
-            p.fill(0, 100);
-            p.rect(bar.x, bar.y, bar.width, bar.height);
+          // 绘制伞面（半圆形）
+          p.noFill();
+          p.stroke(100, 100, 100, 200);
+          p.strokeWeight(3);
+          p.arc(0, 0, umbrella.radius * 2, umbrella.radius * 2, p.PI, 0);
+          
+          // 绘制伞骨线条（增加细节）
+          p.strokeWeight(1.5);
+          for (let angle = p.PI; angle <= 0; angle += p.PI / 8) {
+            let x = umbrella.radius * Math.cos(angle);
+            let y = umbrella.radius * Math.sin(angle);
+            p.line(0, 0, x, y);
           }
           
-          rainDrops.forEach(drop => {
-            // 检查是否在横条上
-            if (!drop.onBar && drop.y + drop.size / 2 >= bar.y && drop.y - drop.size / 2 <= bar.y + bar.height && drop.x >= bar.x && drop.x <= bar.x + bar.width) {
-              // 碰到横条，开始滑落
-              drop.onBar = true;
-              drop.y = bar.y;
-              // 随机决定滑落方向
-              drop.slideDirection = Math.random() > 0.5 ? 1 : -1;
-              drop.slideSpeed = p.random(1, 3);
-            }
+          // 绘制伞柄
+          p.stroke(80, 80, 80, 220);
+          p.strokeWeight(4);
+          p.line(0, 0, 0, umbrella.handleLength);
+          
+          // 绘制伞柄弯钩
+          p.noFill();
+          p.strokeWeight(3);
+          p.arc(-15, umbrella.handleLength, 30, 30, 0, p.PI);
+          
+          p.pop();
+        }
+        
+        // 创建水花效果
+        function createSplash(x, y, color) {
+          for (let i = 0; i < 5; i++) {
+            splashes.push({
+              x: x,
+              y: y,
+              vx: p.random(-2, 2),
+              vy: p.random(-3, -1),
+              life: 30,
+              maxLife: 30,
+              color: color,
+              size: p.random(2, 5)
+            });
+          }
+        }
+        
+        // 更新和绘制水花
+        function updateSplashes() {
+          for (let i = splashes.length - 1; i >= 0; i--) {
+            let s = splashes[i];
+            s.x += s.vx;
+            s.y += s.vy;
+            s.vy += 0.15; // 重力
+            s.life--;
             
-            if (drop.onBar) {
-              // 沿横条滑落
-              drop.x += drop.slideDirection * drop.slideSpeed;
-              
-              // 滑落出横条后，继续下落
-              if (drop.x < bar.x || drop.x > bar.x + bar.width) {
-                drop.onBar = false;
-                drop.slideDirection = 0;
-                drop.slideSpeed = 0;
+            let alpha = (s.life / s.maxLife) * 255;
+            p.fill(s.color[0], s.color[1], s.color[2], alpha);
+            p.noStroke();
+            p.ellipse(s.x, s.y, s.size, s.size);
+            
+            if (s.life <= 0) {
+              splashes.splice(i, 1);
+            }
+          }
+        }
+        
+        p.draw = () => {
+          p.background(245, 245, 245);
+
+          // 隐藏鼠标
+          p.noCursor();
+
+          // 雨伞跟随鼠标
+          umbrella.x = p.mouseX;
+          umbrella.y = p.mouseY;
+          
+          // 先绘制雨伞
+          drawUmbrella();
+          
+          rainDrops.forEach(drop => {
+            if (!drop.onBar) {
+              // 计算雨滴下一个位置
+              let nextY = drop.y + drop.speed;
+
+              // 检查下一个位置是否会碰到雨伞（半圆弧线）
+              let dx = drop.x - umbrella.x;
+              let dy = nextY - umbrella.y;
+              let distance = Math.sqrt(dx * dx + dy * dy);
+
+              // 检查是否在半圆内（只考虑上半部分）
+              let willCollide = distance <= umbrella.radius && dy <= 0;
+
+              if (willCollide) {
+                // 碰到雨伞，弹开后继续下落
+                drop.onBar = true;
+                drop.bounceTime = 40;
+
+                // 计算反弹方向（向左或向右弹开）
+                if (dx !== 0) {
+                  drop.bounceDir = dx > 0 ? 1 : -1;
+                } else {
+                  drop.bounceDir = Math.random() > 0.5 ? 1 : -1;
+                }
+
+                // 计算落点在伞面的位置
+                let angle = Math.atan2(dy, dx);
+                drop.x = umbrella.x + umbrella.radius * Math.cos(angle);
+                drop.y = umbrella.y + umbrella.radius * Math.sin(angle);
+                
+                // 创建水花效果
+                createSplash(drop.x, drop.y, drop.color);
+              } else {
+                // 如果不会碰到雨伞，就正常下落
+                drop.y = nextY;
               }
             } else {
-              // 正常下落
-              drop.y += drop.speed;
+              // 处理弹开效果
+              if (drop.bounceTime > 0) {
+                drop.bounceTime--;
+                // 向外弹开，横向移动，竖向保持原速度
+                drop.x += drop.bounceDir * (drop.bounceTime * 0.08);
+                drop.y += drop.speed;
+              } else {
+                // 弹开后继续下落
+                drop.onBar = false;
+                drop.bounceTime = 0;
+                drop.bounceDir = 0;
+              }
             }
             
             // 绘制文字
@@ -133,20 +223,17 @@ export default {
               drop.color = colors[Math.floor(p.random(colors.length))];
               drop.opacity = p.random(0.5, 1);
               drop.onBar = false;
-              drop.slideDirection = 0;
-              drop.slideSpeed = 0;
+              drop.bounceTime = 0;
+              drop.bounceDir = 0;
             }
           });
+          
+          // 更新和绘制水花
+          updateSplashes();
         };
         
         p.windowResized = () => {
           p.resizeCanvas(window.innerWidth, window.innerHeight);
-        };
-        
-        // 鼠标移动事件
-        p.mouseMoved = () => {
-          mousePos.x = p.mouseX;
-          mousePos.y = p.mouseY;
         };
       });
     }

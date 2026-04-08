@@ -47,12 +47,9 @@ export default {
               this.trail.shift();
             }
             
-            // 先快速直线运动，然后逐渐减速并受重力影响
+            // 直线运动，不向下掉
             this.x += this.vx;
             this.y += this.vy;
-            
-            // 逐渐增加重力影响
-            this.vy += 0.1; // 较小的重力，使火花先保持直线运动
             
             // 逐渐减速
             this.vx *= 0.98;
@@ -105,12 +102,18 @@ export default {
             this.lights = []; // 边缘亮点
             this.lightTrails = []; // 亮点拖尾
             
-            // 初始化边缘亮点
+            // 初始化边缘亮点，使用亮色，调大一倍
+            const colors = [
+              [255, 100, 100], [100, 255, 100], [100, 100, 255], [255, 255, 100], [255, 100, 255], [100, 255, 255],
+              [255, 200, 100], [200, 100, 200], [100, 200, 200], [200, 200, 100]
+            ];
+            
             for (let i = 0; i < 20; i++) {
               const angle = (i / 20) * Math.PI * 2;
               const x = Math.cos(angle) * this.radius;
               const y = Math.sin(angle) * this.radius;
-              this.lights.push({x, y, angle, opacity: 1, size: 3});
+              const color = colors[i % colors.length]; // 使用彩色
+              this.lights.push({x, y, angle, opacity: 1, size: 6, color}); // 调大一倍
             }
           }
           
@@ -151,30 +154,27 @@ export default {
               
               // 更新边缘亮点
               this.lights.forEach(light => {
-                // 旋转亮点
-                light.angle += this.speed * 2; // 亮点旋转速度是陀螺的2倍
-                light.x = Math.cos(light.angle) * this.radius;
-                light.y = Math.sin(light.angle) * this.radius;
+                // 亮点直接跟随陀螺的速度，而不是自己旋转
+                // 保持稳定的亮度，不闪动
+                light.opacity = 0.8; // 更亮
+                light.size = 6; // 调大一倍，保持稳定大小
                 
-                // 随机闪烁效果
-                light.opacity = 0.5 + Math.random() * 0.5;
-                light.size = 2 + Math.random() * 2;
-                
-                // 添加拖尾效果
+                // 添加拖尾效果，增强残影效果
                 this.lightTrails.push({
                   x: light.x,
                   y: light.y,
-                  opacity: light.opacity * 0.8,
+                  opacity: light.opacity * 0.6,
                   size: light.size * 0.8,
-                  life: 20
+                  life: 30, // 延长生命周期，增强残影效果
+                  color: light.color // 拖尾也使用彩色
                 });
               });
               
               // 更新亮点拖尾
               for (let i = this.lightTrails.length - 1; i >= 0; i--) {
                 const trail = this.lightTrails[i];
-                trail.opacity *= 0.9;
-                trail.size *= 0.95;
+                trail.opacity *= 0.85; // 减慢透明度降低速度，增强残影效果
+                trail.size *= 0.98; // 减慢大小减小速度
                 trail.life--;
                 
                 if (trail.life <= 0) {
@@ -266,7 +266,7 @@ export default {
             // 绘制亮点拖尾
             this.lightTrails.forEach(trail => {
               p.noStroke();
-              p.fill(255, 255, 255, trail.opacity * 255);
+              p.fill(trail.color[0], trail.color[1], trail.color[2], trail.opacity * 255);
               p.ellipse(trail.x, trail.y, trail.size);
             });
             
@@ -274,7 +274,7 @@ export default {
             if (this.isSpinning && Math.abs(this.speed) > 0.001) {
               this.lights.forEach(light => {
                 p.noStroke();
-                p.fill(255, 255, 255, light.opacity * 255);
+                p.fill(light.color[0], light.color[1], light.color[2], light.opacity * 255);
                 p.ellipse(light.x, light.y, light.size);
               });
             }
@@ -330,9 +330,9 @@ export default {
               this.speed += speedDiff * 0.005 * thisSpeedFactor * (Math.random() > 0.5 ? 1 : -1);
               other.speed += speedDiff * 0.005 * otherSpeedFactor * (Math.random() > 0.5 ? 1 : -1);
               
-              // 碰撞后旋转速度会变慢
-              this.speed *= 0.9;
-              other.speed *= 0.9;
+              // 碰撞后旋转速度会变慢，幅度加大5倍
+              this.speed *= 0.5;
+              other.speed *= 0.5;
               
               // 随机改变旋转方向
               if (Math.random() > 0.7) {
@@ -440,13 +440,16 @@ export default {
         
         // 创建火花效果的函数
         function createSparks(x, y, color, count) {
-          // 生成100个火花，有大有小
+          // 生成100个火花，有大有小，使用黄色、橙色和红色
+          const sparkColors = [[255, 255, 0], [255, 165, 0], [255, 0, 0]]; // 黄色、橙色和红色
+          
           for (let i = 0; i < 100; i++) {
             const angle = Math.random() * Math.PI * 2;
             const speed = Math.random() * 10 + 5; // 速度有差异
             const vx = Math.cos(angle) * speed;
             const vy = Math.sin(angle) * speed;
-            const spark = new Spark(x, y, vx, vy, color);
+            const sparkColor = sparkColors[Math.floor(Math.random() * sparkColors.length)]; // 随机使用黄色或橙色
+            const spark = new Spark(x, y, vx, vy, sparkColor);
             // 火花大小有差异
             spark.size = Math.random() * 10 + 5;
             sparks.push(spark);
