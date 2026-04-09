@@ -50,6 +50,11 @@ const routes = [
     path: '/interactivetnet',
     name: 'InteractiveNet',
     component: () => import('../views/InteractiveNet.vue')
+  },
+  {
+    path: '/dancer',
+    name: 'Dancer',
+    component: () => import('../views/DancerPage.vue')
   }
 ]
 

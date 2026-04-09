@@ -194,13 +194,20 @@ export default {
             p.push();
             p.translate(this.x, this.y);
             p.rotate(this.angle);
-            
+                      
             // 绘制陀螺主体
-            // 立体浮雕效果：使用渐变填充
+            // 立体浮雕效果:使用渐变填充(半透明)
             const gradient = p.drawingContext.createRadialGradient(0, 0, 0, 0, 0, this.radius);
-            gradient.addColorStop(0, `rgba(${this.color[0] + 50}, ${this.color[1] + 50}, ${this.color[2] + 50}, 1)`);
-            gradient.addColorStop(0.7, `rgba(${this.color[0]}, ${this.color[1]}, ${this.color[2]}, 1)`);
-            gradient.addColorStop(1, `rgba(${this.color[0] - 30}, ${this.color[1] - 30}, ${this.color[2] - 30}, 1)`);
+            const highlightR = Math.min(255, this.color[0] + 50);
+            const highlightG = Math.min(255, this.color[1] + 50);
+            const highlightB = Math.min(255, this.color[2] + 50);
+            const shadowR = Math.max(0, this.color[0] - 30);
+            const shadowG = Math.max(0, this.color[1] - 30);
+            const shadowB = Math.max(0, this.color[2] - 30);
+                        
+            gradient.addColorStop(0, `rgba(${highlightR}, ${highlightG}, ${highlightB}, 0.6)`);
+            gradient.addColorStop(0.7, `rgba(${this.color[0]}, ${this.color[1]}, ${this.color[2]}, 0.5)`);
+            gradient.addColorStop(1, `rgba(${shadowR}, ${shadowG}, ${shadowB}, 0.4)`);
             p.drawingContext.fillStyle = gradient;
             p.ellipse(0, 0, this.radius * 2);
             
