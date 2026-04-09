@@ -119,7 +119,6 @@ const sketch = (p) => {
     // 直接启用模拟节拍模式（无需麦克风权限）
     useSimulatedBeat = true
     isMusicPlaying = true
-    console.log('🎵 音乐节奏模式已启动！')
   }
   
   // 鼠标移动跟踪
@@ -249,7 +248,6 @@ const sketch = (p) => {
       if (timeSinceLastChange > 3000 + Math.random() * 3000) {  // 3-6秒
         rotationDirection = -rotationDirection  // 反转方向
         window.lastDirectionChange = now
-        console.log('🔄 旋转方向改变:', rotationDirection === 1 ? '顺时针' : '逆时针')
       }
       
       continuousRotation += (0.01 + beatStrength * 0.02) * rotationDirection  // 基础速度 + 音乐增强
