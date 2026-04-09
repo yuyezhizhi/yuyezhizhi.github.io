@@ -36,8 +36,10 @@ const sketch = (p) => {
   let useSimulatedBeat = false  // 使用模拟节拍（测试用）
   let simulatedBeatTimer = 0  // 模拟节拍计时器
   let continuousRotation = 0  // 连续旋转角度
-  let rotationDirection = 1  // 旋转方向：1=顺时针，-1=逆时针
+  let rotationDirection = Math.random() < 0.5 ? 1 : -1  // 随机初始方向：1=顺时针，-1=逆时针
   let lastDirectionChange = 0  // 上次改变方向的时间
+  let targetDirection = rotationDirection  // 目标方向（用于平滑过渡）
+  let currentDirectionSmooth = rotationDirection  // 当前平滑方向值
   
   // 舞者舞蹈相关变量
   let dancerX, dancerY
@@ -249,16 +251,27 @@ const sketch = (p) => {
       }
       
       // 连续旋转（不受节拍影响，始终在转）
-      // 每3-6秒随机改变一次旋转方向
+      // 随机时间改变旋转方向（0.8-3秒之间随机）
       if (!window.lastDirectionChange) window.lastDirectionChange = now
       const timeSinceLastChange = now - window.lastDirectionChange
       
-      if (timeSinceLastChange > 3000 + Math.random() * 3000) {  // 3-6秒
-        rotationDirection = -rotationDirection  // 反转方向
-        window.lastDirectionChange = now
+      // 每次重新计算随机阈值，让转向时间更不可预测
+      if (!window.directionChangeThreshold) {
+        window.directionChangeThreshold = 800 + Math.random() * 2200  // 0.8-3秒
       }
       
-      continuousRotation += (0.01 + beatStrength * 0.02) * rotationDirection  // 基础速度 + 音乐增强
+      if (timeSinceLastChange > window.directionChangeThreshold) {
+        targetDirection = -targetDirection  // 设置新的目标方向
+        window.lastDirectionChange = now
+        window.directionChangeThreshold = 800 + Math.random() * 2200  // 下次随机新的时间
+        // 不再重置 continuousRotation，保持角度连续
+      }
+      
+      // 平滑过渡到目标方向（更慢的缓动效果）
+      const smoothSpeed = 0.03  // 更小的值，更慢更优雅
+      currentDirectionSmooth += (targetDirection - currentDirectionSmooth) * smoothSpeed
+      
+      continuousRotation += (0.01 + beatStrength * 0.02) * currentDirectionSmooth  // 使用平滑后的方向
       return
     }
     
@@ -361,12 +374,28 @@ const sketch = (p) => {
     // 持续稳定旋转
     dancerAngle += rotationSpeed * rotationDirection
     
-    // 舞者在屏幕上优雅移动
+    // 舞者在屏幕上优雅移动 - 加大上下范围
     dancerMoveX = Math.sin(dancePhase * 1.3) * 100 + Math.cos(dancePhase * 0.7) * 60
-    dancerMoveY = Math.cos(dancePhase * 1.1) * 80 + Math.sin(dancePhase * 0.9) * 50
+    dancerMoveY = Math.cos(dancePhase * 1.1) * 150 + Math.sin(dancePhase * 0.9) * 100  // 上下范围加大
     
     const currentDancerX = dancerX + dancerMoveX
     const currentDancerY = dancerY + dancerMoveY
+    
+    // 绘制舞者身体（白色椭圆）
+    p.push()
+    p.translate(currentDancerX, currentDancerY)
+    p.rotate(dancerAngle)
+    
+    // 身体 - 白色半透明椭圆（更扁，与头部协调）
+    p.drawingContext.save()
+    p.drawingContext.shadowBlur = 15
+    p.drawingContext.shadowColor = 'rgba(255, 255, 255, 0.5)'
+    p.noStroke()
+    p.fill(255, 255, 255, 180)  // 白色半透明
+    p.ellipse(0, 0, 70, 30)  // 宽70，高30，非常扁的椭圆
+    p.drawingContext.restore()
+    
+    p.pop()
     
     // 按层级排序绘制：后层->中层->前层
     ribbons.sort((a, b) => a.layer - b.layer)
@@ -399,15 +428,36 @@ const sketch = (p) => {
       // 计算丝带上的点 - 减少分段数提升性能
       ribbon.points = []
       const segments = 30  // 从40降低到30，大幅提升性能
+      
+      // 关键：使用速度-加速度模型实现真实惯性
+      // 初始化（如果不存在）
+      if (!ribbon.pointVelocity) {
+        ribbon.pointVelocity = []
+        ribbon.pointAngle = []
+        for (let i = 0; i <= segments; i++) {
+          ribbon.pointVelocity.push(0)  // 每点的旋转速度
+          ribbon.pointAngle.push(0)     // 每点的旋转角度
+        }
+      }
+      
       for (let i = 0; i <= segments; i++) {
         const t = i / segments
         const currentLength = ribbon.length * t
         
-        // 关键：每个点的旋转角度不同，越往外旋转越慢
-        // t=0（根部）: 100%旋转速度
-        // t=1（尾部）: 20%旋转速度
-        const rotationSpeedAtPoint = 1.0 - t * 0.8  // 从1.0递减到0.2
-        const pointRotation = continuousRotation * rotationSpeedAtPoint
+        // 目标旋转速度：根部快，尾部慢，方向由 currentDirectionSmooth 决定
+        const targetVelocity = (0.01 + beatStrength * 0.02) * currentDirectionSmooth * (1.0 - t * 0.8)
+        
+        // 计算加速度（趋向目标速度）
+        const acceleration = (targetVelocity - ribbon.pointVelocity[i]) * 0.08  // 0.08是响应速度
+        
+        // 更新速度
+        ribbon.pointVelocity[i] += acceleration
+        
+        // 积分得到角度
+        ribbon.pointAngle[i] += ribbon.pointVelocity[i]
+        
+        // 使用该点的旋转角度（带惯性）
+        const pointRotation = ribbon.pointAngle[i]
         
         // 计算波浪效果 - 中国舞风格：根部跟随节奏，尾部极慢跟随，且会慢慢恢复平直
         const wavePhase = frame * ribbon.waveSpeed + ribbon.waveOffset
@@ -415,25 +465,33 @@ const sketch = (p) => {
         // 音乐影响只在根部（t接近0时最强，向尾部递减）
         const musicInfluenceAtPoint = (1 - t) * beatStrength  // 根部100%影响，尾部0%
         
+        // 关键修复：根据旋转方向确定方向因子，确保逆时针时波动反向
+        const directionFactor = currentDirectionSmooth >= 0 ? 1 : -1
+        
         // 基础波动（整体都有，但较弱）- 尾部非常慢，且会衰减
         const decayFactor = Math.exp(-t * 1.5)  // 指数衰减：t=0时为1，t=1时为0.22
-        const baseWaveEffect = Math.sin(wavePhase + t * 2) * wave * t * 0.3 * decayFactor
-        const baseSecondaryWave = Math.cos(wavePhase * 1.1 + t * 3) * wave * 0.1 * t * decayFactor
+        const baseWaveEffect = Math.sin(wavePhase + t * 2 * directionFactor) * wave * t * 0.3 * decayFactor
+        const baseSecondaryWave = Math.cos(wavePhase * 1.1 + t * 3 * directionFactor) * wave * 0.1 * t * decayFactor
         
         // 音乐增强的波动（主要在根部）- 也会快速衰减
-        const musicBoostedWave = Math.sin(wavePhase + t * 1.8) * wave * t * 0.35 * musicInfluenceAtPoint * decayFactor
-        const musicBoostedSecondary = Math.cos(wavePhase * 1.0 + t * 2.5) * wave * 0.12 * t * musicInfluenceAtPoint * decayFactor
+        const musicBoostedWave = Math.sin(wavePhase + t * 1.8 * directionFactor) * wave * t * 0.35 * musicInfluenceAtPoint * decayFactor
+        const musicBoostedSecondary = Math.cos(wavePhase * 1.0 + t * 2.5 * directionFactor) * wave * 0.12 * t * musicInfluenceAtPoint * decayFactor
         
         // 合并两种波动
         const waveEffect = (baseWaveEffect + musicBoostedWave) * musicWaveBoost
         const secondaryWave = baseSecondaryWave + musicBoostedSecondary
         
         // 裙摆曲线：根部固定，中间弯曲，尾部极慢跟随，且会逐渐恢复平直
+        // 关键修复：曲线方向也需要随旋转方向反转
         const skirtCurveDecay = Math.exp(-t * 2.0)  // 更强的衰减，让尾部更快恢复平直
-        const skirtCurve = Math.sin(t * Math.PI) * 15 * ribbon.curveIntensity * (1 + musicInfluenceAtPoint * 0.1) * skirtCurveDecay
+        const skirtCurve = Math.sin(t * Math.PI * directionFactor) * 15 * ribbon.curveIntensity * (1 + musicInfluenceAtPoint * 0.1) * skirtCurveDecay
+        
+        // 关键：添加恢复直线的弹性力
+        // 当没有外力时，裙摆会趋向于直线（angleOffset = 0）
+        const restoreForce = 0.95  // 恢复系数，越接近1恢复越慢
         
         // 计算角度偏移（加入鼠标影响和点位旋转）
-        const angleOffset = waveEffect * 0.0025 + secondaryWave * 0.0015 + skirtCurve * 0.0008 + mouseAngleOffset
+        const angleOffset = (waveEffect * 0.0025 + secondaryWave * 0.0015 + skirtCurve * 0.0008 + mouseAngleOffset) * restoreForce
         const angle = danceInfluencedAngle + pointRotation + angleOffset
         
         const x = currentDancerX + Math.cos(angle) * currentLength
@@ -617,6 +675,21 @@ const sketch = (p) => {
         fireworks.splice(i, 1)
       }
     }
+    
+    // 绘制头部（在最上层，纯黑色）
+    p.push()
+    p.translate(currentDancerX, currentDancerY)
+    p.rotate(dancerAngle)
+    
+    p.drawingContext.save()
+    p.drawingContext.shadowBlur = 8
+    p.drawingContext.shadowColor = 'rgba(0, 0, 0, 0.5)'
+    p.noStroke()
+    p.fill(0, 0, 0, 255)  // 纯黑色
+    p.circle(0, 0, 25)  // 在身体中心，直径25
+    p.drawingContext.restore()
+    
+    p.pop()
     
     // 显示提示文字（右上角）
     p.push()

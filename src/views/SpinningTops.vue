@@ -28,6 +28,7 @@ export default {
         let top1, top2, sparks = [];
         let mouseTrail = []; // 鼠标拖尾
         const maxTrailLength = 20; // 最大拖尾长度
+        let isMobile = false; // 检测是否为移动设备
         
         class Spark {
           constructor(x, y, vx, vy, color) {
@@ -37,7 +38,7 @@ export default {
             this.vy = vy;
             this.color = color;
             this.life = 255;
-            this.size = 10; // 增大火花大小
+            this.size = isMobile ? 5 : 10; // 移动端火花大小减半
             this.brightness = 1; // 初始亮度
             this.trail = []; // 拖尾效果
           }
@@ -45,7 +46,7 @@ export default {
           update() {
             // 记录轨迹点
             this.trail.push({x: this.x, y: this.y, life: this.life});
-            if (this.trail.length > 15) { // 增加拖尾长度
+            if (this.trail.length > (isMobile ? 8 : 15)) { // 移动端拖尾长度减半
               this.trail.shift();
             }
             
@@ -115,7 +116,7 @@ export default {
               const x = Math.cos(angle) * this.radius;
               const y = Math.sin(angle) * this.radius;
               const color = colors[i % colors.length]; // 使用彩色
-              this.lights.push({x, y, angle, opacity: 1, size: 6, color}); // 调大一倍
+              this.lights.push({x, y, angle, opacity: 1, size: isMobile ? 3 : 6, color}); // 移动端亮点大小减半
             }
           }
           
@@ -159,7 +160,7 @@ export default {
                 // 亮点直接跟随陀螺的速度，而不是自己旋转
                 // 保持稳定的亮度，不闪动
                 light.opacity = 0.8; // 更亮
-                light.size = 6; // 调大一倍，保持稳定大小
+                light.size = isMobile ? 3 : 6; // 移动端亮点大小减半，保持稳定大小
                 
                 // 添加拖尾效果，增强残影效果
                 this.lightTrails.push({
@@ -407,15 +408,24 @@ export default {
           const canvas = p.createCanvas(window.innerWidth, window.innerHeight);
           canvas.parent('spinning-tops-canvas');
           
-          // 初始化两个陀螺（放大一倍）
-          top1 = new Top(p.width * 0.3, p.height / 2, 120, [255, 165, 0], 0.2); // 转速增加2倍
-          top2 = new Top(p.width * 0.7, p.height / 2, 100, [255, 99, 71], -0.3); // 转速增加2倍
+          // 检测是否为移动设备
+          isMobile = window.innerWidth <= 768;
           
-          // 给陀螺一个初始速度（增加10倍），并添加垂直方向的速度
-          top1.vx = 20;
-          top1.vy = (Math.random() - 0.5) * 10; // 随机垂直速度
-          top2.vx = -20;
-          top2.vy = (Math.random() - 0.5) * 10; // 随机垂直速度
+          // 初始化两个陀螺（移动端使用更小的尺寸）
+          const top1Radius = isMobile ? 30 : 120;
+          const top2Radius = isMobile ? 25 : 100;
+          const top1Speed = isMobile ? 0.4 : 0.2;
+          const top2Speed = isMobile ? -0.5 : -0.3;
+          
+          top1 = new Top(p.width * 0.3, p.height / 2, top1Radius, [255, 165, 0], top1Speed);
+          top2 = new Top(p.width * 0.7, p.height / 2, top2Radius, [255, 99, 71], top2Speed);
+          
+          // 给陀螺一个初始速度（移动端适当调整）
+          const initialSpeed = isMobile ? 15 : 20;
+          top1.vx = initialSpeed;
+          top1.vy = (Math.random() - 0.5) * (isMobile ? 8 : 10);
+          top2.vx = -initialSpeed;
+          top2.vy = (Math.random() - 0.5) * (isMobile ? 8 : 10);
         };
         
         p.draw = () => {
@@ -460,6 +470,59 @@ export default {
           if (mouseTrail.length > maxTrailLength) {
             mouseTrail.shift();
           }
+        };
+        
+        // 移动端触摸事件处理
+        let lastTouchX = 0;
+        let lastTouchY = 0;
+        
+        p.touchStarted = function() {
+          // 记录初始触摸位置
+          lastTouchX = p.touchX;
+          lastTouchY = p.touchY;
+          return false; // 阻止默认行为
+        };
+        
+        p.touchMoved = function() {
+          const touchX = p.touchX;
+          const touchY = p.touchY;
+          
+          // 计算滑动距离和方向
+          const dx = touchX - lastTouchX;
+          const dy = touchY - lastTouchY;
+          
+          // 根据滑动方向和距离推动陀螺
+          const forceMultiplier = isMobile ? 0.8 : 0.5; // 移动端力度更大
+          top1.vx += dx * forceMultiplier;
+          top1.vy += dy * forceMultiplier;
+          top2.vx += dx * forceMultiplier;
+          top2.vy += dy * forceMultiplier;
+          
+          // 增加旋转速度
+          const rotationForce = Math.sqrt(dx * dx + dy * dy) * 0.01;
+          top1.speed += rotationForce * (Math.random() > 0.5 ? 1 : -1);
+          top2.speed += rotationForce * (Math.random() > 0.5 ? 1 : -1);
+          
+          // 如果陀螺停止旋转，重新启动
+          if (!top1.isSpinning) top1.isSpinning = true;
+          if (!top2.isSpinning) top2.isSpinning = true;
+          
+          // 更新上次触摸位置
+          lastTouchX = touchX;
+          lastTouchY = touchY;
+          
+          // 记录触摸轨迹
+          mouseTrail.push({
+            x: touchX,
+            y: touchY,
+            life: 255
+          });
+          
+          if (mouseTrail.length > maxTrailLength) {
+            mouseTrail.shift();
+          }
+          
+          return false; // 阻止默认行为
         };
         
         // 绘制鼠标效果
@@ -519,21 +582,23 @@ export default {
           // 生成100个火花，有大有小，使用黄色、橙色和红色
           const sparkColors = [[255, 255, 0], [255, 165, 0], [255, 0, 0]]; // 黄色、橙色和红色
           
-          for (let i = 0; i < 100; i++) {
+          for (let i = 0; i < (isMobile ? 50 : 100); i++) { // 移动端火花数量减半
             const angle = Math.random() * Math.PI * 2;
-            const speed = Math.random() * 10 + 5; // 速度有差异
+            const speed = Math.random() * (isMobile ? 6 : 10) + (isMobile ? 3 : 5); // 移动端速度调整
             const vx = Math.cos(angle) * speed;
             const vy = Math.sin(angle) * speed;
             const sparkColor = sparkColors[Math.floor(Math.random() * sparkColors.length)]; // 随机使用黄色或橙色
             const spark = new Spark(x, y, vx, vy, sparkColor);
-            // 火花大小有差异
-            spark.size = Math.random() * 10 + 5;
+            // 火花大小有差异（移动端减半）
+            spark.size = Math.random() * (isMobile ? 5 : 10) + (isMobile ? 3 : 5);
             sparks.push(spark);
           }
         }
         
         p.windowResized = () => {
           p.resizeCanvas(window.innerWidth, window.innerHeight);
+          // 重新检测是否为移动设备
+          isMobile = window.innerWidth <= 768;
         };
       });
     }

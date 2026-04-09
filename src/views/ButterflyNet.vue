@@ -28,10 +28,21 @@ const sketch = (p) => {
   let sparkleParticles = []
   let gravity = 0.3 // 重力加速度
   let friction = 0.95 // 摩擦力
+  let isMobile = false
 
   p.setup = () => {
     p.createCanvas(p.windowWidth, p.windowHeight)
     p.frameRate(60)
+    
+    // 检测是否为移动设备
+    isMobile = p.windowWidth <= 768
+    
+    // 移动端调整参数
+    if (isMobile) {
+      netRadius = 30  // 捕网半径再缩小一倍
+      gravity = 0.2
+    }
+    
     netX = p.width / 2
     netY = p.height / 2
     netTargetX = netX
@@ -43,12 +54,13 @@ const sketch = (p) => {
         angle: (i / 32) * Math.PI * 2,
         offset: 0,
         speed: 0.02 + Math.random() * 0.03,
-        amplitude: 2 + Math.random() * 3
+        amplitude: isMobile ? 1.5 : 2 + Math.random() * 3
       })
     }
 
-    // 蝴蝶
-    for (let i = 0; i < 20; i++) {
+    // 蝴蝶（移动端减少数量和大小）
+    const butterflyCount = isMobile ? 12 : 20
+    for (let i = 0; i < butterflyCount; i++) {
       const hue = Math.random() * 360
       butterflies.push({
         x: Math.random() * p.width,
@@ -57,20 +69,21 @@ const sketch = (p) => {
         vy: (Math.random() - 0.5) * 3,
         targetVx: (Math.random() - 0.5) * 3,
         targetVy: (Math.random() - 0.5) * 3,
-        size: 25 + Math.random() * 15,
+        size: isMobile ? 9 + Math.random() * 5 : 25 + Math.random() * 15, // 移动端蝴蝶大小再减半
         baseHue: hue,
         color: `hsla(${hue}, 75%, 65%, 0.85)`,
         wingAngle: 0,
         wingSpeed: 0.15 + Math.random() * 0.1,
         caught: false,
-        caughtOffset: (i / 20) * Math.PI * 2,
+        caughtOffset: (i / butterflyCount) * Math.PI * 2,
         trail: []
       })
     }
 
-    // 柳条和叶子
+    // 柳条和叶子（保持不变）
     willowBranches = []
-    for (let branchIndex = 0; branchIndex < 8; branchIndex++) {
+    const branchCount = 8
+    for (let branchIndex = 0; branchIndex < branchCount; branchIndex++) {
       const branchX = p.width / 2 + (Math.random() - 0.5) * 400
       const branchY = p.height / 2 - 150 - Math.random() * 100
       const leafCount = 8 + Math.floor(Math.random() * 6)
@@ -105,8 +118,9 @@ const sketch = (p) => {
       })
     }
 
-    // 花朵
-    for (let i = 0; i < 50; i++) {
+    // 花朵（保持不变）
+    const flowerCount = 50
+    for (let i = 0; i < flowerCount; i++) {
       flowers.push({
         x: Math.random() * p.width * 0.8 + p.width * 0.1,
         y: Math.random() * p.height * 0.8 + p.height * 0.1,
@@ -421,20 +435,26 @@ const sketch = (p) => {
 
     // 绘制手柄 (更优雅的设计)
     p.push()
-    p.translate(netX, netY + netRadius * 3)
+    // 手柄顶端位置在圆环顶部边缘，移动端再往下移一个直径
+    const handleTopOffset = isMobile ? netRadius : -netRadius * 3
+    p.translate(netX, netY + handleTopOffset)
     
-    // 手柄渐变
-    const handleGrad = p.drawingContext.createLinearGradient(0, -200, 0, 0)
+    // 手柄渐变（移动端缩短长度）
+    const handleLength = isMobile ? 120 : 200
+    const handleWidth = isMobile ? 3 : 4
+    const handleGrad = p.drawingContext.createLinearGradient(0, 0, 0, handleLength)
     handleGrad.addColorStop(0, '#228b22')
     handleGrad.addColorStop(1, '#006400')
     p.drawingContext.fillStyle = handleGrad
     p.noStroke()
-    p.rect(-4, -200, 8, 200, 4)
+    p.rect(-handleWidth/2, 0, handleWidth, handleLength, handleWidth/2)
     
-    // 手柄装饰环
-    for (let i = 0; i < 5; i++) {
+    // 手柄装饰环（移动端减少数量）
+    const decorationCount = isMobile ? 3 : 5
+    const decorationSpacing = isMobile ? 25 : 35
+    for (let i = 0; i < decorationCount; i++) {
       p.fill('rgba(255, 215, 0, 0.6)')
-      p.ellipse(0, -40 - i * 35, 10, 3)
+      p.ellipse(0, 30 + i * decorationSpacing, isMobile ? 7 : 10, isMobile ? 2 : 3)
     }
     p.pop()
 
@@ -545,6 +565,15 @@ const sketch = (p) => {
 
   p.windowResized = () => {
     p.resizeCanvas(p.windowWidth, p.windowHeight)
+    
+    // 重新检测是否为移动设备
+    const wasMobile = isMobile
+    isMobile = p.windowWidth <= 768
+    
+    // 如果设备类型改变，重新调整网的半径
+    if (wasMobile !== isMobile) {
+      netRadius = isMobile ? 30 : 100
+    }
   }
 }
 
