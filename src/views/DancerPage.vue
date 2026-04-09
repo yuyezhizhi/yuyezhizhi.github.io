@@ -21,6 +21,9 @@ const sketch = (p) => {
   let mouseTrail = []  // 鼠标拖尾
   let mouseParticles = []  // 鼠标粒子
   let mouseInfluenceRadius = 150  // 鼠标影响半径
+  let lastMouseX = 0, lastMouseY = 0  // 上次鼠标位置
+  let mouseStillTimer = 0  // 鼠标静止计时器
+  let fireworks = []  // 烟花数组
   
   // 音乐节奏相关
   let audioContext = null
@@ -63,14 +66,14 @@ const sketch = (p) => {
       })
     }
     
-    // 初始化丝带（从中心向外扩散的光带）- 增加数量，减小粗细
+    // 初始化丝带（从中心向外扩散的光带）- 缩小一半
     for (let i = 0; i < 32; i++) {  // 增加到32条
       const angle = (i / 32) * Math.PI * 2
       ribbons.push({
         angle: angle,
         baseAngle: angle,
-        length: 250,  // 稍长一点
-        maxLength: 250,
+        length: 125,  // 缩小一半：250 -> 125
+        maxLength: 125,
         waveOffset: Math.random() * Math.PI * 2,
         waveSpeed: 0.04 + Math.random() * 0.03,
         waveAmplitude: 25 + Math.random() * 25,
@@ -125,6 +128,11 @@ const sketch = (p) => {
   p.mouseMoved = () => {
     mouseX_pos = p.mouseX
     mouseY_pos = p.mouseY
+    
+    // 重置静止计时器
+    mouseStillTimer = 0
+    lastMouseX = p.mouseX
+    lastMouseY = p.mouseY
     
     // 添加拖尾
     mouseTrail.push({
@@ -283,11 +291,52 @@ const sketch = (p) => {
     prevBassEnergy = bassEnergy
   }
   
+  // 创建烟花
+  function createFirework(x, y) {
+    const particleCount = 30 + Math.floor(Math.random() * 20)  // 30-50个粒子
+    const hue = Math.random() * 360  // 随机颜色
+    const particles = []
+    
+    for (let i = 0; i < particleCount; i++) {
+      const angle = (i / particleCount) * Math.PI * 2
+      const speed = 2 + Math.random() * 3
+      particles.push({
+        x: x,
+        y: y,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        life: 60 + Math.random() * 30,  // 60-90帧生命周期
+        maxLife: 60 + Math.random() * 30,
+        size: 2 + Math.random() * 3,
+        hue: hue + Math.random() * 30 - 15  // slight color variation
+      })
+    }
+    
+    fireworks.push({
+      particles: particles
+    })
+  }
+  
   p.draw = () => {
     frame++
     
     // 分析音乐节奏
     analyzeMusic()
+    
+    // 检测鼠标是否静止
+    const mouseDist = Math.sqrt((mouseX_pos - lastMouseX) ** 2 + (mouseY_pos - lastMouseY) ** 2)
+    if (mouseDist < 2) {  // 鼠标移动小于2像素视为静止
+      mouseStillTimer++
+      // 每60帧（约1秒）放一次烟花
+      if (mouseStillTimer >= 60) {
+        createFirework(mouseX_pos, mouseY_pos)
+        mouseStillTimer = 0  // 重置计时器
+      }
+    } else {
+      mouseStillTimer = 0  // 鼠标移动，重置计时器
+    }
+    lastMouseX = mouseX_pos
+    lastMouseY = mouseY_pos
     
     p.background(0, 40)  // 加快残影消失速度（从20增加到40）
     
@@ -360,26 +409,28 @@ const sketch = (p) => {
         const rotationSpeedAtPoint = 1.0 - t * 0.8  // 从1.0递减到0.2
         const pointRotation = continuousRotation * rotationSpeedAtPoint
         
-        // 计算波浪效果 - 中国舞风格：根部跟随节奏，尾部极慢跟随
+        // 计算波浪效果 - 中国舞风格：根部跟随节奏，尾部极慢跟随，且会慢慢恢复平直
         const wavePhase = frame * ribbon.waveSpeed + ribbon.waveOffset
         
         // 音乐影响只在根部（t接近0时最强，向尾部递减）
         const musicInfluenceAtPoint = (1 - t) * beatStrength  // 根部100%影响，尾部0%
         
-        // 基础波动（整体都有，但较弱）- 尾部非常慢
-        const baseWaveEffect = Math.sin(wavePhase + t * 2) * wave * t * 0.3
-        const baseSecondaryWave = Math.cos(wavePhase * 1.1 + t * 3) * wave * 0.1 * t
+        // 基础波动（整体都有，但较弱）- 尾部非常慢，且会衰减
+        const decayFactor = Math.exp(-t * 1.5)  // 指数衰减：t=0时为1，t=1时为0.22
+        const baseWaveEffect = Math.sin(wavePhase + t * 2) * wave * t * 0.3 * decayFactor
+        const baseSecondaryWave = Math.cos(wavePhase * 1.1 + t * 3) * wave * 0.1 * t * decayFactor
         
-        // 音乐增强的波动（主要在根部）
-        const musicBoostedWave = Math.sin(wavePhase + t * 1.8) * wave * t * 0.35 * musicInfluenceAtPoint
-        const musicBoostedSecondary = Math.cos(wavePhase * 1.0 + t * 2.5) * wave * 0.12 * t * musicInfluenceAtPoint
+        // 音乐增强的波动（主要在根部）- 也会快速衰减
+        const musicBoostedWave = Math.sin(wavePhase + t * 1.8) * wave * t * 0.35 * musicInfluenceAtPoint * decayFactor
+        const musicBoostedSecondary = Math.cos(wavePhase * 1.0 + t * 2.5) * wave * 0.12 * t * musicInfluenceAtPoint * decayFactor
         
         // 合并两种波动
         const waveEffect = (baseWaveEffect + musicBoostedWave) * musicWaveBoost
         const secondaryWave = baseSecondaryWave + musicBoostedSecondary
         
-        // 裙摆曲线：根部固定，中间弯曲，尾部极慢跟随（极度优雅的延迟）
-        const skirtCurve = Math.sin(t * Math.PI) * 15 * ribbon.curveIntensity * (1 + musicInfluenceAtPoint * 0.1)
+        // 裙摆曲线：根部固定，中间弯曲，尾部极慢跟随，且会逐渐恢复平直
+        const skirtCurveDecay = Math.exp(-t * 2.0)  // 更强的衰减，让尾部更快恢复平直
+        const skirtCurve = Math.sin(t * Math.PI) * 15 * ribbon.curveIntensity * (1 + musicInfluenceAtPoint * 0.1) * skirtCurveDecay
         
         // 计算角度偏移（加入鼠标影响和点位旋转）
         const angleOffset = waveEffect * 0.0025 + secondaryWave * 0.0015 + skirtCurve * 0.0008 + mouseAngleOffset
@@ -528,6 +579,44 @@ const sketch = (p) => {
       p.drawingContext.restore()
     }
 
+    // 绘制烟花
+    for (let i = fireworks.length - 1; i >= 0; i--) {
+      const fw = fireworks[i]
+      
+      // 更新烟花粒子
+      for (let j = fw.particles.length - 1; j >= 0; j--) {
+        const ptc = fw.particles[j]
+        ptc.x += ptc.vx
+        ptc.y += ptc.vy
+        ptc.vy += 0.05  // 重力
+        ptc.vx *= 0.99  // 空气阻力
+        ptc.vy *= 0.99
+        ptc.life--
+        
+        if (ptc.life <= 0) {
+          fw.particles.splice(j, 1)
+          continue
+        }
+        
+        const lifeRatio = ptc.life / ptc.maxLife
+        const alpha = lifeRatio * 255
+        
+        p.drawingContext.save()
+        p.drawingContext.shadowBlur = 10
+        p.drawingContext.shadowColor = `hsla(${ptc.hue}, 100%, 70%, ${alpha / 255})`
+        
+        p.noStroke()
+        p.fill(ptc.hue, 100, 70, alpha)
+        p.circle(ptc.x, ptc.y, ptc.size * lifeRatio)
+        
+        p.drawingContext.restore()
+      }
+      
+      // 移除已结束的烟花
+      if (fw.particles.length === 0) {
+        fireworks.splice(i, 1)
+      }
+    }
     
     // 显示提示文字（右上角）
     p.push()
