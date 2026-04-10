@@ -26,12 +26,6 @@
       <router-view />
     </main>
     
-    <footer v-if="showFooter" class="footer">
-      <div class="footer-content">
-        <p>&copy; 2024 yuyezhizhi 的前端博客. 保留所有权利.</p>
-      </div>
-    </footer>
-    
     <!-- 回到顶部按钮 -->
     <button 
       v-if="showBackToTop && !isRainTextPage && !isSpinningTopsPage"
@@ -84,10 +78,6 @@ export default {
     }
   },
   computed: {
-    showFooter() {
-      // 首页、关于页面、文字雨滴页面和陀螺碰撞页面不显示页脚
-      return this.$route.path !== '/' && this.$route.path !== '/about' && this.$route.path !== '/raintext' && this.$route.path !== '/spinningtops';
-    },
     isRainTextPage() {
       // 判断是否为文字雨滴页面
       return this.$route.path === '/raintext';
@@ -273,21 +263,6 @@ body {
     margin: 0;
     padding: 0;
     height: 100vh;
-  }
-}
-
-// 页脚
-.footer {
-  background-color: @dark-gray;
-  color: @white;
-  text-align: center;
-  padding: 1.5rem 0;
-  margin-top: auto;
-  
-  .footer-content {
-    max-width: @container-width;
-    margin: 0 auto;
-    padding: 0 2rem;
   }
 }
 

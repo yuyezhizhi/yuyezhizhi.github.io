@@ -2,17 +2,10 @@
   <div class="cellular-automata-container">
     <div id="p5-canvas"></div>
     <div class="controls">
-      <h3>细胞自动机</h3>
-      <p class="instruction">点击添加/移除细胞，空格开始/暂停，数字键1-5切换规则，R重置</p>
+      <p class="instruction">点击添加细胞 | 空格开始/暂停 | 1-5切换规则 | R重置</p>
       <div class="info">
-        <p>状态: {{ isRunning ? '运行中' : '已暂停' }}</p>
-        <p>代数: {{ generation }}</p>
-        <p>活细胞: {{ aliveCount }}</p>
-        <p>当前规则: {{ rules[currentRule].name }}</p>
-      </div>
-      <div class="rule-info">
-        <h4>规则说明</h4>
-        <p>{{ rules[currentRule].description }}</p>
+        <p>{{ isRunning ? '运行中' : '已暂停' }} | 代数: {{ generation }} | 活细胞: {{ aliveCount }}</p>
+        <p>规则: {{ rules[currentRule].name }}</p>
       </div>
     </div>
   </div>
@@ -63,7 +56,7 @@ const rules = [
 let p5Instance = null
 let grid = []
 let nextGrid = []
-let cellSize = 10
+let cellSize = 5 // 细胞大小缩小一倍，从10改为5
 let cols, rows
 let updateInterval = 100
 let lastUpdateTime = 0
@@ -97,6 +90,9 @@ const sketch = (p) => {
 
     // 绘制网格
     drawGrid()
+
+    // 绘制放大镜效果
+    drawMagnifier()
 
     // 统计活细胞数
     aliveCount.value = countAliveCells()
@@ -202,6 +198,97 @@ const sketch = (p) => {
     return count
   }
 
+  const drawMagnifier = () => {
+    const magRadius = 100 // 放大镜半径
+    const zoomLevel = 4 // 放大倍数改为4倍
+    
+    // 获取鼠标位置的网格坐标
+    const mouseCol = Math.floor(p.mouseX / cellSize)
+    const mouseRow = Math.floor(p.mouseY / cellSize)
+    
+    // 检查是否在画布范围内
+    if (mouseCol < 0 || mouseCol >= cols || mouseRow < 0 || mouseRow >= rows) {
+      return
+    }
+    
+    p.push()
+    
+    // 创建圆形裁剪区域
+    p.drawingContext.save()
+    p.drawingContext.beginPath()
+    p.drawingContext.arc(p.mouseX, p.mouseY, magRadius, 0, p.TWO_PI)
+    p.drawingContext.clip()
+    
+    // 计算需要放大的区域（以鼠标为中心）
+    const cellsInView = Math.ceil(magRadius * 2 / (cellSize * zoomLevel))
+    const halfCells = Math.floor(cellsInView / 2)
+    
+    // 绘制放大的内容
+    p.noStroke()
+    for (let i = 0; i < cellsInView; i++) {
+      for (let j = 0; j < cellsInView; j++) {
+        const col = mouseCol - halfCells + i
+        const row = mouseRow - halfCells + j
+        
+        if (col >= 0 && col < cols && row >= 0 && row < rows) {
+          // 计算放大后的位置和大小
+          const x = p.mouseX - magRadius + i * (magRadius * 2 / cellsInView)
+          const y = p.mouseY - magRadius + j * (magRadius * 2 / cellsInView)
+          const size = magRadius * 2 / cellsInView
+          
+          if (grid[col][row] === 1) {
+            const hue = (currentRule.value * 60) % 360
+            p.colorMode(p.HSB)
+            p.fill(hue, 70, 90)
+            p.rect(x, y, size, size) // 移除 -1，使用完整尺寸
+            p.colorMode(p.RGB)
+          } else {
+            p.fill(20, 20, 30)
+            p.rect(x, y, size, size) // 移除 -1，使用完整尺寸
+          }
+        }
+      }
+    }
+    
+    p.drawingContext.restore()
+    
+    // 绘制放大镜边框
+    p.noFill()
+    p.stroke(100, 180, 255, 220)
+    p.strokeWeight(4)
+    p.circle(p.mouseX, p.mouseY, magRadius * 2)
+    
+    // 绘制鼠标位置的透明方块（与放大后的细胞大小一致）
+    if (mouseCol >= 0 && mouseCol < cols && mouseRow >= 0 && mouseRow < rows) {
+      // 计算这个细胞在放大镜中的位置和大小
+      const cellsInView = Math.ceil(magRadius * 2 / (cellSize * zoomLevel))
+      const halfCells = Math.floor(cellsInView / 2)
+      
+      // 找到鼠标位置对应的细胞在放大镜中的索引
+      const indexI = mouseCol - (mouseCol - halfCells)
+      const indexJ = mouseRow - (mouseRow - halfCells)
+      
+      if (indexI >= 0 && indexI < cellsInView && indexJ >= 0 && indexJ < cellsInView) {
+        const x = p.mouseX - magRadius + indexI * (magRadius * 2 / cellsInView)
+        const y = p.mouseY - magRadius + indexJ * (magRadius * 2 / cellsInView)
+        const size = magRadius * 2 / cellsInView
+        
+        // 绘制半透明的选中框
+        p.noStroke()
+        p.fill(255, 255, 255, 80) // 白色半透明
+        p.rect(x, y, size, size)
+        
+        // 绘制边框
+        p.noFill()
+        p.stroke(255, 255, 255, 200)
+        p.strokeWeight(2)
+        p.rect(x, y, size, size)
+      }
+    }
+    
+    p.pop()
+  }
+
   p.mousePressed = () => {
     const col = Math.floor(p.mouseX / cellSize)
     const row = Math.floor(p.mouseY / cellSize)
@@ -275,9 +362,11 @@ onBeforeUnmount(() => {
 
 <style scoped lang="less">
 .cellular-automata-container {
-  position: relative;
+  position: fixed;
+  top: 0;
+  left: 0;
   width: 100%;
-  height: 100vh;
+  height: 100%;
   overflow: hidden;
 
   #p5-canvas {
@@ -286,56 +375,33 @@ onBeforeUnmount(() => {
     left: 0;
     width: 100%;
     height: 100%;
+    cursor: none; /* 隐藏默认鼠标 */
   }
 
   .controls {
     position: absolute;
     top: 20px;
-    left: 20px;
-    background: rgba(0, 0, 0, 0.7);
-    padding: 1.5rem;
-    border-radius: 10px;
+    right: 20px;
+    background: transparent;
+    padding: 0.8rem 1.2rem;
+    border-radius: 8px;
     color: white;
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    max-width: 350px;
-
-    h3 {
-      margin: 0 0 0.5rem 0;
-      font-size: 1.3rem;
-      color: #fd79a8;
-    }
+    backdrop-filter: none;
+    border: none;
 
     .instruction {
-      margin: 0 0 1rem 0;
-      font-size: 0.9rem;
-      opacity: 0.8;
+      margin: 0 0 0.5rem 0;
+      font-size: 0.85rem;
+      opacity: 0.9;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
     }
 
     .info {
       p {
-        margin: 0.3rem 0;
-        font-size: 0.85rem;
-        opacity: 0.7;
-      }
-    }
-
-    .rule-info {
-      margin-top: 1rem;
-      padding-top: 1rem;
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
-
-      h4 {
-        margin: 0 0 0.5rem 0;
-        font-size: 1rem;
-        color: #fdcb6e;
-      }
-
-      p {
-        margin: 0;
-        font-size: 0.8rem;
-        opacity: 0.6;
-        line-height: 1.5;
+        margin: 0.2rem 0;
+        font-size: 0.75rem;
+        opacity: 0.75;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
       }
     }
   }

@@ -2,12 +2,9 @@
   <div class="meteor-shower-container">
     <div id="p5-canvas"></div>
     <div class="controls">
-      <h3>流星雨</h3>
-      <p class="instruction">鼠标移动改变流星方向，点击产生流星爆发，空格切换速度</p>
+      <p class="instruction">鼠标移动改变方向 | 点击产生爆发 | 空格切换速度</p>
       <div class="info">
-        <p>流星数: {{ meteorCount }}</p>
-        <p>流星速度: {{ meteorSpeed.toFixed(1) }}x</p>
-        <p>当前星座: {{ constellations[currentConstellation].name }}</p>
+        <p>流星: {{ meteorCount }} | 速度: {{ meteorSpeed.toFixed(1) }}x</p>
       </div>
     </div>
   </div>
@@ -256,12 +253,14 @@ const sketch = (p) => {
   p.mouseClicked = () => {
     // 产生流星爆发
     for (let i = 0; i < 20; i++) {
+      const angle = p.random(p.TWO_PI)
+      const speed = meteorBaseSpeed * meteorSpeed.value * 1.5
       meteors.push(new Meteor(
         p.mouseX,
         p.mouseY,
-        p5.Vector.fromAngle(p5.random(p5.TWO_PI)),
-        meteorBaseSpeed * meteorSpeed.value * 1.5,
-        p5Instance.random(3, 6)
+        p.createVector(Math.cos(angle), Math.sin(angle)),
+        speed,
+        p.random(3, 6)
       ))
     }
 
@@ -303,9 +302,11 @@ onBeforeUnmount(() => {
 
 <style scoped lang="less">
 .meteor-shower-container {
-  position: relative;
+  position: fixed;
+  top: 0;
+  left: 0;
   width: 100%;
-  height: 100vh;
+  height: 100%;
   overflow: hidden;
   background: linear-gradient(to bottom, #0a0a1a 0%, #1a1a3a 100%);
 
@@ -315,36 +316,33 @@ onBeforeUnmount(() => {
     left: 0;
     width: 100%;
     height: 100%;
+    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Cdefs%3E%3CradialGradient id='blackHole' cx='50%25' cy='50%25' r='50%25'%3E%3Cstop offset='0%25' style='stop-color:%23000000;stop-opacity:1' /%3E%3Cstop offset='60%25' style='stop-color:%23000000;stop-opacity:0.9' /%3E%3Cstop offset='80%25' style='stop-color:%234a0080;stop-opacity:0.6' /%3E%3Cstop offset='100%25' style='stop-color:%238b00ff;stop-opacity:0' /%3E%3C/radialGradient%3E%3C/defs%3E%3Ccircle cx='20' cy='20' r='18' fill='url(%23blackHole)' /%3E%3Ccircle cx='20' cy='20' r='8' fill='%23000000' /%3E%3Ccircle cx='20' cy='20' r='12' fill='none' stroke='%239d4edd' stroke-width='1.5' opacity='0.7' /%3E%3C/svg%3E") 20 20, auto;
   }
 
   .controls {
     position: absolute;
     top: 20px;
-    left: 20px;
-    background: rgba(0, 0, 0, 0.7);
-    padding: 1.5rem;
-    border-radius: 10px;
+    right: 20px;
+    background: transparent;
+    padding: 0.8rem 1.2rem;
+    border-radius: 8px;
     color: #a29bfe;
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(162, 155, 254, 0.3);
-
-    h3 {
-      margin: 0 0 0.5rem 0;
-      font-size: 1.3rem;
-      text-shadow: 0 0 10px rgba(162, 155, 254, 0.5);
-    }
+    backdrop-filter: none;
+    border: none;
 
     .instruction {
-      margin: 0 0 1rem 0;
-      font-size: 0.9rem;
-      opacity: 0.8;
+      margin: 0 0 0.5rem 0;
+      font-size: 0.85rem;
+      opacity: 0.9;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
     }
 
     .info {
       p {
-        margin: 0.3rem 0;
-        font-size: 0.85rem;
-        opacity: 0.7;
+        margin: 0;
+        font-size: 0.75rem;
+        opacity: 0.75;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
       }
     }
   }

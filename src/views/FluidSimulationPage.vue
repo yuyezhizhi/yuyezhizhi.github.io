@@ -2,11 +2,9 @@
   <div class="fluid-simulation-container">
     <div id="p5-canvas"></div>
     <div class="controls">
-      <h3>流体模拟</h3>
-      <p class="instruction">鼠标拖拽生成流体，数字键1-3切换颜色，R重置</p>
+      <p class="instruction">鼠标拖拽生成流体 | 1-8切换颜色 | R重置</p>
       <div class="info">
-        <p>粒子数: {{ particleCount }}</p>
-        <p>当前颜色: {{ colors[currentColor].name }}</p>
+        <p>粒子: {{ particleCount }} | 颜色: {{ colors[currentColor].name }}</p>
       </div>
     </div>
   </div>
@@ -24,7 +22,10 @@ const colors = [
   { name: '红色', r: 255, g: 80, b: 80 },
   { name: '绿色', r: 80, g: 255, b: 100 },
   { name: '紫色', r: 180, g: 100, b: 255 },
-  { name: '黄色', r: 255, g: 220, b: 80 }
+  { name: '黄色', r: 255, g: 220, b: 80 },
+  { name: '橙色', r: 255, g: 165, b: 0 },
+  { name: '青色', r: 0, g: 255, b: 255 },
+  { name: '粉色', r: 255, g: 105, b: 180 }
 ]
 
 let p5Instance = null
@@ -194,7 +195,7 @@ const sketch = (p) => {
 
   p.keyPressed = () => {
     const key = parseInt(p.key)
-    if (key >= 1 && key <= 5) {
+    if (key >= 1 && key <= 8) {
       currentColor.value = key - 1
     } else if (p.key === 'r' || p.key === 'R') {
       // 重置
@@ -232,9 +233,11 @@ onBeforeUnmount(() => {
 
 <style scoped lang="less">
 .fluid-simulation-container {
-  position: relative;
+  position: fixed;
+  top: 0;
+  left: 0;
   width: 100%;
-  height: 100vh;
+  height: 100%;
   overflow: hidden;
 
   #p5-canvas {
@@ -243,36 +246,33 @@ onBeforeUnmount(() => {
     left: 0;
     width: 100%;
     height: 100%;
+    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='20' viewBox='0 0 16 20'%3E%3Cdefs%3E%3CradialGradient id='waterDrop' cx='40%25' cy='35%25' r='50%25'%3E%3Cstop offset='0%25' style='stop-color:%23e0f7ff;stop-opacity:0.9' /%3E%3Cstop offset='50%25' style='stop-color:%234fc3f7;stop-opacity:0.8' /%3E%3Cstop offset='100%25' style='stop-color:%230288d1;stop-opacity:0.6' /%3E%3C/radialGradient%3E%3ClinearGradient id='highlight' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%23ffffff;stop-opacity:0.8' /%3E%3Cstop offset='100%25' style='stop-color:%23ffffff;stop-opacity:0' /%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M8 1 C8 1 2 9 2 12 C2 15.3 4.7 18 8 18 C11.3 18 14 15.3 14 12 C14 9 8 1 8 1 Z' fill='url(%23waterDrop)' stroke='%230277bd' stroke-width='0.75' /%3E%3Cellipse cx='6' cy='10' rx='2' ry='3' fill='url(%23highlight)' transform='rotate(-30 6 10)' /%3E%3C/svg%3E") 8 18, auto;
   }
 
   .controls {
     position: absolute;
     top: 20px;
-    left: 20px;
-    background: rgba(0, 0, 0, 0.7);
-    padding: 1.5rem;
-    border-radius: 10px;
+    right: 20px;
+    background: transparent;
+    padding: 0.8rem 1.2rem;
+    border-radius: 8px;
     color: white;
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-
-    h3 {
-      margin: 0 0 0.5rem 0;
-      font-size: 1.3rem;
-      color: #a29bfe;
-    }
+    backdrop-filter: none;
+    border: none;
 
     .instruction {
-      margin: 0 0 1rem 0;
-      font-size: 0.9rem;
-      opacity: 0.8;
+      margin: 0 0 0.5rem 0;
+      font-size: 0.85rem;
+      opacity: 0.9;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
     }
 
     .info {
       p {
-        margin: 0.3rem 0;
-        font-size: 0.85rem;
-        opacity: 0.7;
+        margin: 0;
+        font-size: 0.75rem;
+        opacity: 0.75;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
       }
     }
   }

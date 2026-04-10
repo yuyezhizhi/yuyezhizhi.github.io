@@ -2,12 +2,9 @@
   <div class="gravity-particles-container">
     <div id="p5-canvas"></div>
     <div class="controls">
-      <h3>重力粒子</h3>
-      <p class="instruction">鼠标移动创建粒子场，点击产生引力波，数字键1-3切换引力模式</p>
+      <p class="instruction">鼠标移动创建粒子 | 点击产生引力波 | 1-3切换模式</p>
       <div class="info">
-        <p>粒子数: {{ particleCount }}</p>
-        <p>引力模式: {{ gravityModes[currentMode] }}</p>
-        <p>引力强度: {{ gravityStrength.toFixed(1) }}</p>
+        <p>粒子: {{ particleCount }} | 模式: {{ gravityModes[currentMode] }}</p>
       </div>
     </div>
   </div>
@@ -248,9 +245,11 @@ onBeforeUnmount(() => {
 
 <style scoped lang="less">
 .gravity-particles-container {
-  position: relative;
+  position: fixed;
+  top: 0;
+  left: 0;
   width: 100%;
-  height: 100vh;
+  height: 100%;
   overflow: hidden;
 
   #p5-canvas {
@@ -259,36 +258,33 @@ onBeforeUnmount(() => {
     left: 0;
     width: 100%;
     height: 100%;
+    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cdefs%3E%3CradialGradient id='gravityCore' cx='50%25' cy='50%25' r='50%25'%3E%3Cstop offset='0%25' style='stop-color:%23ffffff;stop-opacity:1' /%3E%3Cstop offset='30%25' style='stop-color:%23ffd700;stop-opacity:0.9' /%3E%3Cstop offset='60%25' style='stop-color:%23ff8c00;stop-opacity:0.6' /%3E%3Cstop offset='100%25' style='stop-color:%23ff4500;stop-opacity:0' /%3E%3C/radialGradient%3E%3C/defs%3E%3Ccircle cx='24' cy='24' r='6' fill='%23ffffff' stroke='%23ffd700' stroke-width='2' /%3E%3Ccircle cx='24' cy='24' r='12' fill='url(%23gravityCore)' opacity='0.7' /%3E%3Ccircle cx='24' cy='24' r='18' fill='none' stroke='%23ff8c00' stroke-width='1.5' opacity='0.5' stroke-dasharray='4,3' /%3E%3Ccircle cx='24' cy='24' r='22' fill='none' stroke='%23ff6347' stroke-width='1' opacity='0.3' stroke-dasharray='3,4' /%3E%3C/svg%3E") 24 24, auto;
   }
 
   .controls {
     position: absolute;
     top: 20px;
-    left: 20px;
-    background: rgba(0, 0, 0, 0.7);
-    padding: 1.5rem;
-    border-radius: 10px;
+    right: 20px;
+    background: transparent;
+    padding: 0.8rem 1.2rem;
+    border-radius: 8px;
     color: white;
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-
-    h3 {
-      margin: 0 0 0.5rem 0;
-      font-size: 1.3rem;
-      color: #74b9ff;
-    }
+    backdrop-filter: none;
+    border: none;
 
     .instruction {
-      margin: 0 0 1rem 0;
-      font-size: 0.9rem;
-      opacity: 0.8;
+      margin: 0 0 0.5rem 0;
+      font-size: 0.85rem;
+      opacity: 0.9;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
     }
 
     .info {
       p {
-        margin: 0.3rem 0;
-        font-size: 0.85rem;
-        opacity: 0.7;
+        margin: 0;
+        font-size: 0.75rem;
+        opacity: 0.75;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
       }
     }
   }

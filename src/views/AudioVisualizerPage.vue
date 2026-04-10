@@ -2,16 +2,10 @@
   <div class="audio-visualizer-container">
     <div id="p5-canvas"></div>
     <div class="controls">
-      <h3>音乐可视化</h3>
-      <p class="instruction">点击播放/暂停，数字键1-5切换模式</p>
+      <p class="instruction">点击页面播放/暂停 | 1-5切换模式</p>
       <div class="info">
-        <p>状态: {{ isPlaying ? '播放中' : '已暂停' }}</p>
-        <p>当前模式: {{ modes[currentMode] }}</p>
-        <p>频率范围: {{ freqRange }}</p>
+        <p>{{ isPlaying ? '播放中' : '已暂停' }} | {{ modes[currentMode] }}</p>
       </div>
-      <button class="play-btn" @click="togglePlay">
-        {{ isPlaying ? '暂停' : '播放' }}
-      </button>
     </div>
   </div>
 </template>
@@ -102,7 +96,7 @@ const sketch = (p) => {
       p.fill(255)
       p.textSize(16)
       p.textAlign(p.CENTER, p.CENTER)
-      p.text('点击播放按钮开始', p.width / 2, p.height / 2)
+      p.text('点击页面开始', p.width / 2, p.height / 2)
       return
     }
 
@@ -225,7 +219,7 @@ const sketch = (p) => {
 
     // 更新和绘制粒子
     particles = particles.filter(particle => {
-      particle.update(amplitude)
+      particle.update(50) // 使用默认振幅值
       particle.draw(p)
       return !particle.isDead()
     })
@@ -254,6 +248,10 @@ const sketch = (p) => {
     }
 
     p.colorMode(p.RGB)
+  }
+
+  p.mousePressed = () => {
+    togglePlay()
   }
 
   p.mousePressed = () => {
@@ -301,9 +299,11 @@ onBeforeUnmount(() => {
 
 <style scoped lang="less">
 .audio-visualizer-container {
-  position: relative;
+  position: fixed;
+  top: 0;
+  left: 0;
   width: 100%;
-  height: 100vh;
+  height: 100%;
   overflow: hidden;
 
   #p5-canvas {
@@ -317,48 +317,27 @@ onBeforeUnmount(() => {
   .controls {
     position: absolute;
     top: 20px;
-    left: 20px;
-    background: rgba(0, 0, 0, 0.7);
-    padding: 1.5rem;
-    border-radius: 10px;
+    right: 20px;
+    background: transparent;
+    padding: 0.8rem 1.2rem;
+    border-radius: 8px;
     color: white;
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-
-    h3 {
-      margin: 0 0 0.5rem 0;
-      font-size: 1.3rem;
-      color: #ff6b6b;
-    }
+    backdrop-filter: none;
+    border: none;
 
     .instruction {
-      margin: 0 0 1rem 0;
-      font-size: 0.9rem;
-      opacity: 0.8;
+      margin: 0 0 0.5rem 0;
+      font-size: 0.85rem;
+      opacity: 0.9;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
     }
 
     .info {
       p {
-        margin: 0.3rem 0;
-        font-size: 0.85rem;
-        opacity: 0.7;
-      }
-    }
-
-    .play-btn {
-      margin-top: 1rem;
-      padding: 0.6rem 1.5rem;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      font-size: 1rem;
-      font-weight: bold;
-      transition: transform 0.2s;
-
-      &:hover {
-        transform: scale(1.05);
+        margin: 0;
+        font-size: 0.75rem;
+        opacity: 0.75;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
       }
     }
   }
