@@ -2,6 +2,7 @@
   <div class="home">
     <div class="home-content">
       <div class="menu-container">
+        <!-- 原有链接 -->
         <router-link to="/fish" class="effect-link fish-effect">鱼群效果</router-link>
         <router-link to="/leaves" class="effect-link leaves-effect">树叶效果</router-link>
         <router-link to="/fishgroup" class="effect-link fishgroup-effect">鱼群效果2</router-link>
@@ -11,6 +12,13 @@
         <router-link to="/spinningtops" class="effect-link spinning-effect">陀螺碰撞</router-link>
         <router-link to="/interactivetnet" class="effect-link net-effect">交互网</router-link>
         <router-link to="/dancer" class="effect-link dancer-effect">光之舞者</router-link>
+
+        <!-- 新增 p5.js 创意交互页面 -->
+        <router-link to="/particle-vortex" class="effect-link vortex-effect">粒子漩涡</router-link>
+        <router-link to="/audio-visualizer" class="effect-link audio-effect">音乐可视化</router-link>
+        <router-link to="/digital-rain" class="effect-link digital-effect">数字雨</router-link>
+        <router-link to="/fluid-simulation" class="effect-link fluid-effect">流体模拟</router-link>
+        <router-link to="/cellular-automata" class="effect-link cellular-effect">细胞自动机</router-link>
       </div>
     </div>
   </div>
@@ -89,6 +97,27 @@ export default {
     
     .dancer-effect {
       background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    }
+    
+    /* 新增 p5.js 创意交互页面样式 */
+    .vortex-effect {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    
+    .audio-effect {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    }
+    
+    .digital-effect {
+      background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    }
+    
+    .fluid-effect {
+      background: linear-gradient(135deg, #a29bfe 0%, #6c5ce7 100%);
+    }
+    
+    .cellular-effect {
+      background: linear-gradient(135deg, #fd79a8 0%, #e84393 100%);
     }
   }
 }

@@ -55,6 +55,31 @@ const routes = [
     path: '/dancer',
     name: 'Dancer',
     component: () => import('../views/DancerPage.vue')
+  },
+  {
+    path: '/particle-vortex',
+    name: 'ParticleVortex',
+    component: () => import('../views/ParticleVortexPage.vue')
+  },
+  {
+    path: '/audio-visualizer',
+    name: 'AudioVisualizer',
+    component: () => import('../views/AudioVisualizerPage.vue')
+  },
+  {
+    path: '/digital-rain',
+    name: 'DigitalRain',
+    component: () => import('../views/DigitalRainPage.vue')
+  },
+  {
+    path: '/fluid-simulation',
+    name: 'FluidSimulation',
+    component: () => import('../views/FluidSimulationPage.vue')
+  },
+  {
+    path: '/cellular-automata',
+    name: 'CellularAutomata',
+    component: () => import('../views/CellularAutomataPage.vue')
   }
 ]
 
