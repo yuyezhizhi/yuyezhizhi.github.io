@@ -14,9 +14,9 @@
         <router-link to="/dancer" class="effect-link dancer-effect">光之舞者</router-link>
 
         <!-- 新增 p5.js 创意交互页面 -->
-        <router-link to="/particle-vortex" class="effect-link vortex-effect">粒子漩涡</router-link>
+        <router-link to="/gravity-particles" class="effect-link gravity-effect">重力粒子</router-link>
         <router-link to="/audio-visualizer" class="effect-link audio-effect">音乐可视化</router-link>
-        <router-link to="/digital-rain" class="effect-link digital-effect">数字雨</router-link>
+        <router-link to="/meteor-shower" class="effect-link meteor-effect">流星雨</router-link>
         <router-link to="/fluid-simulation" class="effect-link fluid-effect">流体模拟</router-link>
         <router-link to="/cellular-automata" class="effect-link cellular-effect">细胞自动机</router-link>
       </div>
@@ -100,24 +100,24 @@ export default {
     }
     
     /* 新增 p5.js 创意交互页面样式 */
-    .vortex-effect {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    .gravity-effect {
+      background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
     }
-    
+
     .audio-effect {
       background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
     }
-    
-    .digital-effect {
-      background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-    }
-    
-    .fluid-effect {
+
+    .meteor-effect {
       background: linear-gradient(135deg, #a29bfe 0%, #6c5ce7 100%);
     }
-    
-    .cellular-effect {
+
+    .fluid-effect {
       background: linear-gradient(135deg, #fd79a8 0%, #e84393 100%);
+    }
+
+    .cellular-effect {
+      background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
     }
   }
 }

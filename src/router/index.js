@@ -57,8 +57,8 @@ const routes = [
     component: () => import('../views/DancerPage.vue')
   },
   {
-    path: '/particle-vortex',
-    name: 'ParticleVortex',
+    path: '/gravity-particles',
+    name: 'GravityParticles',
     component: () => import('../views/ParticleVortexPage.vue')
   },
   {
@@ -67,8 +67,8 @@ const routes = [
     component: () => import('../views/AudioVisualizerPage.vue')
   },
   {
-    path: '/digital-rain',
-    name: 'DigitalRain',
+    path: '/meteor-shower',
+    name: 'MeteorShower',
     component: () => import('../views/DigitalRainPage.vue')
   },
   {
