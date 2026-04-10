@@ -80,6 +80,31 @@ const routes = [
     path: '/cellular-automata',
     name: 'CellularAutomata',
     component: () => import('../views/CellularAutomataPage.vue')
+  },
+  {
+    path: '/bubble-pop',
+    name: 'BubblePop',
+    component: () => import('../views/BubblePop.vue')
+  },
+  {
+    path: '/flower-garden',
+    name: 'FlowerGarden',
+    component: () => import('../views/FlowerGarden.vue')
+  },
+  {
+    path: '/rainbow-wave',
+    name: 'RainbowWave',
+    component: () => import('../views/RainbowWave.vue')
+  },
+  {
+    path: '/starlight-dance',
+    name: 'StarlightDance',
+    component: () => import('../views/StarlightDance.vue')
+  },
+  {
+    path: '/candy-rain',
+    name: 'CandyRain',
+    component: () => import('../views/CandyRain.vue')
   }
 ]
 

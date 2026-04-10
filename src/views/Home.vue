@@ -19,6 +19,13 @@
         <router-link to="/meteor-shower" class="effect-link meteor-effect">流星雨</router-link>
         <router-link to="/fluid-simulation" class="effect-link fluid-effect">流体模拟</router-link>
         <router-link to="/cellular-automata" class="effect-link cellular-effect">细胞自动机</router-link>
+
+        <!-- 新增治愈系动画页面 -->
+        <router-link to="/bubble-pop" class="effect-link bubble-effect">彩色泡泡</router-link>
+        <router-link to="/flower-garden" class="effect-link flower-effect">花朵花园</router-link>
+        <router-link to="/rainbow-wave" class="effect-link rainbow-effect">彩虹波浪</router-link>
+        <router-link to="/starlight-dance" class="effect-link starlight-effect">星光舞蹈</router-link>
+        <router-link to="/candy-rain" class="effect-link candy-effect">糖果雨</router-link>
       </div>
     </div>
   </div>
@@ -118,6 +125,27 @@ export default {
 
     .cellular-effect {
       background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
+    }
+
+    /* 新增治愈系动画页面样式 */
+    .bubble-effect {
+      background: linear-gradient(135deg, #ff9ff3 0%, #f368e0 100%);
+    }
+
+    .flower-effect {
+      background: linear-gradient(135deg, #ffcccc 0%, #ffb3ba 50%, #ffdfba 100%);
+    }
+
+    .rainbow-effect {
+      background: linear-gradient(135deg, #ff6b6b 0%, #feca57 25%, #48dbfb 50%, #ff9ff3 75%, #54a0ff 100%);
+    }
+
+    .starlight-effect {
+      background: linear-gradient(135deg, #ffd700 0%, #ffed4e 50%, #fff9c4 100%);
+    }
+
+    .candy-effect {
+      background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #a8edea 100%);
     }
   }
 }
