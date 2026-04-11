@@ -203,24 +203,45 @@ const play = async () => {
     if (!audioLoaded.value || audioElement.value.src !== currentTrack.value.url) {
       audioElement.value.src = currentTrack.value.url
       audioElement.value.load()
-      // 等待音频加载完成
-      await new Promise((resolve, reject) => {
-        const onCanPlay = () => {
-          audioElement.value.removeEventListener('canplaythrough', onCanPlay)
-          audioElement.value.removeEventListener('error', onError)
-          resolve()
-        }
-        const onError = (e) => {
-          audioElement.value.removeEventListener('canplaythrough', onCanPlay)
-          audioElement.value.removeEventListener('error', onError)
-          reject(e)
-        }
-        audioElement.value.addEventListener('canplaythrough', onCanPlay)
-        audioElement.value.addEventListener('error', onError)
-        // 超时处理
-        setTimeout(() => reject(new Error('Audio load timeout')), 10000)
-      })
-      audioLoaded.value = true
+      
+      // 使用 canplay 事件（比 canplaythrough 更快触发）
+      try {
+        await new Promise((resolve, reject) => {
+          // 如果已经缓存，直接resolve
+          if (audioElement.value.readyState >= 3) {
+            resolve()
+            return
+          }
+          
+          const onCanPlay = () => {
+            cleanup()
+            resolve()
+          }
+          const onError = (e) => {
+            cleanup()
+            reject(e)
+          }
+          const cleanup = () => {
+            clearTimeout(timeoutId)
+            audioElement.value?.removeEventListener('canplay', onCanPlay)
+            audioElement.value?.removeEventListener('error', onError)
+          }
+          
+          audioElement.value.addEventListener('canplay', onCanPlay)
+          audioElement.value.addEventListener('error', onError)
+          
+          // 缩短超时时间到5秒
+          const timeoutId = setTimeout(() => {
+            cleanup()
+            reject(new Error('Audio load timeout'))
+          }, 5000)
+        })
+        audioLoaded.value = true
+      } catch (loadError) {
+        // 加载失败但继续尝试播放（可能部分加载可用）
+        console.warn('Audio preload warning:', loadError)
+        audioLoaded.value = true
+      }
     }
     
     audioElement.value.volume = isMuted.value ? 0 : volume.value / 100
@@ -229,6 +250,8 @@ const play = async () => {
   } catch (e) {
     console.error('Failed to play audio:', e)
     isPlaying.value = false
+    // 显示友好的错误提示
+    alert('音频加载失败，请检查网络连接或尝试切换其他音效')
   }
 }
 
