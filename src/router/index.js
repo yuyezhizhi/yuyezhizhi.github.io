@@ -110,7 +110,83 @@ const routes = [
     path: '/lotus-pond',
     name: 'LotusPond',
     component: () => import('../views/LotusPond.vue')
-  }
+  },
+  {
+    path: '/gravity-field',
+    name: 'GravityField',
+    component: () => import('../views/GravityField.vue')
+  },
+  {
+    path: '/black-hole',
+    name: 'BlackHole',
+    component: () => import('../views/BlackHole.vue')
+  },
+  {
+    path: '/wave-interference',
+    name: 'WaveInterference',
+    component: () => import('../views/WaveInterference.vue')
+  },
+  {
+    path: '/magnetic-field',
+    name: 'MagneticField',
+    component: () => import('../views/MagneticField.vue')
+  },
+  {
+    path: '/fireworks',
+    name: 'Fireworks',
+    component: () => import('../views/Fireworks.vue')
+  },
+  {
+    path: '/quicksand',
+    name: 'Quicksand',
+    component: () => import('../views/Quicksand.vue')
+  },
+  {
+    path: '/fractal-tree',
+    name: 'FractalTree',
+    component: () => import('../views/FractalTree.vue')
+  },
+  {
+    path: '/cell-division',
+    name: 'CellDivision',
+    component: () => import('../views/CellDivision.vue')
+  },
+  {
+    path: '/noise-terrain',
+    name: 'NoiseTerrain',
+    component: () => import('../views/NoiseTerrain.vue')
+  },
+  {
+    path: '/mandala',
+    name: 'Mandala',
+    component: () => import('../views/Mandala.vue')
+  },
+  {
+    path: '/frequency-tower',
+    name: 'FrequencyTower',
+    component: () => import('../views/FrequencyTower.vue')
+  },
+  {
+    path: '/audio-wheel',
+    name: 'AudioWheel',
+    component: () => import('../views/AudioWheel.vue')
+  },
+  {
+    path: '/music-network',
+    name: 'MusicNetwork',
+    component: () => import('../views/MusicNetwork.vue')
+  },
+  {
+    path: '/morphing-sphere',
+    name: 'MorphingSphere',
+    component: () => import('../views/MorphingSphere.vue')
+  },
+  {
+    path: '/stereo-channel',
+    name: 'StereoChannel',
+    component: () => import('../views/StereoChannel.vue')
+  },
+
 ]
 
 const router = createRouter({
