@@ -68,7 +68,7 @@
         <FavoriteButton 
           :artwork-id="animation.id" 
           class="card-favorite-btn"
-          @click.stop
+          @click.prevent.stop
         />
       </router-link>
       
