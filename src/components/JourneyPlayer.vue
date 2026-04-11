@@ -408,7 +408,7 @@ onUnmounted(() => {
 // 退出按钮 - 放在进度条上方右侧
 .exit-journey {
   position: fixed;
-  bottom: 6.8rem; // 进度条上方
+  bottom: 8rem; // 进度条上方（上移20px）
   right: 1rem;
   width: auto;
   height: auto;
@@ -619,7 +619,7 @@ onUnmounted(() => {
 
   .exit-journey {
     right: 0.5rem;
-    bottom: 6rem;
+    bottom: 7rem;
     padding: 0.35rem 0.75rem;
     font-size: 0.7rem;
   }
