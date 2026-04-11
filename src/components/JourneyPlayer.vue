@@ -219,26 +219,26 @@ onUnmounted(() => {
   }
 }
 
-// 进度条 - 右下角紧凑样式
+// 进度条 - 右下角紧凑样式，与控制栏同宽
 .journey-progress {
   position: fixed;
-  bottom: 5rem;
+  bottom: 4.2rem;
   right: 1rem;
   width: auto;
-  min-width: 200px;
-  max-width: 300px;
+  min-width: auto;
+  max-width: none;
   background: rgba(255, 255, 255, 0.9);
-  padding: 0.6rem 0.875rem;
+  padding: 0.5rem 0.75rem;
   border-radius: 1rem;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
   backdrop-filter: blur(10px);
   z-index: 1001;
 
   .progress-track {
-    height: 3px;
+    height: 2px;
     background: #e0e0e0;
-    border-radius: 2px;
-    margin-bottom: 0.5rem;
+    border-radius: 1px;
+    margin-bottom: 0.4rem;
     overflow: hidden;
 
     .progress-fill {
@@ -409,15 +409,16 @@ onUnmounted(() => {
 .exit-journey {
   position: fixed;
   bottom: 1rem;
-  right: 11rem; // 放在控制栏左侧
-  width: 2.5rem;
-  height: 2.5rem;
+  right: 10.5rem; // 放在控制栏左侧
+  width: 2.2rem;
+  height: 2.2rem;
   padding: 0;
   border: none;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.9);
   color: #666;
-  font-size: 1rem;
+  font-size: 0.9rem;
+  line-height: 1;
   cursor: pointer;
   transition: all 0.3s ease;
   backdrop-filter: blur(10px);
@@ -616,11 +617,11 @@ onUnmounted(() => {
   }
 
   .exit-journey {
-    right: 9rem;
+    right: 8.5rem;
     bottom: 0.5rem;
-    width: 2.25rem;
-    height: 2.25rem;
-    font-size: 0.9rem;
+    width: 2rem;
+    height: 2rem;
+    font-size: 0.8rem;
   }
 
   .narrative-overlay .narrative-content {
