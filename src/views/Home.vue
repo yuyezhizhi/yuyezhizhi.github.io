@@ -26,6 +26,7 @@
         <router-link to="/rainbow-wave" class="effect-link rainbow-effect">彩虹波浪</router-link>
         <router-link to="/starlight-dance" class="effect-link starlight-effect">星光舞蹈</router-link>
         <router-link to="/candy-rain" class="effect-link candy-effect">糖果雨</router-link>
+        <router-link to="/lotus-pond" class="effect-link lotus-effect">荷塘小舟</router-link>
       </div>
     </div>
   </div>
@@ -146,6 +147,10 @@ export default {
 
     .candy-effect {
       background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #a8edea 100%);
+    }
+
+    .lotus-effect {
+      background: linear-gradient(135deg, #a8e063 0%, #56ab2f 100%);
     }
   }
 }

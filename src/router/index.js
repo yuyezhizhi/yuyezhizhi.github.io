@@ -105,6 +105,11 @@ const routes = [
     path: '/candy-rain',
     name: 'CandyRain',
     component: () => import('../views/CandyRain.vue')
+  },
+  {
+    path: '/lotus-pond',
+    name: 'LotusPond',
+    component: () => import('../views/LotusPond.vue')
   }
 ]
 
