@@ -186,6 +186,11 @@ const routes = [
     name: 'StereoChannel',
     component: () => import('../views/StereoChannel.vue')
   },
+  {
+    path: '/journeys',
+    name: 'Journeys',
+    component: () => import('../views/JourneysPage.vue')
+  },
 
 ]
 

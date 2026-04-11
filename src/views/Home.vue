@@ -1,8 +1,25 @@
 <template>
   <div class="home">
     <div class="home-header">
+      <div class="header-decoration">
+        <span class="deco-item" style="--delay: 0s">✨</span>
+        <span class="deco-item" style="--delay: 0.5s">🎨</span>
+        <span class="deco-item" style="--delay: 1s">✨</span>
+      </div>
       <h1 class="site-title">好玩的动画</h1>
       <p class="site-subtitle">探索创意编程的无限可能</p>
+      
+      <!-- 特色入口 -->
+      <div class="feature-entrances">
+        <router-link to="/journeys" class="feature-card journey-card">
+          <span class="feature-icon">🎭</span>
+          <div class="feature-content">
+            <h3>艺术旅程</h3>
+            <p>按主题串联的沉浸式体验</p>
+          </div>
+          <span class="feature-arrow">→</span>
+        </router-link>
+      </div>
     </div>
 
     <!-- 分类Tab栏 -->
@@ -11,12 +28,21 @@
         v-for="category in categories"
         :key="category.id"
         class="tab-button"
-        :class="{ active: currentCategory === category.id }"
-        @click="currentCategory = category.id"
+        :class="{ active: currentCategory === category.id && !showFavoritesOnly }"
+        @click="currentCategory = category.id; showFavoritesOnly = false"
       >
         <span class="tab-icon">{{ category.icon }}</span>
         <span class="tab-name">{{ category.name }}</span>
         <span class="tab-count">{{ getCategoryCount(category.id) }}</span>
+      </button>
+      <button
+        class="tab-button favorites-tab"
+        :class="{ active: showFavoritesOnly }"
+        @click="toggleFavoritesFilter"
+      >
+        <span class="tab-icon">❤️</span>
+        <span class="tab-name">我的收藏</span>
+        <span class="tab-count">{{ favoriteIds.length }}</span>
       </button>
     </div>
 
@@ -39,17 +65,54 @@
         <div class="difficulty-badge" :class="animation.difficulty">
           {{ getDifficultyLabel(animation.difficulty) }}
         </div>
+        <FavoriteButton 
+          :artwork-id="animation.id" 
+          class="card-favorite-btn"
+          @click.stop
+        />
       </router-link>
+      
+      <!-- 空状态 -->
+      <div v-if="filteredAnimations.length === 0" key="empty" class="empty-state">
+        <div class="empty-icon">🎨</div>
+        <p>{{ showFavoritesOnly ? '还没有收藏任何作品，去发现喜欢的动画吧！' : '该分类下暂无作品' }}</p>
+      </div>
     </TransitionGroup>
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { animations, categories } from '../data/animations.js'
+import FavoriteButton from '../components/FavoriteButton.vue'
 
 // 当前选中的分类
 const currentCategory = ref('all')
+const showFavoritesOnly = ref(false)
+const favoriteIds = ref([])
+
+// 从 localStorage 加载收藏
+const loadFavorites = () => {
+  try {
+    const stored = localStorage.getItem('animation-favorites')
+    if (stored) {
+      favoriteIds.value = JSON.parse(stored)
+    }
+  } catch (e) {
+    console.error('Failed to load favorites:', e)
+  }
+}
+
+// 监听收藏变化
+const checkFavorites = () => {
+  loadFavorites()
+}
+
+onMounted(() => {
+  loadFavorites()
+  // 监听 storage 变化
+  window.addEventListener('storage', checkFavorites)
+})
 
 // 获取分类的动画数量
 const getCategoryCount = (categoryId) => {
@@ -71,11 +134,28 @@ const getDifficultyLabel = (difficulty) => {
 
 // 根据当前分类筛选动画
 const filteredAnimations = computed(() => {
-  if (currentCategory.value === 'all') {
-    return animations
+  let result = animations
+  
+  // 按分类筛选
+  if (currentCategory.value !== 'all') {
+    result = result.filter(animation => animation.category === currentCategory.value)
   }
-  return animations.filter(animation => animation.category === currentCategory.value)
+  
+  // 按收藏筛选
+  if (showFavoritesOnly.value) {
+    result = result.filter(animation => favoriteIds.value.includes(animation.id))
+  }
+  
+  return result
 })
+
+// 切换收藏筛选
+const toggleFavoritesFilter = () => {
+  showFavoritesOnly.value = !showFavoritesOnly.value
+  if (showFavoritesOnly.value) {
+    currentCategory.value = 'all'
+  }
+}
 </script>
 
 <style scoped lang="less">
@@ -88,6 +168,18 @@ const filteredAnimations = computed(() => {
 .home-header {
   text-align: center;
   margin-bottom: 2.5rem;
+
+  .header-decoration {
+    margin-bottom: 1rem;
+
+    .deco-item {
+      display: inline-block;
+      font-size: 1.5rem;
+      margin: 0 0.5rem;
+      animation: float 3s ease-in-out infinite;
+      animation-delay: var(--delay);
+    }
+  }
 
   .site-title {
     font-size: 2.5rem;
@@ -103,7 +195,82 @@ const filteredAnimations = computed(() => {
   .site-subtitle {
     font-size: 1.1rem;
     color: #666;
-    margin: 0;
+    margin: 0 0 2rem 0;
+  }
+
+  // 特色入口
+  .feature-entrances {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1.5rem;
+
+    .feature-card {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem 1.5rem;
+      background: white;
+      border-radius: 1rem;
+      text-decoration: none;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+      transition: all 0.3s ease;
+      min-width: 280px;
+
+      &:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+
+        .feature-arrow {
+          transform: translateX(4px);
+        }
+      }
+
+      &.journey-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+
+        .feature-content p {
+          color: rgba(255, 255, 255, 0.8);
+        }
+      }
+
+      .feature-icon {
+        font-size: 2rem;
+      }
+
+      .feature-content {
+        text-align: left;
+        flex-grow: 1;
+
+        h3 {
+          font-size: 1.1rem;
+          font-weight: 600;
+          margin: 0 0 0.25rem 0;
+        }
+
+        p {
+          font-size: 0.85rem;
+          color: #666;
+          margin: 0;
+        }
+      }
+
+      .feature-arrow {
+        font-size: 1.2rem;
+        transition: transform 0.3s ease;
+      }
+    }
+  }
+}
+
+// 动画
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
   }
 }
 
@@ -237,7 +404,7 @@ const filteredAnimations = computed(() => {
 .difficulty-badge {
   position: absolute;
   top: 1rem;
-  right: 1rem;
+  right: 3rem;
   padding: 0.3rem 0.7rem;
   border-radius: 1rem;
   font-size: 0.75rem;
@@ -256,6 +423,39 @@ const filteredAnimations = computed(() => {
 
   &.advanced {
     background: rgba(244, 67, 54, 0.8);
+  }
+}
+
+// 收藏按钮
+.card-favorite-btn {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  z-index: 10;
+}
+
+// 收藏标签样式
+.favorites-tab {
+  &.active {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a5a 100%) !important;
+  }
+}
+
+// 空状态
+.empty-state {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 4rem 2rem;
+  color: #999;
+
+  .empty-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+  }
+
+  p {
+    font-size: 1.1rem;
   }
 }
 

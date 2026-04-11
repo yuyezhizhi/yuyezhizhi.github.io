@@ -13,10 +13,13 @@
           </router-link>
         </h1>
         <ul class="nav-menu">
+          <li><router-link to="/journeys" class="nav-link animated-text">
+            <span class="letter" style="color: #ff6b6b;">旅</span>
+            <span class="letter" style="color: #4ecdc4;">程</span>
+          </router-link></li>
           <li><router-link to="/about" class="nav-link animated-text">
-            <span class="letter" style="color: #ff6b6b;">关</span>
-            <span class="letter" style="color: #4ecdc4;">于</span>
-            <span class="letter" style="color: #45b7d1;">我</span>
+            <span class="letter" style="color: #45b7d1;">关</span>
+            <span class="letter" style="color: #96ceb4;">于</span>
           </router-link></li>
         </ul>
       </div>
