@@ -25,19 +25,19 @@
       </div>
     </nav>
     
-    <main :class="['main-content', { 'fullscreen': isRainTextPage || isSpinningTopsPage }]">
+    <main :class="['main-content', { 'fullscreen': isFullscreenPage }]">
       <router-view />
     </main>
     
     <!-- 环境音效控制 -->
     <AmbientAudio 
-      v-if="!isRainTextPage && !isSpinningTopsPage"
+      v-if="!isFullscreenPage"
       class="ambient-audio-control"
     />
 
     <!-- 回到顶部按钮 -->
     <button 
-      v-if="showBackToTop && !isRainTextPage && !isSpinningTopsPage"
+      v-if="showBackToTop && !isFullscreenPage"
       @click="backToTop"
       class="back-to-top-btn"
     >
@@ -96,6 +96,47 @@ export default {
     isSpinningTopsPage() {
       // 判断是否为陀螺碰撞页面
       return this.$route.path === '/spinningtops';
+    },
+    isFullscreenPage() {
+      // 判断是否为全屏动画页面（需要隐藏导航和控制元素）
+      const fullscreenPaths = [
+        '/raintext',
+        '/spinningtops',
+        '/fish',
+        '/leaves',
+        '/fishgroup',
+        '/datavortex',
+        '/butterfly',
+        '/interactivetnet',
+        '/dancer',
+        '/gravity-particles',
+        '/audio-visualizer',
+        '/meteor-shower',
+        '/fluid-simulation',
+        '/cellular-automata',
+        '/bubble-pop',
+        '/flower-garden',
+        '/rainbow-wave',
+        '/starlight-dance',
+        '/candy-rain',
+        '/lotus-pond',
+        '/gravity-field',
+        '/black-hole',
+        '/wave-interference',
+        '/magnetic-field',
+        '/fireworks',
+        '/quicksand',
+        '/fractal-tree',
+        '/cell-division',
+        '/noise-terrain',
+        '/mandala',
+        '/frequency-tower',
+        '/audio-wheel',
+        '/music-network',
+        '/morphing-sphere',
+        '/stereo-channel'
+      ];
+      return fullscreenPaths.includes(this.$route.path);
     },
     ringDashoffset() {
       return this.ringCircumference - (this.scrollProgress / 100) * this.ringCircumference
