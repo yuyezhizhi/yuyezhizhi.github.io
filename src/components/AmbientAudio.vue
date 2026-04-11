@@ -374,12 +374,12 @@ defineExpose({
   z-index: 1002;
 
   .volume-slider {
-    writing-mode: bt-lr; /* IE */
-    -webkit-appearance: slider-vertical; /* WebKit */
-    width: 8px;
-    height: 100px;
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100px;
+    height: 6px;
     background: #e0e0e0;
-    border-radius: 4px;
+    border-radius: 3px;
     outline: none;
     cursor: pointer;
 
