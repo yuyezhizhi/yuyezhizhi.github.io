@@ -75,11 +75,20 @@ const toggleFavorite = () => {
     favorites.value.push(props.artworkId)
   }
   saveFavorites()
+  // 触发自定义事件通知其他组件更新
+  window.dispatchEvent(new CustomEvent('favorites-updated'))
 }
 
 onMounted(() => {
   loadFavorites()
+  // 监听收藏更新事件
+  window.addEventListener('favorites-updated', loadFavorites)
 })
+
+// 清理事件监听
+const cleanup = () => {
+  window.removeEventListener('favorites-updated', loadFavorites)
+}
 </script>
 
 <style scoped lang="less">

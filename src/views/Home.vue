@@ -112,6 +112,8 @@ onMounted(() => {
   loadFavorites()
   // 监听 storage 变化
   window.addEventListener('storage', checkFavorites)
+  // 监听收藏更新事件
+  window.addEventListener('favorites-updated', loadFavorites)
 })
 
 // 获取分类的动画数量
