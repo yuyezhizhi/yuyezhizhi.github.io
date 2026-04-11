@@ -199,9 +199,28 @@ const play = async () => {
   if (!audioElement.value || !currentTrack.value) return
   
   try {
+    // 如果音频未加载或URL不同，先加载
     if (!audioLoaded.value || audioElement.value.src !== currentTrack.value.url) {
       audioElement.value.src = currentTrack.value.url
       audioElement.value.load()
+      // 等待音频加载完成
+      await new Promise((resolve, reject) => {
+        const onCanPlay = () => {
+          audioElement.value.removeEventListener('canplaythrough', onCanPlay)
+          audioElement.value.removeEventListener('error', onError)
+          resolve()
+        }
+        const onError = (e) => {
+          audioElement.value.removeEventListener('canplaythrough', onCanPlay)
+          audioElement.value.removeEventListener('error', onError)
+          reject(e)
+        }
+        audioElement.value.addEventListener('canplaythrough', onCanPlay)
+        audioElement.value.addEventListener('error', onError)
+        // 超时处理
+        setTimeout(() => reject(new Error('Audio load timeout')), 10000)
+      })
+      audioLoaded.value = true
     }
     
     audioElement.value.volume = isMuted.value ? 0 : volume.value / 100
