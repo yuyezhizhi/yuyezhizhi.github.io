@@ -224,6 +224,9 @@ body {
   line-height: 1.6;
   color: @text-color;
   background-color: @bg-color;
+  overflow-x: hidden;
+  margin: 0;
+  padding: 0;
 }
 
 // 主应用容器
@@ -231,6 +234,8 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  overflow-x: hidden;
+  width: 100%;
 }
 
 // 导航栏
