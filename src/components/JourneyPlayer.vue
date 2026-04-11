@@ -405,19 +405,19 @@ onUnmounted(() => {
   }
 }
 
-// 退出按钮 - 右下角紧凑样式
+// 退出按钮 - 放在进度条上方右侧
 .exit-journey {
   position: fixed;
-  bottom: 1rem;
-  right: 10.5rem; // 放在控制栏左侧
-  width: 2.2rem;
-  height: 2.2rem;
-  padding: 0;
+  bottom: 6.8rem; // 进度条上方
+  right: 1rem;
+  width: auto;
+  height: auto;
+  padding: 0.4rem 0.875rem;
   border: none;
-  border-radius: 50%;
+  border-radius: 1rem;
   background: rgba(255, 255, 255, 0.9);
   color: #666;
-  font-size: 0.9rem;
+  font-size: 0.75rem;
   line-height: 1;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -427,11 +427,12 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 0.3rem;
+  white-space: nowrap;
 
   &:hover {
     background: #ff6b6b;
     color: white;
-    transform: scale(1.1);
   }
 }
 
@@ -617,11 +618,10 @@ onUnmounted(() => {
   }
 
   .exit-journey {
-    right: 8.5rem;
-    bottom: 0.5rem;
-    width: 2rem;
-    height: 2rem;
-    font-size: 0.8rem;
+    right: 0.5rem;
+    bottom: 6rem;
+    padding: 0.35rem 0.75rem;
+    font-size: 0.7rem;
   }
 
   .narrative-overlay .narrative-content {
