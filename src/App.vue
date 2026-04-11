@@ -29,6 +29,12 @@
       <router-view />
     </main>
     
+    <!-- 环境音效控制 -->
+    <AmbientAudio 
+      v-if="!isRainTextPage && !isSpinningTopsPage"
+      class="ambient-audio-control"
+    />
+
     <!-- 回到顶部按钮 -->
     <button 
       v-if="showBackToTop && !isRainTextPage && !isSpinningTopsPage"
@@ -66,11 +72,13 @@
 
 <script>
 import DynamicBackground from './components/DynamicBackground.vue';
+import AmbientAudio from './components/AmbientAudio.vue';
 
 export default {
   name: 'App',
   components: {
-    DynamicBackground
+    DynamicBackground,
+    AmbientAudio
   },
   data() {
     return {
@@ -285,6 +293,14 @@ body {
   .main-content {
     padding: 8rem 1rem 1rem;
   }
+}
+
+// 环境音效控制
+.ambient-audio-control {
+  position: fixed;
+  bottom: 2rem;
+  left: 2rem;
+  z-index: 999;
 }
 
 // 回到顶部按钮

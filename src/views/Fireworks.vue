@@ -7,12 +7,19 @@
         <p>粒子: {{ particleCount }} | 爆炸: {{ explosionCount }}</p>
       </div>
     </div>
+    <!-- 导出工具 -->
+    <ExportTool 
+      canvas-selector="#p5-canvas canvas"
+      filename="fireworks"
+      class="export-tool-container"
+    />
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import p5 from 'p5'
+import ExportTool from '../components/ExportTool.vue'
 
 const particleCount = ref(0)
 const explosionCount = ref(0)
@@ -306,10 +313,17 @@ onBeforeUnmount(() => {
     height: 100%;
   }
 
-  .controls {
+  .export-tool-container {
     position: absolute;
     top: 20px;
     right: 20px;
+    z-index: 100;
+  }
+
+  .controls {
+    position: absolute;
+    top: 20px;
+    right: 80px;
     background: transparent;
     padding: 0.8rem 1.2rem;
     border-radius: 8px;
