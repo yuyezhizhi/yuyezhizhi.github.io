@@ -163,6 +163,8 @@ const toggleFavoritesFilter = () => {
   min-height: 100vh;
   background: linear-gradient(135deg, #fff5f5 0%, #f0f0ff 100%);
   padding: 2rem;
+  overflow-x: hidden;
+  box-sizing: border-box;
 }
 
 .home-header {
@@ -281,7 +283,8 @@ const toggleFavoritesFilter = () => {
   flex-wrap: wrap;
   gap: 0.75rem;
   margin-bottom: 2.5rem;
-  padding: 0 1rem;
+  padding: 0;
+  max-width: 100%;
 }
 
 .tab-button {
@@ -343,7 +346,8 @@ const toggleFavoritesFilter = () => {
   gap: 1.5rem;
   max-width: 1400px;
   margin: 0 auto;
-  padding: 0 1rem;
+  padding: 0;
+  width: 100%;
 }
 
 .animation-card {
