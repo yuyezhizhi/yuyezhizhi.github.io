@@ -219,25 +219,26 @@ onUnmounted(() => {
   }
 }
 
-// 进度条
+// 进度条 - 右下角紧凑样式
 .journey-progress {
   position: fixed;
-  top: 80px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 60%;
-  max-width: 800px;
-  background: rgba(255, 255, 255, 0.95);
-  padding: 1rem 1.5rem;
-  border-radius: 2rem;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  bottom: 5rem;
+  right: 1rem;
+  width: auto;
+  min-width: 200px;
+  max-width: 300px;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 0.6rem 0.875rem;
+  border-radius: 1rem;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
   backdrop-filter: blur(10px);
+  z-index: 1001;
 
   .progress-track {
-    height: 4px;
+    height: 3px;
     background: #e0e0e0;
     border-radius: 2px;
-    margin-bottom: 0.75rem;
+    margin-bottom: 0.5rem;
     overflow: hidden;
 
     .progress-fill {
@@ -250,12 +251,13 @@ onUnmounted(() => {
 
   .progress-steps {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
+    gap: 0.4rem;
     align-items: center;
 
     .step {
-      width: 2rem;
-      height: 2rem;
+      width: 1.5rem;
+      height: 1.5rem;
       border-radius: 50%;
       background: #e0e0e0;
       display: flex;
@@ -265,14 +267,14 @@ onUnmounted(() => {
       transition: all 0.3s ease;
 
       .step-number {
-        font-size: 0.85rem;
+        font-size: 0.7rem;
         font-weight: 600;
         color: #666;
       }
 
       &.active {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        transform: scale(1.2);
+        transform: scale(1.1);
 
         .step-number {
           color: white;
@@ -347,28 +349,28 @@ onUnmounted(() => {
   }
 }
 
-// 控制栏
+// 控制栏 - 右下角紧凑样式
 .journey-controls {
   position: fixed;
-  bottom: 2rem;
-  left: 50%;
-  transform: translateX(-50%);
+  bottom: 1rem;
+  right: 1rem;
   display: flex;
   align-items: center;
-  gap: 1.5rem;
-  background: rgba(255, 255, 255, 0.95);
-  padding: 1rem 2rem;
-  border-radius: 3rem;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  gap: 0.5rem;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 0.5rem 0.75rem;
+  border-radius: 2rem;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
   backdrop-filter: blur(10px);
+  z-index: 1001;
 
   .control-btn {
-    padding: 0.6rem 1.2rem;
+    padding: 0.4rem 0.8rem;
     border: none;
-    border-radius: 2rem;
+    border-radius: 1.5rem;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
-    font-size: 0.9rem;
+    font-size: 0.75rem;
     font-weight: 500;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -387,42 +389,48 @@ onUnmounted(() => {
 
   .journey-info {
     text-align: center;
-    min-width: 150px;
+    min-width: auto;
+    padding: 0 0.25rem;
 
     .journey-name {
-      display: block;
-      font-size: 0.85rem;
-      color: #666;
-      margin-bottom: 0.25rem;
+      display: none; // 隐藏旅程名称，节省空间
     }
 
     .artwork-counter {
       display: block;
-      font-size: 1rem;
+      font-size: 0.8rem;
       font-weight: 600;
       color: #333;
     }
   }
 }
 
-// 退出按钮
+// 退出按钮 - 右下角紧凑样式
 .exit-journey {
   position: fixed;
-  top: 2rem;
-  right: 2rem;
-  padding: 0.6rem 1rem;
+  bottom: 1rem;
+  right: 11rem; // 放在控制栏左侧
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0;
   border: none;
-  border-radius: 2rem;
+  border-radius: 50%;
   background: rgba(255, 255, 255, 0.9);
   color: #666;
-  font-size: 0.85rem;
+  font-size: 1rem;
   cursor: pointer;
   transition: all 0.3s ease;
   backdrop-filter: blur(10px);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  z-index: 1001;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
   &:hover {
     background: #ff6b6b;
     color: white;
+    transform: scale(1.1);
   }
 }
 
@@ -569,40 +577,50 @@ onUnmounted(() => {
 // 响应式
 @media (max-width: 768px) {
   .journey-progress {
-    width: 90%;
-    padding: 0.75rem 1rem;
+    right: 0.5rem;
+    bottom: 4.5rem;
+    min-width: 160px;
+    max-width: 220px;
+    padding: 0.5rem 0.75rem;
 
-    .progress-steps .step {
-      width: 1.5rem;
-      height: 1.5rem;
+    .progress-steps {
+      gap: 0.3rem;
 
-      .step-number {
-        font-size: 0.75rem;
+      .step {
+        width: 1.25rem;
+        height: 1.25rem;
+
+        .step-number {
+          font-size: 0.65rem;
+        }
       }
     }
   }
 
   .journey-controls {
-    width: 90%;
-    padding: 0.75rem 1rem;
-    gap: 0.75rem;
+    right: 0.5rem;
+    bottom: 0.5rem;
+    padding: 0.4rem 0.6rem;
+    gap: 0.4rem;
 
     .control-btn {
-      padding: 0.5rem 0.8rem;
-      font-size: 0.8rem;
+      padding: 0.35rem 0.6rem;
+      font-size: 0.7rem;
     }
 
     .journey-info {
-      min-width: auto;
-
-      .journey-name {
+      .artwork-counter {
         font-size: 0.75rem;
       }
-
-      .artwork-counter {
-        font-size: 0.9rem;
-      }
     }
+  }
+
+  .exit-journey {
+    right: 9rem;
+    bottom: 0.5rem;
+    width: 2.25rem;
+    height: 2.25rem;
+    font-size: 0.9rem;
   }
 
   .narrative-overlay .narrative-content {
