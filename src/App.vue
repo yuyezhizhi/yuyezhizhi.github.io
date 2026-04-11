@@ -26,7 +26,7 @@
     </nav>
     
     <main :class="['main-content', { 'fullscreen': isFullscreenPage }]">
-      <router-view />
+      <router-view @start-journey="startJourney" />
     </main>
     
     <!-- 环境音效控制 -->
@@ -67,25 +67,37 @@
       </svg>
       <span class="back-to-top-arrow">↑</span>
     </button>
+
+    <!-- 旅程播放器 - 全局显示 -->
+    <JourneyPlayer 
+      v-if="activeJourney"
+      :journey="activeJourney"
+      @exit="exitJourney"
+    />
   </div>
 </template>
 
 <script>
 import DynamicBackground from './components/DynamicBackground.vue';
 import AmbientAudio from './components/AmbientAudio.vue';
+import JourneyPlayer from './components/JourneyPlayer.vue';
+import { journeys } from './data/journeys.js';
 
 export default {
   name: 'App',
   components: {
     DynamicBackground,
-    AmbientAudio
+    AmbientAudio,
+    JourneyPlayer
   },
   data() {
     return {
       showBackToTop: false,
       scrollProgress: 0,
       ringRadius: 10,
-      ringCircumference: 0
+      ringCircumference: 0,
+      activeJourney: null,
+      journeys: journeys
     }
   },
   computed: {
@@ -169,6 +181,21 @@ export default {
         top: 0,
         behavior: 'smooth'
       })
+    },
+    
+    // 开始旅程
+    startJourney(journey) {
+      this.activeJourney = journey
+      // 导航到第一个作品
+      if (journey.artworks.length > 0) {
+        this.$router.push(journey.artworks[0].id)
+      }
+    },
+    
+    // 退出旅程
+    exitJourney() {
+      this.activeJourney = null
+      this.$router.push('/journeys')
     }
   }
 }

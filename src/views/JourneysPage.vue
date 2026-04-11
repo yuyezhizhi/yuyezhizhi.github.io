@@ -50,35 +50,16 @@
       </div>
     </div>
 
-    <!-- 旅程播放器 -->
-    <JourneyPlayer 
-      v-if="activeJourney"
-      :journey="activeJourney"
-      @exit="exitJourney"
-    />
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
 import { journeys } from '../data/journeys.js'
-import JourneyPlayer from '../components/JourneyPlayer.vue'
 
-const router = useRouter()
-const activeJourney = ref(null)
+const emit = defineEmits(['start-journey'])
 
 const startJourney = (journey) => {
-  activeJourney.value = journey
-  // 导航到第一个作品
-  if (journey.artworks.length > 0) {
-    router.push(journey.artworks[0].id)
-  }
-}
-
-const exitJourney = () => {
-  activeJourney.value = null
-  router.push('/journeys')
+  emit('start-journey', journey)
 }
 </script>
 
