@@ -134,7 +134,7 @@ const handleDrop = (e) => {
 }
 
 // 加载音频文件
-const loadAudio = (file) => {
+const loadAudio = async (file) => {
   // 清理之前的资源
   cleanup()
 
@@ -146,6 +146,21 @@ const loadAudio = (file) => {
   initAudioContext()
 
   hasAudio.value = true
+  
+  // 等待音频加载完成后自动播放
+  await new Promise((resolve) => {
+    const onCanPlay = () => {
+      audioEl.value.removeEventListener('canplay', onCanPlay)
+      resolve()
+    }
+    audioEl.value.addEventListener('canplay', onCanPlay)
+  })
+  
+  // 自动播放
+  if (audioContext.value && audioContext.value.state === 'suspended') {
+    await audioContext.value.resume()
+  }
+  await audioEl.value.play()
 }
 
 // 初始化 AudioContext
