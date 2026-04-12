@@ -80,6 +80,7 @@
     <!-- 隐藏的 audio 元素 -->
     <audio
       ref="audioEl"
+      loop
       @timeupdate="onTimeUpdate"
       @loadedmetadata="onLoadedMetadata"
       @ended="onEnded"
