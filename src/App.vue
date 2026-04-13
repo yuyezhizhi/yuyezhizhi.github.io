@@ -33,12 +33,6 @@
       </router-view>
     </main>
     
-    <!-- 环境音效控制 -->
-    <AmbientAudio 
-      v-if="!isFullscreenPage"
-      class="ambient-audio-control"
-    />
-
     <!-- 回到顶部按钮 -->
     <button 
       v-if="showBackToTop && !isFullscreenPage"
@@ -90,7 +84,6 @@
 import { defineAsyncComponent } from 'vue'
 // 使用懒加载导入大型组件
 const DynamicBackground = defineAsyncComponent(() => import('./components/DynamicBackground.vue'));
-const AmbientAudio = defineAsyncComponent(() => import('./components/AmbientAudio.vue'));
 const JourneyPlayer = defineAsyncComponent(() => import('./components/JourneyPlayer.vue'));
 import { journeys } from './data/journeys.js';
 
@@ -98,7 +91,6 @@ export default {
   name: 'App',
   components: {
     DynamicBackground,
-    AmbientAudio,
     JourneyPlayer
   },
   data() {
@@ -370,11 +362,6 @@ body {
     bottom: 1.5rem;
     right: 1.5rem;
   }
-  
-  .ambient-audio-control {
-    bottom: 1.5rem;
-    left: 1.5rem;
-  }
 }
 
 @media (max-width: 480px) {
@@ -407,19 +394,6 @@ body {
       font-size: 1rem;
     }
   }
-  
-  .ambient-audio-control {
-    bottom: 1rem;
-    left: 1rem;
-  }
-}
-
-// 环境音效控制
-.ambient-audio-control {
-  position: fixed;
-  bottom: 2rem;
-  left: 2rem;
-  z-index: 999;
 }
 
 // 回到顶部按钮

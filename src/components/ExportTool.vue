@@ -492,13 +492,12 @@ const getTimestamp = () => {
           .setting-slider {
             flex-grow: 1;
             height: 6px;
-            -webkit-appearance: none;
             background: #ddd;
             border-radius: 3px;
             outline: none;
 
             &::-webkit-slider-thumb {
-              -webkit-appearance: none;
+
               width: 16px;
               height: 16px;
               background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);

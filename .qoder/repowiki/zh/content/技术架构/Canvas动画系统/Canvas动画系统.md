@@ -16,6 +16,7 @@
 - [src/views/MagneticField.vue](file://src/views/MagneticField.vue)
 - [src/views/BlackHole.vue](file://src/views/BlackHole.vue)
 - [src/views/FluidSimulationPage.vue](file://src/views/FluidSimulationPage.vue)
+- [src/views/FlowerGarden.vue](file://src/views/FlowerGarden.vue)
 </cite>
 
 ## 目录
@@ -35,7 +36,7 @@
 - 原生Canvas 2D API：用于实现DynamicBackground组件的粒子系统
 - p5.js 2.2.3：用于实现各种复杂的粒子系统和物理模拟动画
 
-动画系统涵盖了从基础的粒子效果到高级的物理模拟，包括鱼群效果、重力场可视化、黑洞吸积盘、流体模拟等多种复杂动画。
+动画系统涵盖了从基础的粒子效果到高级的物理模拟，包括鱼群效果、重力场可视化、黑洞吸积盘、流体模拟等多种复杂动画。**最新更新**：FlowerGarden动画引入了超级花朵机制、云朵系统、改进的粒子效果和增强的背景可视化等重大视觉增强功能。
 
 ## 项目结构
 项目采用模块化组织方式，主要分为以下几个部分：
@@ -61,12 +62,15 @@ K[DynamicBackground.vue] -- 动态背景
 end
 subgraph "views/"
 L[动画页面集合]
+M[新增: FlowerGarden.vue - 花园动画]
+N[现有: 各种p5.js动画页面]
 end
 ```
 
 **图表来源**
 - [src/components/DynamicBackground.vue:1-185](file://src/components/DynamicBackground.vue#L1-L185)
-- [src/router/index.js:1-205](file://src/router/index.js#L1-L205)
+- [src/router/index.js:1-245](file://src/router/index.js#L1-L245)
+- [src/views/FlowerGarden.vue:1-465](file://src/views/FlowerGarden.vue#L1-L465)
 
 **章节来源**
 - [README.md:69-86](file://README.md#L69-L86)
@@ -85,6 +89,8 @@ end
 ### p5.js动画页面
 系统包含多个基于p5.js的复杂动画页面，每个页面都实现了特定的物理模拟或视觉效果。
 
+**更新**：FlowerGarden动画引入了全新的花朵生成机制，包含超级花朵系统和云朵背景。
+
 **章节来源**
 - [src/components/DynamicBackground.vue:14-56](file://src/components/DynamicBackground.vue#L14-L56)
 - [src/components/DynamicBackground.vue:89-96](file://src/components/DynamicBackground.vue#L89-L96)
@@ -98,35 +104,48 @@ subgraph "用户界面层"
 A[Vue 3组件]
 B[路由系统]
 C[页面组件]
+D[FlowerGarden - 新增]
 end
 subgraph "动画引擎层"
-D[原生Canvas 2D API]
-E[p5.js 2.2.3]
-F[物理引擎]
+E[原生Canvas 2D API]
+F[p5.js 2.2.3]
+G[物理引擎]
+H[花花园系统]
+I[云朵系统]
+J[粒子系统]
 end
 subgraph "数据层"
-G[动画配置]
-H[路由配置]
-I[性能监控]
+K[动画配置]
+L[路由配置]
+M[性能监控]
+N[花朵计数器]
+O[云朵配置]
 end
 subgraph "渲染层"
-J[requestAnimationFrame]
-K[事件监听器]
-L[内存管理]
+P[requestAnimationFrame]
+Q[事件监听器]
+R[内存管理]
+S[渐变背景]
+T[贝塞尔云朵]
 end
-A --> D
 A --> E
-B --> H
-C --> F
+A --> F
+B --> K
+C --> G
+D --> H
+D --> I
 D --> J
-E --> J
-F --> K
-F --> L
+F --> P
+G --> Q
+H --> S
+I --> T
+J --> R
 ```
 
 **图表来源**
 - [src/views/GravityField.vue:25-207](file://src/views/GravityField.vue#L25-L207)
 - [src/views/ParticleVortexPage.vue:151-233](file://src/views/ParticleVortexPage.vue#L151-L233)
+- [src/views/FlowerGarden.vue:200-275](file://src/views/FlowerGarden.vue#L200-L275)
 
 ## 详细组件分析
 
@@ -216,6 +235,106 @@ Frame->>Frame : 连接邻近粒子
 
 **章节来源**
 - [src/components/DynamicBackground.vue:14-154](file://src/components/DynamicBackground.vue#L14-L154)
+
+### FlowerGarden动画系统深度解析
+
+#### 花朵生成与超级花朵机制
+FlowerGarden是系统中最新的动画组件，实现了复杂的花朵生成和交互系统：
+
+```mermaid
+classDiagram
+class Flower {
++Vector pos
++boolean isSuper
++number petals
++number size
++number maxSize
++number growthSpeed
++number rotation
++number rotationSpeed
++number stemHeight
++number maxStemHeight
++string bloomPhase
++update() void
++display() void
++isFullyGrown() boolean
+}
+class Sparkle {
++Vector pos
++Vector vel
++boolean isSuper
++number size
++number life
++number hue
++update() void
++display() void
++isDead() boolean
+}
+class Cloud {
++number x
++number y
++number size
++number speed
++drawBezierCloud() void
+}
+class FlowerGardenSystem {
++Flower[] flowers
++Sparkle[] sparkles
++Cloud[] clouds
++number flowerAddCount
++initClouds() void
++drawClouds() void
++mouseClicked() void
+}
+FlowerGardenSystem --> Flower : "管理"
+FlowerGardenSystem --> Sparkle : "产生"
+FlowerGardenSystem --> Cloud : "渲染"
+Flower --> Sparkle : "产生"
+```
+
+**图表来源**
+- [src/views/FlowerGarden.vue:23-156](file://src/views/FlowerGarden.vue#L23-L156)
+- [src/views/FlowerGarden.vue:158-196](file://src/views/FlowerGarden.vue#L158-L196)
+- [src/views/FlowerGarden.vue:200-275](file://src/views/FlowerGarden.vue#L200-L275)
+
+#### 超级花朵系统
+超级花朵是FlowerGarden的核心创新功能，具有以下特性：
+
+- **概率生成**：每点击50次出现一次超级花朵
+- **视觉增强**：花瓣数量增加至12片，颜色偏向红紫色系
+- **尺寸放大**：花朵大小为普通花朵的3-4倍
+- **生长加速**：茎和花的生长速度提高2-3倍
+- **特殊叶子**：额外添加两对叶子，使整体更加壮观
+- **强化粒子效果**：产生更多、更大、持续时间更长的闪光粒子
+
+#### 云朵系统
+FlowerGarden引入了完整的云朵背景系统：
+
+- **动态生成**：初始化5个随机位置的云朵
+- **贝塞尔曲线绘制**：使用椭圆组合创建自然的云朵形状
+- **渐变高光**：添加白色高光效果增强立体感
+- **平滑移动**：云朵以不同速度水平移动，营造天空效果
+- **性能优化**：使用椭圆而非复杂贝塞尔曲线提升渲染效率
+
+#### 增强的粒子效果
+火花粒子系统经过重大改进：
+
+- **速度差异**：超级花朵粒子速度是普通花朵的6-16倍
+- **生命周期延长**：超级花朵粒子衰减更慢，可持续更长时间
+- **尺寸优化**：超级花朵粒子更大，视觉冲击更强
+- **色彩丰富**：超级花朵使用预设的彩虹色序列
+- **数量控制**：普通花朵每次产生3个粒子，超级花朵产生15个
+
+#### 背景可视化增强
+FlowerGarden的背景系统包含多个层次：
+
+- **渐变天空**：从天蓝色到接近白色的线性渐变
+- **太阳光晕**：使用径向渐变创建柔和的太阳光效果
+- **自定义鼠标**：隐藏默认鼠标，显示小花形状的自定义指针
+- **旋转花瓣**：自定义鼠标带有轻微旋转动画
+
+**章节来源**
+- [src/views/FlowerGarden.vue:14-465](file://src/views/FlowerGarden.vue#L14-L465)
 
 ### p5.js动画页面实现模式
 
@@ -346,23 +465,28 @@ B[Vue 3]
 C[Vue Router 4]
 D[p5.dom.js]
 E[p5.sound.js]
+F[Less]
+G[animate.css]
+H[highlight.js]
+I[marked]
+J[echarts]
 end
 subgraph "构建工具"
-F[Vite]
-G[@vitejs/plugin-vue]
-H[Rollup]
+K[Vite]
+L[@vitejs/plugin-vue]
+M[Rollup]
+N[Terser]
 end
 subgraph "辅助库"
-I[animate.css]
-J[highlight.js]
-K[marked]
-L[echarts]
+O[Three.js]
+P[DomPurify]
+Q[GIF.js Optimized]
 end
 A --> B
 B --> C
-F --> G
-H --> A
-H --> B
+K --> L
+M --> A
+M --> B
 ```
 
 **图表来源**
@@ -370,10 +494,10 @@ H --> B
 - [vite.config.js:17-29](file://vite.config.js#L17-L29)
 
 ### 动画页面路由配置
-系统通过Vue Router管理所有动画页面的路由：
+系统通过Vue Router管理所有动画页面的路由，包括新增的FlowerGarden页面：
 
 **章节来源**
-- [src/router/index.js:3-190](file://src/router/index.js#L3-L190)
+- [src/router/index.js:3-245](file://src/router/index.js#L3-L245)
 
 ## 性能考虑
 
@@ -444,8 +568,6 @@ subgraph "开发工具"
 A[浏览器开发者工具]
 B[Vue DevTools]
 C[p5.js调试器]
-end
-subgraph "性能分析"
 D[性能面板]
 E[内存面板]
 F[网络面板]
@@ -454,11 +576,15 @@ subgraph "动画调试"
 G[帧率监控]
 H[粒子计数]
 I[内存使用]
+J[花朵数量]
+K[云朵位置]
 end
 A --> D
 B --> G
 C --> H
 D --> I
+E --> J
+F --> K
 ```
 
 **图表来源**
@@ -468,7 +594,7 @@ D --> I
 - [src/views/ParticleVortexPage.vue:235-243](file://src/views/ParticleVortexPage.vue#L235-L243)
 
 ## 结论
-本项目的Canvas动画系统展现了现代Web动画开发的最佳实践，通过原生Canvas 2D API和p5.js的有机结合，实现了从基础粒子效果到复杂物理模拟的完整动画生态。系统在性能优化、内存管理和移动端适配方面都达到了专业水准，为类似项目提供了宝贵的参考模板。
+本项目的Canvas动画系统展现了现代Web动画开发的最佳实践，通过原生Canvas 2D API和p5.js的有机结合，实现了从基础粒子效果到复杂物理模拟的完整动画生态。**最新更新**：FlowerGarden动画的成功集成展示了系统在处理复杂视觉效果方面的强大能力，包括超级花朵机制、云朵系统、改进的粒子效果和增强的背景可视化等创新功能。系统在性能优化、内存管理和移动端适配方面都达到了专业水准，为类似项目提供了宝贵的参考模板。
 
 ## 附录
 
@@ -477,12 +603,14 @@ D --> I
 
 | 分类 | 动画数量 | 特点 |
 |------|----------|------|
-| 自然系 | 6 | 鱼群、叶子、花朵等自然现象模拟 |
+| 自然系 | 7 | 鱼群、叶子、花朵等自然现象模拟（新增：FlowerGarden） |
 | 粒子物理 | 8 | 重力、流体、磁场等物理现象 |
 | 音频系 | 4 | 音乐可视化、音频分析 |
 | 波形能量 | 3 | 波动、干涉等波动现象 |
 | 生成艺术 | 4 | 分形、曼陀罗等艺术创作 |
 | 交互治愈 | 4 | 可交互的治愈系动画 |
+
+**更新**：FlowerGarden作为新的自然系动画，为系统增加了独特的花朵生成和交互体验。
 
 **章节来源**
 - [src/data/animations.js:1-400](file://src/data/animations.js#L1-L400)
@@ -495,3 +623,19 @@ Vite配置针对大型动画项目进行了专门优化：
 
 **章节来源**
 - [vite.config.js:17-31](file://vite.config.js#L17-L31)
+
+### 新增功能特性对比
+
+| 功能特性 | DynamicBackground | FlowerGarden | 其他p5.js动画 |
+|----------|-------------------|--------------|---------------|
+| 粒子系统 | ✅ 基础粒子 | ❌ 无 | ✅ 复杂粒子 |
+| 花朵系统 | ❌ 无 | ✅ 超级花朵机制 | ❌ 无 |
+| 云朵系统 | ❌ 无 | ✅ 动态云朵 | ❌ 无 |
+| 背景可视化 | ❌ 无 | ✅ 渐变天空+太阳光晕 | ✅ 基础背景 |
+| 粒子效果 | ✅ 基础粒子 | ✅ 改进粒子（超级花朵） | ✅ 各种特效 |
+| 交互机制 | ✅ 鼠标交互 | ✅ 点击种植花朵 | ✅ 各种交互 |
+| 性能优化 | ✅ 内存管理 | ✅ 对象池优化 | ✅ 各种优化 |
+
+**图表来源**
+- [src/views/FlowerGarden.vue:23-196](file://src/views/FlowerGarden.vue#L23-L196)
+- [src/components/DynamicBackground.vue:14-154](file://src/components/DynamicBackground.vue#L14-L154)
