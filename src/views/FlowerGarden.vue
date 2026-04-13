@@ -2,7 +2,7 @@
   <div class="flower-garden-container">
     <div id="p5-canvas"></div>
     <div class="controls">
-      <p class="instruction">点击种植花朵 | 自动绽放</p>
+      <p class="instruction">点击种植花朵 | 每50次出现超级花朵</p>
       <div class="info">
         <p>花朵数: {{ flowerCount }}</p>
       </div>
@@ -21,17 +21,20 @@ let flowers = []
 onMounted(() => {
   const sketch = (p) => {
     class Flower {
-      constructor(x, y) {
+      constructor(x, y, isSuper = false) {
         this.pos = p.createVector(x, y)
-        this.petals = p.floor(p.random(5, 9))
+        this.isSuper = isSuper
+        this.petals = isSuper ? 12 : p.floor(p.random(5, 9))
         this.size = 0
-        this.maxSize = p.random(30, 60)
-        this.hue = p.random(360)
-        this.growthSpeed = p.random(0.5, 1.5)
+        // 超级花朵比普通花朵大3-4倍
+        this.maxSize = isSuper ? p.random(120, 180) : p.random(30, 60)
+        this.hue = isSuper ? p.random(300, 360) : p.random(360) // 超级花朵偏向红紫色系
+        this.growthSpeed = isSuper ? 0.8 : p.random(0.5, 1.5)
         this.rotation = p.random(p.TWO_PI)
-        this.rotationSpeed = p.random(-0.01, 0.01)
+        this.rotationSpeed = isSuper ? p.random(-0.005, 0.005) : p.random(-0.01, 0.01)
         this.stemHeight = 0
-        this.maxStemHeight = p.random(80, 150)
+        // 超级花朵的茎也更高（增加一倍）
+        this.maxStemHeight = isSuper ? p.random(400, 560) : p.random(80, 150)
         this.bloomPhase = 'growing' // growing, blooming, full
       }
 
@@ -65,24 +68,47 @@ onMounted(() => {
         // 绘制茎（向上生长，所以是负方向）
         if (this.stemHeight > 0) {
           p.stroke(120, 60, 70)
-          p.strokeWeight(3)
+          // 超级花朵枝干更粗
+          p.strokeWeight(this.isSuper ? 8 : 3)
           p.line(0, 0, 0, -this.stemHeight)  // 改为负值，向上生长
           
           // 叶子
-          if (this.stemHeight > 30) {
+          const leafThreshold = this.isSuper ? 60 : 30
+          if (this.stemHeight > leafThreshold) {
             p.noStroke()
             p.fill(120, 50, 75, 200)
+            
+            // 超级花朵叶子大一倍
+            const leafOffsetX = this.isSuper ? 30 : 15
+            const leafSizeW = this.isSuper ? 40 : 20
+            const leafSizeH = this.isSuper ? 16 : 8
+            
             p.push()
             p.translate(0, -this.stemHeight * 0.6)  // 改为负值
             p.rotate(p.PI / 4)
-            p.ellipse(15, 0, 20, 8)
+            p.ellipse(leafOffsetX, 0, leafSizeW, leafSizeH)
             p.pop()
             
             p.push()
             p.translate(0, -this.stemHeight * 0.4)  // 改为负值
             p.rotate(-p.PI / 4)
-            p.ellipse(-15, 0, 20, 8)
+            p.ellipse(-leafOffsetX, 0, leafSizeW, leafSizeH)
             p.pop()
+            
+            // 超级花朵额外添加两对叶子
+            if (this.isSuper) {
+              p.push()
+              p.translate(0, -this.stemHeight * 0.8)
+              p.rotate(p.PI / 4)
+              p.ellipse(leafOffsetX * 0.7, 0, leafSizeW * 0.8, leafSizeH * 0.8)
+              p.pop()
+              
+              p.push()
+              p.translate(0, -this.stemHeight * 0.2)
+              p.rotate(-p.PI / 4)
+              p.ellipse(-leafOffsetX * 0.7, 0, leafSizeW * 0.8, leafSizeH * 0.8)
+              p.pop()
+            }
           }
         }
         
@@ -130,19 +156,24 @@ onMounted(() => {
     }
 
     class Sparkle {
-      constructor(x, y) {
+      constructor(x, y, isSuper = false, hue = null) {
         this.pos = p.createVector(x, y)
         const angle = p.random(p.TWO_PI)
-        this.vel = p.createVector(p.cos(angle), p.sin(angle)).mult(p.random(0.5, 2))
-        this.size = p.random(2, 5)
+        // 超级花朵的粒子速度更快、跑得更远
+        const speed = isSuper ? p.random(3, 8) : p.random(0.5, 2)
+        this.vel = p.createVector(p.cos(angle), p.sin(angle)).mult(speed)
+        // 超级花朵的粒子更大
+        this.size = isSuper ? p.random(5, 12) : p.random(2, 5)
         this.life = 255
-        this.hue = p.random(360)
+        this.hue = hue !== null ? hue : p.random(360)
+        this.isSuper = isSuper
       }
 
       update() {
         this.pos.add(this.vel)
-        this.life -= 5
-        this.size *= 0.98
+        // 超级花朵的粒子衰减更慢，跑得更远
+        this.life -= this.isSuper ? 3 : 5
+        this.size *= this.isSuper ? 0.99 : 0.98
       }
 
       display() {
@@ -165,10 +196,90 @@ onMounted(() => {
     }
 
     let sparkles = []
+    
+    // 云朵数组
+    let clouds = []
+    
+    // 花朵添加计数器
+    let flowerAddCount = 0
+    
+    // 初始化云朵
+    const initClouds = () => {
+      clouds = []
+      for (let i = 0; i < 5; i++) {
+        clouds.push({
+          x: p.random(p.width),
+          y: p.random(50, 200),
+          size: p.random(60, 120),
+          speed: p.random(0.2, 0.5)
+        })
+      }
+    }
+    
+    // 绘制云朵
+    const drawClouds = () => {
+      p.push()
+      p.noStroke()
+      
+      for (let cloud of clouds) {
+        // 移动云朵
+        cloud.x += cloud.speed
+        if (cloud.x > p.width + cloud.size * 1.5) {
+          cloud.x = -cloud.size * 1.5
+        }
+        
+        // 使用贝塞尔曲线绘制更自然的云朵
+        p.fill(255, 255, 255, 220)
+        drawBezierCloud(cloud.x, cloud.y, cloud.size)
+      }
+      
+      p.pop()
+    }
+    
+    // 使用椭圆组合绘制云朵
+    const drawBezierCloud = (x, y, size) => {
+      p.push()
+      p.translate(x, y)
+      
+      const s = size / 100  // 缩放因子
+      
+      // 使用多个重叠的椭圆创建云朵效果
+      p.fill(255, 255, 255, 200)
+      p.noStroke()
+      
+      // 底部大椭圆
+      p.ellipse(0, 10 * s, 100 * s, 40 * s)
+      
+      // 左侧凸起
+      p.ellipse(-35 * s, -5 * s, 50 * s, 45 * s)
+      
+      // 右侧凸起
+      p.ellipse(35 * s, -5 * s, 55 * s, 48 * s)
+      
+      // 中央顶部凸起
+      p.ellipse(0, -25 * s, 45 * s, 50 * s)
+      
+      // 左上小凸起
+      p.ellipse(-50 * s, 5 * s, 35 * s, 30 * s)
+      
+      // 右上小凸起
+      p.ellipse(50 * s, 0, 40 * s, 35 * s)
+      
+      // 添加高光效果
+      p.fill(255, 255, 255, 150)
+      p.ellipse(-20 * s, -15 * s, 30 * s, 25 * s)
+      p.ellipse(15 * s, -20 * s, 25 * s, 20 * s)
+      p.ellipse(0, 0, 40 * s, 20 * s)
+      
+      p.pop()
+    }
 
     p.setup = () => {
       const canvas = p.createCanvas(p.windowWidth, p.windowHeight)
       canvas.parent('p5-canvas')
+      
+      // 初始化云朵
+      initClouds()
       
       // 初始创建一些花朵
       for (let i = 0; i < 5; i++) {
@@ -177,22 +288,26 @@ onMounted(() => {
     }
 
     p.draw = () => {
-      // 温暖的渐变背景
+      // 蓝天白云背景
       const gradient = p.drawingContext.createLinearGradient(0, 0, 0, p.height)
-      gradient.addColorStop(0, '#FFE5F0')
-      gradient.addColorStop(0.5, '#FFF5E6')
-      gradient.addColorStop(1, '#E8F5E9')
+      gradient.addColorStop(0, '#4FC3F7')  // 天蓝色
+      gradient.addColorStop(0.6, '#81D4FA') // 浅蓝色
+      gradient.addColorStop(1, '#E1F5FE')   // 接近白色的淡蓝
       p.drawingContext.fillStyle = gradient
       p.rect(0, 0, p.width, p.height)
       
-      // 阳光效果
+      // 绘制云朵
+      drawClouds()
+      
+      // 太阳效果
       p.push()
       p.noStroke()
       const sunGradient = p.drawingContext.createRadialGradient(
-        p.width * 0.8, 100, 0,
-        p.width * 0.8, 100, 200
+        p.width * 0.85, 80, 0,
+        p.width * 0.85, 80, 150
       )
-      sunGradient.addColorStop(0, 'rgba(255, 255, 200, 0.3)')
+      sunGradient.addColorStop(0, 'rgba(255, 235, 100, 0.8)')
+      sunGradient.addColorStop(0.3, 'rgba(255, 220, 100, 0.4)')
       sunGradient.addColorStop(1, 'transparent')
       p.drawingContext.fillStyle = sunGradient
       p.rect(0, 0, p.width, p.height)
@@ -205,11 +320,18 @@ onMounted(() => {
         
         // 完全绽放时产生闪光
         if (flower.bloomPhase === 'full' && p.frameCount % 120 === 0) {
-          for (let i = 0; i < 3; i++) {
-            sparkles.push(new Sparkle(
-              flower.pos.x + p.random(-20, 20),
-              flower.pos.y - flower.maxStemHeight + p.random(-20, 20)
-            ))
+          // 超级花朵产生更多、更大的持续闪光
+          const sparkleCount = flower.isSuper ? 15 : 3
+          const sparkleColors = flower.isSuper ? [0, 60, 120, 180, 240, 300] : [p.random(360)]
+          
+          for (let i = 0; i < sparkleCount; i++) {
+            const sparkle = new Sparkle(
+              flower.pos.x,
+              flower.pos.y - flower.maxStemHeight,
+              flower.isSuper,
+              flower.isSuper ? sparkleColors[i % sparkleColors.length] : p.random(360)
+            )
+            sparkles.push(sparkle)
           }
         }
       }
@@ -251,17 +373,35 @@ onMounted(() => {
     p.mouseClicked = () => {
       // 花朵始终从底部开始生长，X坐标为点击位置
       const groundY = p.height - 20
-      const newFlower = new Flower(p.mouseX, groundY)
+      
+      // 增加计数
+      flowerAddCount++
+      
+      // 每50次出现一个超级花朵
+      const isSuperFlower = (flowerAddCount % 50 === 0)
+      
+      const newFlower = new Flower(p.mouseX, groundY, isSuperFlower)
       flowers.push(newFlower)
       
-      // 种植时的闪光效果
-      for (let i = 0; i < 8; i++) {
-        sparkles.push(new Sparkle(p.mouseX, groundY))
+      // 超级花朵有更炫的闪光效果
+      const sparkleCount = isSuperFlower ? 50 : 8
+      const sparkleColors = isSuperFlower ? [0, 60, 120, 180, 240, 300] : [p.random(360)]
+      
+      for (let i = 0; i < sparkleCount; i++) {
+        const sparkle = new Sparkle(
+          p.mouseX,
+          groundY,
+          isSuperFlower,  // 传递是否是超级花朵
+          isSuperFlower ? sparkleColors[i % sparkleColors.length] : null
+        )
+        sparkles.push(sparkle)
       }
     }
 
     p.windowResized = () => {
       p.resizeCanvas(p.windowWidth, p.windowHeight)
+      // 重新初始化云朵位置
+      initClouds()
     }
   }
 
