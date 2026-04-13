@@ -1,10 +1,10 @@
 <template>
   <div id="app">
     <DynamicBackground v-if="!isRainTextPage" />
-    <nav class="navbar">
+    <nav class="navbar" aria-label="主导航">
       <div class="nav-container">
         <h1 class="logo">
-          <router-link to="/" class="animated-text">
+          <router-link to="/" class="animated-text" aria-label="首页">
             <span class="letter" style="color: #ff6b6b;">好</span>
             <span class="letter" style="color: #4ecdc4;">玩</span>
             <span class="letter" style="color: #45b7d1;">的</span>
@@ -12,12 +12,12 @@
             <span class="letter" style="color: #ffeaa7;">画</span>
           </router-link>
         </h1>
-        <ul class="nav-menu">
-          <li><router-link to="/journeys" class="nav-link animated-text">
+        <ul class="nav-menu" role="menubar">
+          <li role="none"><router-link to="/journeys" class="nav-link animated-text" role="menuitem" tabindex="0" aria-label="旅程">
             <span class="letter" style="color: #ff6b6b;">旅</span>
             <span class="letter" style="color: #4ecdc4;">程</span>
           </router-link></li>
-          <li><router-link to="/about" class="nav-link animated-text">
+          <li role="none"><router-link to="/about" class="nav-link animated-text" role="menuitem" tabindex="0" aria-label="关于">
             <span class="letter" style="color: #45b7d1;">关</span>
             <span class="letter" style="color: #96ceb4;">于</span>
           </router-link></li>
@@ -26,7 +26,11 @@
     </nav>
     
     <main :class="['main-content', { 'fullscreen': isFullscreenPage }]">
-      <router-view @start-journey="startJourney" />
+      <router-view v-slot="{ Component }">
+        <transition name="fade" mode="out-in">
+          <component :is="Component" @start-journey="startJourney" />
+        </transition>
+      </router-view>
     </main>
     
     <!-- 环境音效控制 -->
@@ -39,9 +43,14 @@
     <button 
       v-if="showBackToTop && !isFullscreenPage"
       @click="backToTop"
+      @keyup.enter="backToTop"
+      @keyup.space="backToTop"
       class="back-to-top-btn"
+      aria-label="回到顶部"
+      tabindex="0"
+      role="button"
     >
-      <svg width="24" height="24" viewBox="0 0 24 24" class="progress-ring">
+      <svg width="24" height="24" viewBox="0 0 24 24" class="progress-ring" aria-hidden="true">
         <circle 
           cx="12" 
           cy="12" 
@@ -65,7 +74,7 @@
           class="progress-ring-circle"
         />
       </svg>
-      <span class="back-to-top-arrow">↑</span>
+      <span class="back-to-top-arrow" aria-hidden="true">↑</span>
     </button>
 
     <!-- 旅程播放器 - 全局显示 -->
@@ -78,9 +87,11 @@
 </template>
 
 <script>
-import DynamicBackground from './components/DynamicBackground.vue';
-import AmbientAudio from './components/AmbientAudio.vue';
-import JourneyPlayer from './components/JourneyPlayer.vue';
+import { defineAsyncComponent } from 'vue'
+// 使用懒加载导入大型组件
+const DynamicBackground = defineAsyncComponent(() => import('./components/DynamicBackground.vue'));
+const AmbientAudio = defineAsyncComponent(() => import('./components/AmbientAudio.vue'));
+const JourneyPlayer = defineAsyncComponent(() => import('./components/JourneyPlayer.vue'));
 import { journeys } from './data/journeys.js';
 
 export default {
@@ -111,44 +122,7 @@ export default {
     },
     isFullscreenPage() {
       // 判断是否为全屏动画页面（需要隐藏导航和控制元素）
-      const fullscreenPaths = [
-        '/raintext',
-        '/spinningtops',
-        '/fish',
-        '/leaves',
-        '/fishgroup',
-        '/datavortex',
-        '/butterfly',
-        '/interactivetnet',
-        '/dancer',
-        '/gravity-particles',
-        '/audio-visualizer',
-        '/meteor-shower',
-        '/fluid-simulation',
-        '/cellular-automata',
-        '/bubble-pop',
-        '/flower-garden',
-        '/rainbow-wave',
-        '/starlight-dance',
-        '/candy-rain',
-        '/lotus-pond',
-        '/gravity-field',
-        '/black-hole',
-        '/wave-interference',
-        '/magnetic-field',
-        '/fireworks',
-        '/quicksand',
-        '/fractal-tree',
-        '/cell-division',
-        '/noise-terrain',
-        '/mandala',
-        '/frequency-tower',
-        '/audio-wheel',
-        '/music-network',
-        '/morphing-sphere',
-        '/stereo-channel'
-      ];
-      return fullscreenPaths.includes(this.$route.path);
+      return this.$route.meta.fullscreen === true;
     },
     ringDashoffset() {
       return this.ringCircumference - (this.scrollProgress / 100) * this.ringCircumference
@@ -351,20 +325,92 @@ body {
 }
 
 // 响应式设计
+@media (max-width: 1200px) {
+  .navbar {
+    .nav-container {
+      max-width: 90%;
+      padding: 0 1rem;
+    }
+  }
+  
+  .main-content {
+    max-width: 90%;
+    padding: 8rem 1rem 1rem;
+  }
+}
+
 @media (max-width: 768px) {
   .navbar {
     .nav-container {
       flex-direction: column;
       gap: 1rem;
       
+      .logo a {
+        font-size: 1.2rem;
+      }
+      
       .nav-menu {
         gap: 1rem;
+        
+        .nav-link {
+          font-size: 1.2rem;
+          padding: 0.3rem 0.8rem;
+        }
       }
     }
   }
   
   .main-content {
     padding: 8rem 1rem 1rem;
+  }
+  
+  .back-to-top-btn {
+    width: 2.5rem;
+    height: 2.5rem;
+    bottom: 1.5rem;
+    right: 1.5rem;
+  }
+  
+  .ambient-audio-control {
+    bottom: 1.5rem;
+    left: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .navbar {
+    .nav-container {
+      .logo a {
+        font-size: 1rem;
+      }
+      
+      .nav-menu {
+        .nav-link {
+          font-size: 1rem;
+          padding: 0.2rem 0.6rem;
+        }
+      }
+    }
+  }
+  
+  .main-content {
+    padding: 7rem 0.5rem 0.5rem;
+  }
+  
+  .back-to-top-btn {
+    width: 2rem;
+    height: 2rem;
+    bottom: 1rem;
+    right: 1rem;
+    
+    .back-to-top-arrow {
+      font-size: 1rem;
+    }
+  }
+  
+  .ambient-audio-control {
+    bottom: 1rem;
+    left: 1rem;
   }
 }
 
@@ -422,5 +468,16 @@ body {
     position: relative;
     z-index: 1;
   }
+}
+
+// 路由过渡效果
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 </style>
