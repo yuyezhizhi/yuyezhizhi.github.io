@@ -72,12 +72,6 @@ const routes = [
     meta: { fullscreen: true }
   },
   {
-    path: '/audio-visualizer',
-    name: 'AudioVisualizer',
-    component: () => import('../views/AudioVisualizerPage.vue'),
-    meta: { fullscreen: true }
-  },
-  {
     path: '/meteor-shower',
     name: 'MeteorShower',
     component: () => import('../views/DigitalRainPage.vue'),

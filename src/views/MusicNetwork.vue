@@ -45,16 +45,18 @@ class NetworkNode {
     this.vy += this.p.random(-0.1, 0.1)
     
     // 限制速度
-    this.vx = this.p.constrain(this.vx, -2, 2)
-    this.vy = this.p.constrain(this.vy, -2, 2)
+    this.vx = this.p.constrain(this.vx, -3, 3)
+    this.vy = this.p.constrain(this.vy, -3, 3)
     
-    // 鼠标吸引
+    // 鼠标吸引 - 增强吸引力和范围
     const dx = mouseX - this.x
     const dy = mouseY - this.y
     const dist = this.p.sqrt(dx * dx + dy * dy)
-    if (dist < 200 && dist > 10) {
-      this.vx += dx / dist * 0.05
-      this.vy += dy / dist * 0.05
+    if (dist < 300 && dist > 5) {
+      // 距离越近吸引力越强
+      const force = this.p.map(dist, 0, 300, 0.3, 0.02)
+      this.vx += dx / dist * force
+      this.vy += dy / dist * force
     }
     
     // 更新位置
@@ -65,18 +67,21 @@ class NetworkNode {
     if (this.x < 0 || this.x > this.p.width) this.vx *= -1
     if (this.y < 0 || this.y > this.p.height) this.vy *= -1
     
-    // 低频影响节点大小（脉冲效果）
-    const targetSize = this.baseSize + this.p.map(lowFreq, 0, 255, 0, 15)
-    this.size = this.p.lerp(this.size, targetSize, 0.1)
+    // 低频影响节点大小（脉冲效果）- 增强效果
+    const targetSize = this.baseSize + this.p.map(lowFreq, 0, 255, 0, 25)
+    this.size = this.p.lerp(this.size, targetSize, 0.15)
     
-    // 节拍检测脉冲
+    // 节拍检测脉冲 - 增强脉冲效果
     if (isBeat) {
-      this.pulseSize = 20
+      this.pulseSize = 35
+      // 节拍时速度爆发
+      this.vx *= 1.5
+      this.vy *= 1.5
     }
-    this.pulseSize = this.p.lerp(this.pulseSize, 0, 0.1)
+    this.pulseSize = this.p.lerp(this.pulseSize, 0, 0.08)
     
-    // 高频影响亮度
-    this.brightness = this.p.map(highFreq, 0, 255, 50, 100)
+    // 高频影响亮度 - 增强变化
+    this.brightness = this.p.map(highFreq, 0, 255, 40, 100)
   }
   
   draw(p, midFreq) {
@@ -206,6 +211,9 @@ const sketch = (p) => {
       node.update(lowFreq, midFreq, highFreq, p.mouseX, p.mouseY, isBeat)
     }
     
+    // 绘制鼠标影响范围
+    drawMouseInfluence(p, lowFreq)
+    
     // 绘制连线
     drawConnections(p, midFreq, lowFreq)
     
@@ -215,9 +223,54 @@ const sketch = (p) => {
     }
   }
   
+  // 绘制鼠标影响范围可视化
+  const drawMouseInfluence = (p, lowFreq) => {
+    const mouseX = p.mouseX
+    const mouseY = p.mouseY
+    
+    // 只有在画布内才绘制
+    if (mouseX < 0 || mouseX > p.width || mouseY < 0 || mouseY > p.height) return
+    
+    p.colorMode(p.HSB, 360, 100, 100, 100)
+    
+    // 外圈 - 最大影响范围
+    p.noFill()
+    p.stroke(320, 60, 80, 15)
+    p.strokeWeight(1)
+    p.circle(mouseX, mouseY, 600)
+    
+    // 中圈 - 强影响范围
+    p.stroke(300, 70, 90, 25)
+    p.circle(mouseX, mouseY, 400)
+    
+    // 内圈 - 核心影响范围，随低频脉冲
+    const pulseRadius = 100 + lowFreq * 0.3
+    p.stroke(280, 80, 100, 40)
+    p.strokeWeight(2)
+    p.circle(mouseX, mouseY, pulseRadius * 2)
+    
+    // 中心点
+    p.fill(280, 90, 100, 80)
+    p.noStroke()
+    p.circle(mouseX, mouseY, 8)
+    
+    // 中心点外发光
+    for (let i = 3; i >= 0; i--) {
+      const glowSize = 8 + i * 15
+      const alpha = p.map(i, 0, 3, 60, 10)
+      p.fill(280, 70, 100, alpha)
+      p.circle(mouseX, mouseY, glowSize)
+    }
+    
+    p.colorMode(p.RGB, 255)
+  }
+  
   const drawConnections = (p, midFreq, lowFreq) => {
-    const lineHue = p.map(midFreq, 0, 255, 200, 320)
-    const lineThickness = p.map(lowFreq, 0, 255, 0.5, 3)
+    const lineHue = p.map(midFreq, 0, 255, 180, 340)
+    // 低频越强线条越粗
+    const lineThickness = p.map(lowFreq, 0, 255, 0.5, 5)
+    // 音频强度影响最大连接距离
+    const dynamicThreshold = connectionThreshold + lowFreq * 0.5
     
     p.colorMode(p.HSB, 360, 100, 100, 100)
     
@@ -227,11 +280,15 @@ const sketch = (p) => {
         const dy = nodes[i].y - nodes[j].y
         const dist = p.sqrt(dx * dx + dy * dy)
         
-        if (dist < connectionThreshold) {
-          const alpha = p.map(dist, 0, connectionThreshold, 50, 5)
+        if (dist < dynamicThreshold) {
+          // 距离越近越亮，音频越强越亮
+          const baseAlpha = p.map(dist, 0, dynamicThreshold, 70, 5)
+          const audioBoost = p.map(lowFreq, 0, 255, 1, 1.5)
+          const alpha = baseAlpha * audioBoost
           
-          // 渐变线
-          p.stroke(lineHue, 60, 80, alpha)
+          // 渐变线，根据距离调整色相
+          const distHue = (lineHue + p.map(dist, 0, dynamicThreshold, 0, 40)) % 360
+          p.stroke(distHue, 70, 90, alpha)
           p.strokeWeight(lineThickness)
           p.line(nodes[i].x, nodes[i].y, nodes[j].x, nodes[j].y)
         }

@@ -77,8 +77,9 @@
       </button>
     </div>
 
-    <!-- 隐藏的 audio 元素 -->
+    <!-- 隐藏的 audio 元素 - 使用 key 确保切换音频时重新创建 -->
     <audio
+      :key="audioKey"
       ref="audioEl"
       loop
       @timeupdate="onTimeUpdate"
@@ -91,7 +92,7 @@
 </template>
 
 <script setup>
-import { ref, onUnmounted } from 'vue'
+import { ref, onUnmounted, nextTick } from 'vue'
 
 const emit = defineEmits(['audio-ready', 'audio-play', 'audio-pause'])
 
@@ -110,6 +111,7 @@ const isPlaying = ref(false)
 const currentTime = ref(0)
 const duration = ref(0)
 const volume = ref(1)
+const audioKey = ref(0)  // 用于强制重新创建 audio 元素
 
 // 触发文件选择
 const triggerFileInput = () => {
@@ -140,7 +142,18 @@ const loadAudio = async (file) => {
 
   // 创建对象URL
   objectUrl.value = URL.createObjectURL(file)
-  audioEl.value.src = objectUrl.value
+  
+  // 使用现有的 audio 元素，但确保它是全新的引用
+  if (!audioEl.value) {
+    // 如果 audio 元素不存在，等待下一个 tick 让 Vue 重新渲染
+    await nextTick()
+  }
+  
+  // 设置音频源
+  if (audioEl.value) {
+    audioEl.value.src = objectUrl.value
+    audioEl.value.loop = true
+  }
 
   // 初始化 Web Audio API
   initAudioContext()
@@ -150,23 +163,30 @@ const loadAudio = async (file) => {
   // 等待音频加载完成后自动播放
   await new Promise((resolve) => {
     const onCanPlay = () => {
-      audioEl.value.removeEventListener('canplay', onCanPlay)
+      audioEl.value?.removeEventListener('canplay', onCanPlay)
       resolve()
     }
-    audioEl.value.addEventListener('canplay', onCanPlay)
+    audioEl.value?.addEventListener('canplay', onCanPlay)
   })
   
   // 自动播放
   if (audioContext.value && audioContext.value.state === 'suspended') {
     await audioContext.value.resume()
   }
-  await audioEl.value.play()
+  await audioEl.value?.play()
 }
 
 // 初始化 AudioContext
 const initAudioContext = () => {
   try {
-    // 创建 AudioContext
+    // 如果已经有 AudioContext，先关闭
+    if (audioContext.value) {
+      try {
+        audioContext.value.close()
+      } catch (e) {}
+    }
+    
+    // 创建新的 AudioContext
     audioContext.value = new (window.AudioContext || window.webkitAudioContext)()
 
     // 创建 AnalyserNode
@@ -174,12 +194,14 @@ const initAudioContext = () => {
     analyser.value.fftSize = 2048
     analyser.value.smoothingTimeConstant = 0.8
 
-    // 创建 MediaElementSource
-    source.value = audioContext.value.createMediaElementSource(audioEl.value)
-
-    // 连接节点: source -> analyser -> destination
-    source.value.connect(analyser.value)
-    analyser.value.connect(audioContext.value.destination)
+    // 创建 MediaElementSource - 每个 audio 元素只能连接一次
+    if (audioEl.value) {
+      source.value = audioContext.value.createMediaElementSource(audioEl.value)
+      
+      // 连接节点: source -> analyser -> destination
+      source.value.connect(analyser.value)
+      analyser.value.connect(audioContext.value.destination)
+    }
 
     // 通知父组件音频已就绪
     emit('audio-ready', {
@@ -263,6 +285,14 @@ const resetAudio = () => {
   isPlaying.value = false
   currentTime.value = 0
   duration.value = 0
+  
+  // 更新 key 强制重新创建 audio 元素（避免 createMediaElementSource 重复连接问题）
+  audioKey.value++
+  
+  // 触发文件选择框
+  setTimeout(() => {
+    triggerFileInput()
+  }, 150)
 }
 
 // 清理资源
@@ -270,6 +300,12 @@ const cleanup = () => {
   if (audioEl.value) {
     audioEl.value.pause()
     audioEl.value.src = ''
+    // 移除事件监听器
+    audioEl.value.removeEventListener('timeupdate', onTimeUpdate)
+    audioEl.value.removeEventListener('loadedmetadata', onLoadedMetadata)
+    audioEl.value.removeEventListener('ended', onEnded)
+    audioEl.value.removeEventListener('play', onPlay)
+    audioEl.value.removeEventListener('pause', onPause)
   }
 
   if (objectUrl.value) {
@@ -297,6 +333,11 @@ const cleanup = () => {
     } catch (e) {}
     audioContext.value = null
   }
+  
+  // 重置播放状态
+  isPlaying.value = false
+  currentTime.value = 0
+  duration.value = 0
 }
 
 // 格式化时间

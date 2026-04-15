@@ -111,17 +111,6 @@ export const animations = [
     color: 'linear-gradient(135deg, #74b9ff 0%, #0984e3 100%)'
   },
   {
-    id: 'audio-visualizer',
-    name: 'AudioVisualizer',
-    path: '/audio-visualizer',
-    category: 'audio',
-    title: '音乐可视化',
-    description: '将音乐转化为动态视觉图形',
-    difficulty: 'intermediate',
-    tags: ['音乐', '可视化', '音频'],
-    color: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)'
-  },
-  {
     id: 'meteor-shower',
     name: 'MeteorShower',
     path: '/meteor-shower',
