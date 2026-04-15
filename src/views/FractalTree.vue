@@ -222,31 +222,103 @@ const sketch = (p) => {
   }
 
   const drawButterflies = (p, season) => {
-    // 添加新蝴蝶 - 在树冠顶部周围生成
-    if (p.frameCount % 60 === 1 && butterflies.length < 5) {
-      // 树冠顶部位置（屏幕中间偏上）
+    // 初始化蝴蝶 - 一次性生成10只，不同位置、大小、飞行参数
+    if (butterflies.length === 0 && currentSeason.value === 1) {
       const treeTopX = p.width / 2
       const treeTopY = p.height * 0.35
-      const angle = p.random(p.TWO_PI)
-      const radius = p.random(80, 250)
-      butterflies.push({
-        x: treeTopX + p.cos(angle) * radius,
-        y: treeTopY + p.sin(angle) * radius,
-        size: p.random(12, 18),
-        speedX: p.random(-1, 1),
-        speedY: p.random(-0.5, 0.5),
-        wingAngle: p.random(p.TWO_PI),
-        wingSpeed: p.random(0.15, 0.3),
-        color: p.random([[255, 100, 150], [255, 150, 50], [150, 100, 255], [255, 200, 50]])
-      })
+      
+      for (let i = 0; i < 10; i++) {
+        const angle = (p.TWO_PI / 10) * i + p.random(-0.3, 0.3)
+        const radius = p.random(80, 250)
+        
+        // 每只蝴蝶有独特的飞行参数
+        const flyPattern = p.random(['circle', 'wave', 'random', 'hover'])
+        let speedRange, turnSpeed, amplitude
+        
+        switch(flyPattern) {
+          case 'circle':
+            speedRange = [0.8, 1.5]
+            turnSpeed = 0.02
+            amplitude = 30
+            break
+          case 'wave':
+            speedRange = [1, 2]
+            turnSpeed = 0.05
+            amplitude = 50
+            break
+          case 'random':
+            speedRange = [0.5, 1.8]
+            turnSpeed = 0.08
+            amplitude = 20
+            break
+          default: // hover
+            speedRange = [0.3, 0.8]
+            turnSpeed = 0.03
+            amplitude = 15
+        }
+        
+        butterflies.push({
+          x: treeTopX + p.cos(angle) * radius,
+          y: treeTopY + p.sin(angle) * radius,
+          baseX: treeTopX + p.cos(angle) * radius,
+          baseY: treeTopY + p.sin(angle) * radius,
+          vx: p.random(-1, 1),
+          vy: p.random(-0.5, 0.5),
+          size: p.random(8, 18),  // 不同大小
+          wingAngle: p.random(p.TWO_PI),
+          wingSpeed: p.random(0.1, 0.4),
+          color: p.random([[255, 100, 150], [255, 150, 50], [150, 100, 255], [255, 200, 50], [255, 180, 180]]),
+          flyPattern: flyPattern,
+          speedRange: speedRange,
+          turnSpeed: turnSpeed,
+          amplitude: amplitude,
+          angle: p.random(p.TWO_PI),
+          time: p.random(100)
+        })
+      }
     }
     
     // 更新和绘制蝴蝶
+    // 更新和绘制蝴蝶 - 每只蝴蝶有不同的飞行模式
     for (let i = butterflies.length - 1; i >= 0; i--) {
       const b = butterflies[i]
-      b.x += b.speedX
-      b.y += b.speedY + p.sin(p.frameCount * 0.03 + i) * 0.2
+      b.time++
       b.wingAngle += b.wingSpeed
+      
+      // 根据飞行模式更新位置
+      switch(b.flyPattern) {
+        case 'circle':
+          // 圆周运动
+          b.angle += b.turnSpeed
+          b.x = b.baseX + p.cos(b.angle) * b.amplitude
+          b.y = b.baseY + p.sin(b.angle) * b.amplitude * 0.6
+          break
+        case 'wave':
+          // 波浪运动
+          b.x += b.speedRange[1] * 0.5
+          b.y = b.baseY + p.sin(b.time * b.turnSpeed) * b.amplitude
+          if (b.x > p.width + 50) b.x = -50
+          break
+        case 'random':
+          // 随机游走
+          b.vx += p.random(-b.turnSpeed, b.turnSpeed)
+          b.vy += p.random(-b.turnSpeed, b.turnSpeed)
+          b.vx = p.constrain(b.vx, -b.speedRange[1], b.speedRange[1])
+          b.vy = p.constrain(b.vy, -b.speedRange[1] * 0.5, b.speedRange[1] * 0.5)
+          b.x += b.vx
+          b.y += b.vy
+          const distFromBase = p.dist(b.x, b.y, b.baseX, b.baseY)
+          if (distFromBase > 100) {
+            const angleToBase = p.atan2(b.baseY - b.y, b.baseX - b.x)
+            b.vx += p.cos(angleToBase) * 0.1
+            b.vy += p.sin(angleToBase) * 0.1
+          }
+          break
+        default: // hover
+          // 悬停抖动
+          b.x = b.baseX + p.sin(b.time * b.turnSpeed) * b.amplitude * 0.5 + p.random(-2, 2)
+          b.y = b.baseY + p.cos(b.time * b.turnSpeed * 1.3) * b.amplitude * 0.3 + p.random(-2, 2)
+      }
       
       // 绘制蝴蝶
       p.push()
@@ -277,38 +349,118 @@ const sketch = (p) => {
       p.ellipse(0, 0, b.size * 0.15, b.size)
       
       p.pop()
-      
-      // 移除飞出屏幕的蝴蝶
-      if (b.x > p.width + 50 || b.x < -50) {
-        butterflies.splice(i, 1)
-      }
     }
   }
   
   const drawBees = (p, season) => {
-    // 添加新蜜蜂 - 在树冠顶部周围生成
-    if (p.frameCount % 80 === 1 && bees.length < 4) {
+    // 初始化蜜蜂 - 一次性生成8只，不同位置、大小、飞行参数
+    if (bees.length === 0 && currentSeason.value === 1) {
       const treeTopX = p.width / 2
       const treeTopY = p.height * 0.35
-      const angle = p.random(p.TWO_PI)
-      const radius = p.random(60, 200)
-      bees.push({
-        x: treeTopX + p.cos(angle) * radius,
-        y: treeTopY + p.sin(angle) * radius,
-        size: p.random(8, 12),
-        speedX: p.random(-2, 2),
-        speedY: p.random(-1, 1),
-        wingAngle: 0,
-        wingSpeed: p.random(0.8, 1.2)
-      })
+      
+      for (let i = 0; i < 8; i++) {
+        const angle = (p.TWO_PI / 8) * i + p.random(-0.3, 0.3)
+        const radius = p.random(60, 200)
+        
+        // 每只蜜蜂有独特的飞行参数
+        const beeType = p.random(['busy', 'lazy', 'zigzag', 'steady'])
+        let speedRange, turnFreq, jitterAmount
+        
+        switch(beeType) {
+          case 'busy':
+            speedRange = [2, 4]
+            turnFreq = [10, 20]
+            jitterAmount = 0.2
+            break
+          case 'lazy':
+            speedRange = [0.5, 1.5]
+            turnFreq = [40, 80]
+            jitterAmount = 0.05
+            break
+          case 'zigzag':
+            speedRange = [1.5, 3]
+            turnFreq = [5, 15]
+            jitterAmount = 0.3
+            break
+          default: // steady
+            speedRange = [1, 2.5]
+            turnFreq = [20, 40]
+            jitterAmount = 0.1
+        }
+        
+        bees.push({
+          x: treeTopX + p.cos(angle) * radius,
+          y: treeTopY + p.sin(angle) * radius,
+          baseX: treeTopX + p.cos(angle) * radius,
+          baseY: treeTopY + p.sin(angle) * radius,
+          vx: p.random(-1, 1),
+          vy: p.random(-0.5, 0.5),
+          size: p.random(6, 12),  // 不同大小
+          wingAngle: 0,
+          wingSpeed: p.random(0.6, 1.5),
+          beeType: beeType,
+          speedRange: speedRange,
+          turnFreq: turnFreq,
+          jitterAmount: jitterAmount,
+          changeDirTimer: p.random(10, 30),
+          time: p.random(100)
+        })
+      }
     }
     
-    // 更新和绘制蜜蜂
+    // 更新和绘制蜜蜂 - 每只蜜蜂有不同的飞行模式
     for (let i = bees.length - 1; i >= 0; i--) {
       const b = bees[i]
-      b.x += b.speedX
-      b.y += b.speedY + p.sin(p.frameCount * 0.1 + i * 2) * 0.5
+      b.time++
       b.wingAngle += b.wingSpeed
+      
+      // 根据蜜蜂类型更新位置
+      b.changeDirTimer--
+      if (b.changeDirTimer <= 0) {
+        b.changeDirTimer = p.random(b.turnFreq[0], b.turnFreq[1])
+        
+        switch(b.beeType) {
+          case 'busy':
+            // 快速直线飞行，突然转向
+            b.vx = p.random(-b.speedRange[1], b.speedRange[1])
+            b.vy = p.random(-b.speedRange[1] * 0.5, b.speedRange[1] * 0.5)
+            break
+          case 'lazy':
+            // 缓慢漂移
+            b.vx = p.random(-b.speedRange[1] * 0.5, b.speedRange[1] * 0.5)
+            b.vy = p.random(-b.speedRange[1] * 0.3, b.speedRange[1] * 0.3)
+            break
+          case 'zigzag':
+            // 之字形飞行
+            b.vx = p.random(-b.speedRange[1], b.speedRange[1])
+            b.vy = (p.random() > 0.5 ? 1 : -1) * b.speedRange[1] * 0.8
+            break
+          default: // steady
+            // 稳定飞行，小幅度调整
+            b.vx += p.random(-0.5, 0.5)
+            b.vy += p.random(-0.3, 0.3)
+        }
+      }
+      
+      // 添加抖动
+      b.vx += p.random(-b.jitterAmount, b.jitterAmount)
+      b.vy += p.random(-b.jitterAmount * 0.6, b.jitterAmount * 0.6)
+      
+      // 限制速度
+      b.vx = p.constrain(b.vx, -b.speedRange[1], b.speedRange[1])
+      b.vy = p.constrain(b.vy, -b.speedRange[1] * 0.6, b.speedRange[1] * 0.6)
+      
+      // 更新位置
+      b.x += b.vx
+      b.y += b.vy
+      
+      // 保持在树周围
+      const distFromBase = p.dist(b.x, b.y, b.baseX, b.baseY)
+      if (distFromBase > 150) {
+        const angleToBase = p.atan2(b.baseY - b.y, b.baseX - b.x)
+        b.vx += p.cos(angleToBase) * 0.2
+        b.vy += p.sin(angleToBase) * 0.2
+      }
       
       p.push()
       p.translate(b.x, b.y)
@@ -328,50 +480,140 @@ const sketch = (p) => {
       p.rect(-b.size * 0.15, b.size * 0.15, b.size * 0.3, b.size * 0.12)
       
       p.pop()
-      
-      // 移除飞出屏幕的蜜蜂
-      if (b.x > p.width + 50) {
-        bees.splice(i, 1)
-      }
     }
   }
   
   const drawBirds = (p, season) => {
-    // 添加新鸟儿 - 绕着树顶飞行
-    if (p.frameCount % 100 === 1 && birds.length < 3) {
-      birds.push({
-        angle: p.random(p.TWO_PI),
-        radius: p.random(120, 250),
-        speed: p.random(0.01, 0.02),
-        yOffset: p.random(-30, 30),
-        size: p.random(12, 18),
-        wingAngle: 0,
-        wingSpeed: p.random(0.15, 0.25),
-        color: p.random([[60, 60, 80], [80, 60, 40], [40, 60, 80], [100, 80, 60]])
-      })
+    // 初始化鸟儿 - 一次性生成10只，不同位置、大小、飞行参数
+    if (birds.length === 0 && currentSeason.value === 2) {
+      const treeTopX = p.width / 2
+      const treeTopY = p.height * 0.5
+      
+      for (let i = 0; i < 10; i++) {
+        const angle = (p.TWO_PI / 10) * i + p.random(-0.3, 0.3)
+        const radius = p.random(80, 200)
+        
+        // 每只鸟有独特的飞行参数
+        const birdType = p.random(['fast', 'slow', 'wandering', 'steady'])
+        let speedRange, changeFreq, wanderAmount
+        
+        switch(birdType) {
+          case 'fast':
+            speedRange = [1.2, 2]
+            changeFreq = [40, 70]  // 延长直线飞行时间
+            wanderAmount = 0.03
+            break
+          case 'slow':
+            speedRange = [0.3, 0.8]
+            changeFreq = [80, 150]  // 更长直线飞行
+            wanderAmount = 0.02
+            break
+          case 'wandering':
+            speedRange = [0.6, 1.2]
+            changeFreq = [25, 45]  // 相对频繁转向
+            wanderAmount = 0.1
+            break
+          default: // steady
+            speedRange = [0.8, 1.5]
+            changeFreq = [60, 100]  // 较长直线飞行
+            wanderAmount = 0.05
+        }
+        
+        birds.push({
+          x: treeTopX + p.cos(angle) * radius,
+          y: treeTopY + p.sin(angle) * radius * 0.3,
+          vx: p.random(-1, 1),
+          vy: p.random(-0.8, 0.8),
+          size: p.random(10, 18),  // 不同大小
+          wingAngle: p.random(p.TWO_PI),
+          wingSpeed: p.random(0.1, 0.3),
+          color: p.random([[60, 60, 80], [80, 60, 40], [40, 60, 80], [100, 80, 60], [70, 80, 90]]),
+          perched: false,
+          perchTimer: 0,
+          changeDirTimer: p.random(10, 30),
+          speedRange: speedRange,
+          changeFreq: changeFreq,
+          wanderAmount: wanderAmount,
+          birdType: birdType
+        })
+      }
     }
     
-    // 更新和绘制鸟儿 - 绕着树顶飞行
+    // 更新和绘制鸟儿 - 在大树周围随机飞行，偶尔停留
     const treeTopX = p.width / 2
-    const treeTopY = p.height * 0.35
+    const treeTopY = p.height * 0.5  // 降低高度，在树冠中部
     
     for (let i = birds.length - 1; i >= 0; i--) {
       const b = birds[i]
-      // 绕树飞行
-      b.angle += b.speed
-      const x = treeTopX + p.cos(b.angle) * b.radius
-      const y = treeTopY + p.sin(b.angle) * b.radius * 0.5 + b.yOffset
+      
+      if (b.perched) {
+        // 停在树上
+        b.perchTimer--
+        if (b.perchTimer <= 0) {
+          b.perched = false
+          // 重新起飞
+          b.vx = p.random(-1.5, 1.5)
+          b.vy = p.random(-1, 1)
+        }
+      } else {
+        // 随机飞行
+        b.x += b.vx
+        b.y += b.vy
+        
+        // 定期改变方向（每只鸟有不同的频率）
+        b.changeDirTimer--
+        if (b.changeDirTimer <= 0) {
+          b.changeDirTimer = p.random(b.changeFreq[0], b.changeFreq[1])
+          // 根据鸟的类型改变方向
+          const newAngle = p.random(p.TWO_PI)
+          const speed = p.random(b.speedRange[0], b.speedRange[1])
+          b.vx = p.cos(newAngle) * speed
+          b.vy = p.sin(newAngle) * speed * 0.6
+        }
+        
+        // 添加随机扰动（每只鸟有不同的扰动程度）
+        b.vx += p.random(-b.wanderAmount, b.wanderAmount)
+        b.vy += p.random(-b.wanderAmount * 0.8, b.wanderAmount * 0.8)
+        
+        // 限制速度（根据鸟的类型）
+        b.vx = p.constrain(b.vx, -b.speedRange[1], b.speedRange[1])
+        b.vy = p.constrain(b.vy, -b.speedRange[1] * 0.7, b.speedRange[1] * 0.7)
+        
+        // 保持在树周围
+        const distFromTree = p.dist(b.x, b.y, treeTopX, treeTopY)
+        if (distFromTree > 250) {
+          // 飞回树的方向
+          const angleToTree = p.atan2(treeTopY - b.y, treeTopX - b.x)
+          b.vx = p.cos(angleToTree) * p.random(0.8, 1.2)
+          b.vy = p.sin(angleToTree) * p.random(0.5, 0.8)
+          b.changeDirTimer = p.random(30, 50)  // 重置方向计时器
+        }
+        
+        // 偶尔停在树叶上（0.5%概率每帧）
+        if (p.random() < 0.005 && distFromTree < 180) {
+          b.perched = true
+          b.perchTimer = p.random(60, 180)
+          b.vx = 0
+          b.vy = 0
+        }
+      }
+      
       b.wingAngle += b.wingSpeed
       
-      // 计算飞行方向（切线方向）
-      const flightAngle = b.angle + p.PI / 2
+      // 计算飞行方向
+      let flightAngle = 0
+      if (!b.perched) {
+        flightAngle = p.atan2(b.vy, b.vx)
+      }
       
       p.push()
-      p.translate(x, y)
-      p.rotate(flightAngle)
+      p.translate(b.x, b.y)
+      if (!b.perched) {
+        p.rotate(flightAngle)
+      }
       
-      // 翅膀扇动
-      const wingY = p.sin(b.wingAngle) * b.size * 0.4
+      // 翅膀扇动（停留时不扇动）
+      const wingY = b.perched ? 0 : p.sin(b.wingAngle) * b.size * 0.4
       
       p.fill(b.color[0], b.color[1], b.color[2])
       p.noStroke()
