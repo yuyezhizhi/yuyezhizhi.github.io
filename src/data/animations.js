@@ -211,28 +211,6 @@ export const animations = [
   },
   // 新增动画
   {
-    id: 'gravity-field',
-    name: 'GravityField',
-    path: '/gravity-field',
-    category: 'particle',
-    title: '引力场',
-    description: '模拟天体引力场对粒子的吸引作用',
-    difficulty: 'intermediate',
-    tags: ['引力', '天体', '物理'],
-    color: 'linear-gradient(135deg, #00d2ff 0%, #3a7bd5 100%)'
-  },
-  {
-    id: 'black-hole',
-    name: 'BlackHole',
-    path: '/black-hole',
-    category: 'particle',
-    title: '黑洞吸积盘',
-    description: '黑洞周围物质旋转形成的吸积盘',
-    difficulty: 'advanced',
-    tags: ['黑洞', '宇宙', '吸积盘'],
-    color: 'linear-gradient(135deg, #0c0c1d 0%, #1a0533 50%, #2d1b69 100%)'
-  },
-  {
     id: 'wave-interference',
     name: 'WaveInterference',
     path: '/wave-interference',

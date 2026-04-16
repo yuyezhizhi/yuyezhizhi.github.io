@@ -190,8 +190,14 @@ const sketch = (p) => {
   }
 
   p.draw = () => {
-    // 暗色背景带拖尾
-    p.background(10, 10, 26, 30)
+    // 明亮渐变背景
+    const bgGradient = p.drawingContext.createLinearGradient(0, 0, 0, p.height)
+    bgGradient.addColorStop(0, '#E8F5E9')
+    bgGradient.addColorStop(0.5, '#FFF3E0')
+    bgGradient.addColorStop(1, '#FCE4EC')
+    p.drawingContext.fillStyle = bgGradient
+    p.noStroke()
+    p.rect(0, 0, p.width, p.height)
     
     // 更新和绘制磁极
     for (let magnet of magnets) {

@@ -18,14 +18,14 @@ const particleCount = ref(0)
 const currentColor = ref(0)
 
 const colors = [
-  { name: '蓝色', r: 0, g: 150, b: 255 },
-  { name: '红色', r: 255, g: 80, b: 80 },
-  { name: '绿色', r: 80, g: 255, b: 100 },
-  { name: '紫色', r: 180, g: 100, b: 255 },
-  { name: '黄色', r: 255, g: 220, b: 80 },
-  { name: '橙色', r: 255, g: 165, b: 0 },
-  { name: '青色', r: 0, g: 255, b: 255 },
-  { name: '粉色', r: 255, g: 105, b: 180 }
+  { name: '天蓝', r: 100, g: 200, b: 255 },
+  { name: '珊瑚', r: 255, g: 120, b: 120 },
+  { name: '薄荷', r: 100, g: 255, b: 150 },
+  { name: '薰衣草', r: 200, g: 150, b: 255 },
+  { name: '金黄', r: 255, g: 230, b: 100 },
+  { name: '蜜桃', r: 255, g: 180, b: 120 },
+  { name: '青柠', r: 150, g: 255, b: 200 },
+  { name: '玫瑰', r: 255, g: 150, b: 200 }
 ]
 
 let p5Instance = null
@@ -96,7 +96,6 @@ const sketch = (p) => {
   p.setup = () => {
     const canvas = p.createCanvas(window.innerWidth, window.innerHeight)
     canvas.parent('p5-canvas')
-    p.background(20, 20, 30)
 
     // 初始化流场
     cols = Math.floor(p.width / gridSize)
@@ -111,7 +110,14 @@ const sketch = (p) => {
   }
 
   p.draw = () => {
-    p.background(20, 20, 30, 20) // 半透明背景实现拖尾
+    // 深色渐变背景
+    const bgGradient = p.drawingContext.createLinearGradient(0, 0, 0, p.height)
+    bgGradient.addColorStop(0, '#1a1a2e')
+    bgGradient.addColorStop(0.5, '#16213e')
+    bgGradient.addColorStop(1, '#0f3460')
+    p.drawingContext.fillStyle = bgGradient
+    p.noStroke()
+    p.rect(0, 0, p.width, p.height)
 
     // 更新流场（使用 Perlin 噪声）
     const time = p.millis() * 0.001

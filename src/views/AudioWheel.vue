@@ -58,8 +58,14 @@ const sketch = (p) => {
   }
 
   p.draw = () => {
-    // 半透明覆盖产生拖尾效果
-    p.background(0, 0, 0, 30)
+    // 明亮渐变背景
+    const bgGradient = p.drawingContext.createLinearGradient(0, 0, 0, p.height)
+    bgGradient.addColorStop(0, '#E8EAF6')
+    bgGradient.addColorStop(0.5, '#F3E5F5')
+    bgGradient.addColorStop(1, '#FFF3E0')
+    p.drawingContext.fillStyle = bgGradient
+    p.noStroke()
+    p.rect(0, 0, p.width, p.height)
     
     // 获取频谱数据
     let totalVolume = 0

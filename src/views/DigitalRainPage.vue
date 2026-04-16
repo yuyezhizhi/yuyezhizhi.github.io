@@ -57,31 +57,13 @@ class Meteor {
     this.pos = p5Instance.createVector(x, y)
     this.direction = direction.copy()
     this.speed = speed * p5Instance.random(0.8, 1.2)
-    this.size = size || p5Instance.random(2, 4)
-    this.trailLength = 0
-    this.trail = []
-    this.color = p5Instance.color(
-      p5Instance.random(200, 255),
-      p5Instance.random(200, 255),
-      p5Instance.random(150, 255)
-    )
-    this.isBurst = false
-    this.burstCount = 0
+    this.size = size || p5Instance.random(3, 6)
   }
 
   update() {
-    // 记录轨迹
-    this.trail.unshift(this.pos.copy())
-    if (this.trail.length > this.trailLength + 50) {
-      this.trail.pop()
-    }
-
     // 更新位置
     this.direction.normalize()
     this.pos.add(this.direction.copy().mult(this.speed))
-
-    // 逐渐增加轨迹长度
-    this.trailLength = p5Instance.min(this.trailLength + 0.5, 30)
 
     // 检查是否超出屏幕
     if (this.pos.x < -100 || this.pos.x > p5Instance.width + 100 ||
@@ -93,28 +75,22 @@ class Meteor {
   }
 
   draw(p) {
-    // 绘制轨迹（渐变尾迹）
-    for (let i = 0; i < this.trail.length; i++) {
-      const pos = this.trail[i]
-      const alpha = p.map(i, 0, this.trail.length, 0, 255)
-      const size = p.map(i, 0, this.trail.length, 0, this.size)
-
+    // 绘制短拖尾（固定长度，无放大效果）
+    const tailLength = 6
+    for (let i = 1; i <= tailLength; i++) {
+      const t = i / tailLength
+      const alpha = p.map(i, 1, tailLength, 80, 0)  // 渐变透明度
+      const prevPos = p5.Vector.sub(this.pos, p5.Vector.mult(this.direction, i * this.speed * 0.8))
+      
       p.noStroke()
-      this.color.setAlpha(Math.floor(alpha))
-      p.fill(this.color)
-      p.circle(pos.x, pos.y, size)
+      p.fill(255, 255, 255, Math.floor(alpha))
+      p.circle(prevPos.x, prevPos.y, this.size * 0.6)  // 固定大小，无放大
     }
 
-    // 绘制流星头部（亮白色）
+    // 绘制流星头部
     p.noStroke()
-    p.fill(255, 255, 255, 255)
-    p.circle(this.pos.x, this.pos.y, this.size * 1.5)
-
-    // 绘制光晕
-    p.noFill()
-    p.stroke(255, 255, 255, 100)
-    p.strokeWeight(1)
-    p.circle(this.pos.x, this.pos.y, this.size * 3)
+    p.fill(255, 255, 255, 180)
+    p.circle(this.pos.x, this.pos.y, this.size)
   }
 
   isDead() {
@@ -160,16 +136,23 @@ const sketch = (p) => {
   p.setup = () => {
     const canvas = p.createCanvas(window.innerWidth, window.innerHeight)
     canvas.parent('p5-canvas')
-    p.background(5, 5, 15)
-
+    
     // 初始化星星
-    for (let i = 0; i < 300; i++) {
+    for (let i = 0; i < 150; i++) {
       stars.push(new Star())
     }
   }
 
   p.draw = () => {
-    p.background(5, 5, 15, 30) // 深蓝色夜空背景
+    // 暗色渐变背景 - 夜空色彩（只绘制一次，不刷新）
+    const bgGradient = p.drawingContext.createLinearGradient(0, 0, 0, p.height)
+    bgGradient.addColorStop(0, '#1a1a2e')
+    bgGradient.addColorStop(0.3, '#16213e')
+    bgGradient.addColorStop(0.7, '#0f3460')
+    bgGradient.addColorStop(1, '#1a1a2e')
+    p.drawingContext.fillStyle = bgGradient
+    p.noStroke()
+    p.rect(0, 0, p.width, p.height)
 
     // 绘制星星
     const time = p.millis()

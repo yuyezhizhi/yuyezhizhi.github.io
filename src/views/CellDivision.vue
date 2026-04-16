@@ -126,11 +126,17 @@ const sketch = (p) => {
   }
 
   p.draw = () => {
-    // 暗色背景
-    p.background(10, 0, 21)
+    // 明亮渐变背景
+    const bgGradient = p.drawingContext.createLinearGradient(0, 0, 0, p.height)
+    bgGradient.addColorStop(0, '#F3E5F5')
+    bgGradient.addColorStop(0.5, '#E1F5FE')
+    bgGradient.addColorStop(1, '#FFF8E1')
+    p.drawingContext.fillStyle = bgGradient
+    p.noStroke()
+    p.rect(0, 0, p.width, p.height)
     
     // 更新和绘制连接
-    p.stroke(200, 100, 255, 30)
+    p.stroke(180, 140, 200, 40)
     p.strokeWeight(1)
     for (let cell of cells) {
       for (let child of cell.children) {

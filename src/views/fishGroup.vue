@@ -15,6 +15,8 @@ let sketchInstance = null
 const sketch = (p) => {
   let boids = []
   const numBoids = 100
+  let waves = [] // 存储波浪
+  let mouseCircleSize = 30 // 鼠标圆圈大小
 
   p.setup = () => {
     p.createCanvas(p.windowWidth, p.windowHeight)
@@ -29,16 +31,101 @@ const sketch = (p) => {
   p.draw = () => {
     p.background(30, 40, 60)
 
+    // 更新和绘制波浪
+    for (let i = waves.length - 1; i >= 0; i--) {
+      let wave = waves[i]
+      wave.update()
+      wave.show()
+      if (wave.isDead()) {
+        waves.splice(i, 1)
+      }
+    }
+
     for (let boid of boids) {
       boid.edges()
       boid.flock(boids)
+      boid.reactToWaves(waves) // 鱼群对波浪的反应
       boid.update()
       boid.show()
     }
+
+  }
+
+  // 绘制透明圆形鼠标样式（已禁用）
+  const drawMouseCircle = () => {
+    return // 不绘制鼠标
+  }
+
+  const oldDrawMouseCircle = () => {
+    p.push()
+    p.noFill()
+    p.stroke(255, 255, 255, 100)
+    p.strokeWeight(2)
+    p.circle(p.mouseX, p.mouseY, mouseCircleSize)
+    
+    // 内部小圆点
+    p.fill(255, 255, 255, 150)
+    p.noStroke()
+    p.circle(p.mouseX, p.mouseY, 6)
+    p.pop()
+  }
+
+  // 鼠标点击产生波浪
+  p.mousePressed = () => {
+    waves.push(new Wave(p.mouseX, p.mouseY))
   }
 
   p.windowResized = () => {
     p.resizeCanvas(p.windowWidth, p.windowHeight)
+  }
+
+  // 波浪类
+  class Wave {
+    constructor(x, y) {
+      this.pos = p.createVector(x, y)
+      this.radius = 10
+      this.maxRadius = 300
+      this.speed = 4
+      this.alpha = 255
+      this.strength = 2 // 波浪强度
+    }
+
+    update() {
+      this.radius += this.speed
+      this.alpha = p.map(this.radius, 10, this.maxRadius, 255, 0)
+    }
+
+    show() {
+      p.push()
+      p.noFill()
+      p.stroke(100, 200, 255, this.alpha)
+      p.strokeWeight(3)
+      p.circle(this.pos.x, this.pos.y, this.radius * 2)
+      
+      // 内部弱一点的波纹
+      p.stroke(150, 220, 255, this.alpha * 0.5)
+      p.strokeWeight(2)
+      p.circle(this.pos.x, this.pos.y, this.radius * 1.5)
+      p.pop()
+    }
+
+    isDead() {
+      return this.radius > this.maxRadius
+    }
+
+    // 获取在波浪影响范围内的力
+    getForce(boidPos) {
+      let d = p.dist(this.pos.x, this.pos.y, boidPos.x, boidPos.y)
+      // 只在波浪边缘附近产生力
+      let waveWidth = 30
+      if (d > this.radius - waveWidth && d < this.radius + waveWidth) {
+        let force = p5.Vector.sub(boidPos, this.pos)
+        force.normalize()
+        force.mult(this.strength)
+        return force
+      }
+      return p.createVector(0, 0)
+    }
   }
 
   class Boid {
@@ -145,6 +232,16 @@ const sketch = (p) => {
       this.vel.add(this.acc)
       this.vel.limit(this.maxSpeed)
       this.acc.mult(0)
+    }
+
+    // 对波浪的反应
+    reactToWaves(waves) {
+      for (let wave of waves) {
+        let force = wave.getForce(this.pos)
+        if (force.mag() > 0) {
+          this.acc.add(force)
+        }
+      }
     }
 
     show() {

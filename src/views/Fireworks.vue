@@ -7,19 +7,12 @@
         <p>粒子: {{ particleCount }} | 爆炸: {{ explosionCount }}</p>
       </div>
     </div>
-    <!-- 导出工具 -->
-    <ExportTool 
-      canvas-selector="#p5-canvas canvas"
-      filename="fireworks"
-      class="export-tool-container"
-    />
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import p5 from 'p5'
-import ExportTool from '../components/ExportTool.vue'
 
 const particleCount = ref(0)
 const explosionCount = ref(0)
@@ -68,12 +61,12 @@ class Rocket {
     this.exploded = true
     explosionCount.value++
     
-    // 闪光效果
+    // 闪光效果（缩小到1/5）
     flashes.push({
       x: this.pos.x,
       y: this.pos.y,
       radius: 0,
-      maxRadius: 100,
+      maxRadius: 20,
       alpha: 255
     })
     
@@ -251,8 +244,13 @@ const sketch = (p) => {
     // 更新和绘制闪光
     for (let i = flashes.length - 1; i >= 0; i--) {
       let f = flashes[i]
-      f.radius += 8
-      f.alpha -= 15
+      f.radius += 2  // 减小扩散速度
+      f.alpha -= 20  // 加快淡出
+      
+      // 限制最大半径
+      if (f.radius > f.maxRadius) {
+        f.radius = f.maxRadius
+      }
       
       if (f.alpha > 0) {
         p.noStroke()
@@ -311,13 +309,6 @@ onBeforeUnmount(() => {
     left: 0;
     width: 100%;
     height: 100%;
-  }
-
-  .export-tool-container {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    z-index: 100;
   }
 
   .controls {

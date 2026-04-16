@@ -28,11 +28,11 @@ const sketch = (p) => {
     const canvas = p.createCanvas(p.windowWidth, p.windowHeight)
     canvas.parent('p5-canvas')
     
-    // 创建离屏缓冲区
+    // 创建离屏缓冲区 - 明亮背景
     pg = p.createGraphics(p.windowWidth, p.windowHeight)
-    pg.background(0)
+    pg.background(255, 250, 245)
     
-    p.background(0)
+    p.background(255, 250, 245)
     p.colorMode(p.HSB, 360, 100, 100, 100)
   }
 
@@ -67,7 +67,7 @@ const sketch = (p) => {
     const rotation = p.frameCount * 0.005
     p.rotate(rotation)
     
-    p.stroke(255, 30)
+    p.stroke(200, 180, 220, 40)
     p.strokeWeight(1)
     
     for (let i = 0; i < symmetry.value; i++) {
@@ -79,7 +79,7 @@ const sketch = (p) => {
     
     // 外围圆环
     p.noFill()
-    p.stroke(255, 20)
+    p.stroke(180, 200, 220, 30)
     p.circle(0, 0, radius * 2)
     
     p.pop()
@@ -98,7 +98,7 @@ const sketch = (p) => {
     
     for (let i = 5; i > 0; i--) {
       p.noStroke()
-      p.fill(280, 60, 80, 3)
+      p.fill((hueOffset + 180) % 360, 50, 95, 5)
       p.circle(0, 0, i * 40)
     }
     
@@ -182,7 +182,7 @@ const sketch = (p) => {
     
     // C键清空
     if (key === 'c' || key === 'C') {
-      pg.background(0)
+      pg.background(255, 250, 245)
     }
     
     // S键保存
@@ -197,7 +197,7 @@ const sketch = (p) => {
     // 保存当前绘制内容
     const oldPg = pg
     pg = p.createGraphics(p.windowWidth, p.windowHeight)
-    pg.background(0)
+    pg.background(255, 250, 245)
     pg.image(oldPg, 0, 0)
   }
 }
@@ -235,25 +235,23 @@ onBeforeUnmount(() => {
     position: absolute;
     top: 20px;
     right: 20px;
-    background: transparent;
+    background: rgba(255, 255, 255, 0.8);
     padding: 0.8rem 1.2rem;
     border-radius: 8px;
-    backdrop-filter: none;
-    border: none;
-    color: #8e2de2;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(200, 180, 220, 0.3);
+    color: #6B5B95;
 
     .instruction {
       margin: 0 0 0.5rem 0;
       font-size: 0.85rem;
       opacity: 0.9;
-      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
     }
 
     .info p {
       margin: 0;
       font-size: 0.75rem;
       opacity: 0.75;
-      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
     }
   }
 }

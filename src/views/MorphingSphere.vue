@@ -85,8 +85,14 @@ const sketch = (p) => {
   }
   
   p.draw = () => {
-    // 纯黑背景
-    p.background(0)
+    // 明亮渐变背景
+    const bgGradient = p.drawingContext.createLinearGradient(0, 0, 0, p.height)
+    bgGradient.addColorStop(0, '#E3F2FD')
+    bgGradient.addColorStop(0.5, '#F3E5F5')
+    bgGradient.addColorStop(1, '#FFF8E1')
+    p.drawingContext.fillStyle = bgGradient
+    p.noStroke()
+    p.rect(0, 0, p.width, p.height)
     
     // 计算音频驱动的参数
     let audioAmplitude = 0

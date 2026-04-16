@@ -36,6 +36,8 @@ const sketch = (p) => {
   let butterflies = []
   let bees = []
   let birds = []
+  let branchEndPoints = []  // 存储树枝末端位置
+  let branchSnowIdCounter = 0  // 积雪标识计数器
 
   p.setup = () => {
     const canvas = p.createCanvas(p.windowWidth, p.windowHeight)
@@ -55,8 +57,9 @@ const sketch = (p) => {
       drawGradientBackground(p, season.bg)
       lastSeason = currentSeason.value
     } else {
-      // 使用半透明覆盖来清除上一帧的动画元素
-      p.fill(season.bg[0], season.bg[1], season.bg[2], 80)
+      // 使用半透明覆盖来清除上一帧的动画元素（冬季增加透明度避免雪花轨迹）
+      const clearAlpha = currentSeason.value === 4 ? 120 : 80
+      p.fill(season.bg[0], season.bg[1], season.bg[2], clearAlpha)
       p.noStroke()
       p.rect(0, 0, p.width, p.height)
     }
@@ -64,12 +67,20 @@ const sketch = (p) => {
     windOffset += 0.01
     
     // 绘制树 - 调整初始高度
-    p.push()
-    p.translate(p.width / 2, p.height)
+    // 在秋季和冬季不清空树枝末端位置（秋季需要落叶，冬季需要积雪）
+    if (currentSeason.value !== 3 && currentSeason.value !== 4) {
+      branchEndPoints = []
+    }
+    // 重置积雪标识计数器
+    branchSnowIdCounter = 0
+    // 如果是冬季且未初始化，记录开始时间
+    if (currentSeason.value === 4 && !isWinterInitialized) {
+      winterStartTime = p.frameCount
+      isWinterInitialized = true
+    }
     p.randomSeed(treeSeed)
     // 初始枝干稍短，让整体更协调
-    drawBranch(p, p.height * 0.18, 0, maxDepth.value, season)
-    p.pop()
+    drawBranch(p, p.height * 0.18, 0, maxDepth.value, season, p.width / 2, p.height)
     
     // 春季蝴蝶和蜜蜂
     if (currentSeason.value === 1) {
@@ -110,22 +121,30 @@ const sketch = (p) => {
     p.rect(0, 0, p.width, p.height)
   }
 
-  const drawBranch = (p, len, angle, depth, season) => {
-    if (depth === 0) {
-      // 绘制叶片/花朵
-      if (currentSeason.value !== 4) {
-        drawLeaf(p, season)
-      }
-      return
-    }
-    
+  const drawBranch = (p, len, angle, depth, season, currentX, currentY) => {
     // 微风摇摆效果
     const sway = p.sin(windOffset + depth * 0.5) * 0.015 * (maxDepth.value - depth)
     const finalAngle = angle + sway
     
     // 计算终点
-    const endX = p.sin(finalAngle) * len
-    const endY = -p.cos(finalAngle) * len
+    const endX = currentX + p.sin(finalAngle) * len
+    const endY = currentY - p.cos(finalAngle) * len
+    
+    if (depth === 0) {
+      // 记录树枝末端位置（用于落叶）
+      branchEndPoints.push({ x: endX, y: endY })
+      // 绘制叶片/花朵或积雪
+      p.push()
+      p.translate(endX, endY)
+      if (currentSeason.value !== 4) {
+        drawLeaf(p, season)
+      } else {
+        // 冬季绘制积雪（传入当前索引作为稳定标识）
+        drawSnowOnBranch(p, branchSnowIdCounter++)
+      }
+      p.pop()
+      return
+    }
     
     // 树枝颜色渐变 - 越往上越细
     const branchColor = season.branch
@@ -135,25 +154,19 @@ const sketch = (p) => {
     
     p.stroke(branchColor[0], branchColor[1], branchColor[2], alpha)
     p.strokeWeight(weight)
-    p.line(0, 0, endX, endY)
-    
-    // 递归绘制分支
-    p.push()
-    p.translate(endX, endY)
+    p.line(currentX, currentY, endX, endY)
     
     // 调整角度分布：底部角度大（分散），顶部角度小（集中）
-    // 这样底部更密，顶部更疏
-    const depthRatio = depth / maxDepth.value  // 0-1，1是底部，0是顶部
-    const baseAngle = p.PI / 4 * (0.6 + 0.4 * depthRatio)  // 底部角度大，顶部角度小
+    const depthRatio = depth / maxDepth.value
+    const baseAngle = p.PI / 4 * (0.6 + 0.4 * depthRatio)
     const angleOffset = baseAngle + p.random(-0.15, 0.15)
     
     // 长度比例也随深度变化
     const lengthRatio = 0.72 + p.random(-0.03, 0.03)
     
-    drawBranch(p, len * lengthRatio, -angleOffset, depth - 1, season)
-    drawBranch(p, len * lengthRatio, angleOffset, depth - 1, season)
-    
-    p.pop()
+    // 递归绘制分支，传递绝对坐标
+    drawBranch(p, len * lengthRatio, finalAngle - angleOffset, depth - 1, season, endX, endY)
+    drawBranch(p, len * lengthRatio, finalAngle + angleOffset, depth - 1, season, endX, endY)
   }
 
   const drawLeaf = (p, season) => {
@@ -192,30 +205,91 @@ const sketch = (p) => {
     p.circle(0, 0, size * 0.3)
   }
 
+  // 冬季积雪出现控制
+  let winterStartTime = 0
+  let snowAppearDelay = 300  // 5秒后开始出现 (60fps * 5s)
+  let snowAppearDuration = 300  // 5秒内逐渐出现 (60fps * 5s)
+  let isWinterInitialized = false  // 标记冬季是否已初始化
+  
+  // 存储每片积雪的透明度状态
+  let branchSnowAlpha = new Map()
+  
+  const drawSnowOnBranch = (p, branchId) => {
+    // 检查是否到了显示积雪的时间
+    if (winterStartTime === 0) return
+    
+    const elapsed = p.frameCount - winterStartTime
+    if (elapsed < snowAppearDelay) return
+    
+    // 计算积雪显示进度（0-1）
+    const progress = Math.min((elapsed - snowAppearDelay) / snowAppearDuration, 1)
+    
+    // 根据进度和随机值决定是否开始显示这片积雪
+    const branchRandom = (branchId % 1000) / 1000
+    if (branchRandom > progress) return
+    
+    // 获取或初始化透明度
+    if (!branchSnowAlpha.has(branchId)) {
+      branchSnowAlpha.set(branchId, 0)
+    }
+    
+    // 逐渐增加透明度
+    let alpha = branchSnowAlpha.get(branchId)
+    if (alpha < 220) {
+      alpha = Math.min(alpha + 2, 220)
+      branchSnowAlpha.set(branchId, alpha)
+    }
+    
+    // 在树枝末端绘制积雪（使用branchId生成固定大小）
+    const size = 3 + ((branchId * 7) % 30) / 10  // 3-6之间的固定值
+    p.noStroke()
+    // 白色积雪（使用渐变的透明度）
+    p.fill(255, 255, 255, alpha)
+    p.circle(0, 0, size)
+    // 积雪高光（透明度稍低）
+    p.fill(255, 255, 255, alpha * 0.7)
+    p.circle(-size * 0.2, -size * 0.2, size * 0.5)
+  }
+
   const drawSnow = (p) => {
-    // 添加新雪花 - 全屏飘落
-    if (p.frameCount % 2 === 1 && snowflakes.length < 60) {
+    // 飘落雪花立即开始，不等待
+    while (snowflakes.length < 600) {
       snowflakes.push({
-        x: p.random(p.width),
-        y: p.random(-50, -10),  // 从屏幕上方不同高度开始
-        size: p.random(2, 5),
-        speed: p.random(1, 3),
-        drift: p.random(-0.5, 0.5)
+        x: Math.random() * p.width,
+        y: Math.random() * 300 - 300,
+        size: Math.random() * 3 + 2,
+        speed: Math.random() * 2 + 0.8,
+        drift: (Math.random() - 0.5) * 0.3,
+        swayFreq: Math.random() * 0.01 + 0.003,
+        swayAmp: Math.random() * 0.4 + 0.1,
+        swayPhase: Math.random() * Math.PI * 2,
+        alpha: 0,  // 初始透明度为0
+        targetAlpha: Math.random() * 80 + 120  // 目标透明度120-200
       })
     }
     
     // 更新和绘制雪花
     p.noStroke()
-    p.fill(255, 255, 255, 180)
     
     for (let i = snowflakes.length - 1; i >= 0; i--) {
       const flake = snowflakes[i]
       flake.y += flake.speed
-      flake.x += flake.drift + p.sin(p.frameCount * 0.02 + i) * 0.5
+      flake.x += Math.sin(p.frameCount * flake.swayFreq + flake.swayPhase) * flake.swayAmp
       
+      // 边界处理，左右循环
+      if (flake.x > p.width) flake.x = 0
+      if (flake.x < 0) flake.x = p.width
+      
+      // 透明度渐变 - 慢慢出现
+      if (flake.alpha < flake.targetAlpha) {
+        flake.alpha += 2  // 每帧增加2点透明度
+      }
+      
+      p.fill(255, 255, 255, flake.alpha)
       p.circle(flake.x, flake.y, flake.size)
       
-      if (flake.y > p.height) {
+      // 掉出屏幕底部后移除
+      if (flake.y > p.height + 20) {
         snowflakes.splice(i, 1)
       }
     }
@@ -225,7 +299,7 @@ const sketch = (p) => {
     // 初始化蝴蝶 - 一次性生成10只，不同位置、大小、飞行参数
     if (butterflies.length === 0 && currentSeason.value === 1) {
       const treeTopX = p.width / 2
-      const treeTopY = p.height * 0.35
+      const treeTopY = p.height * 0.50  // 蝴蝶高度整体调低
       
       for (let i = 0; i < 10; i++) {
         const angle = (p.TWO_PI / 10) * i + p.random(-0.3, 0.3)
@@ -356,7 +430,7 @@ const sketch = (p) => {
     // 初始化蜜蜂 - 一次性生成8只，不同位置、大小、飞行参数
     if (bees.length === 0 && currentSeason.value === 1) {
       const treeTopX = p.width / 2
-      const treeTopY = p.height * 0.35
+      const treeTopY = p.height * 0.50  // 蜜蜂高度整体调低
       
       for (let i = 0; i < 8; i++) {
         const angle = (p.TWO_PI / 8) * i + p.random(-0.3, 0.3)
@@ -499,23 +573,23 @@ const sketch = (p) => {
         
         switch(birdType) {
           case 'fast':
-            speedRange = [1.2, 2]
-            changeFreq = [40, 70]  // 延长直线飞行时间
+            speedRange = [6, 10]  // 加快5倍
+            changeFreq = [40, 70]
             wanderAmount = 0.03
             break
           case 'slow':
-            speedRange = [0.3, 0.8]
-            changeFreq = [80, 150]  // 更长直线飞行
+            speedRange = [1.5, 4]  // 加快5倍
+            changeFreq = [80, 150]
             wanderAmount = 0.02
             break
           case 'wandering':
-            speedRange = [0.6, 1.2]
-            changeFreq = [25, 45]  // 相对频繁转向
+            speedRange = [3, 6]  // 加快5倍
+            changeFreq = [25, 45]
             wanderAmount = 0.1
             break
           default: // steady
-            speedRange = [0.8, 1.5]
-            changeFreq = [60, 100]  // 较长直线飞行
+            speedRange = [4, 7.5]  // 加快5倍
+            changeFreq = [60, 100]
             wanderAmount = 0.05
         }
         
@@ -643,30 +717,48 @@ const sketch = (p) => {
     }
   }
   
+  // 落叶批次控制
+  let leafBatchTimer = 0
+  let leafBatchInterval = 30  // 每30帧生成一批
+  
   const drawFallingLeaves = (p, season) => {
-    // 添加新落叶 - 从树冠区域均匀落下
-    if (p.frameCount % 10 === 1 && fallingLeaves.length < 20) {
-      const treeTopX = p.width / 2
-      const treeTopY = p.height * 0.35
-      // 在圆形树冠区域内随机生成
-      const angle = p.random(p.TWO_PI)
-      const radius = p.random(0, 180) * p.sqrt(p.random(1))  // 均匀分布
-      fallingLeaves.push({
-        x: treeTopX + p.cos(angle) * radius,
-        y: treeTopY + p.sin(angle) * radius * 0.6,  // 稍微压扁的椭圆
-        size: p.random(6, 12),
-        speed: p.random(0.8, 2),
-        rotation: p.random(p.TWO_PI),
-        rotSpeed: p.random(-0.05, 0.05),
-        color: p.random([[255, 140, 0], [200, 100, 0], [180, 80, 20], [220, 120, 30]])
-      })
+    // 分批生成落叶，从树枝末端位置开始掉落
+    leafBatchTimer++
+    if (leafBatchTimer >= leafBatchInterval && fallingLeaves.length < 25 && branchEndPoints.length > 0) {
+      leafBatchTimer = 0
+      // 每批生成3-5片树叶
+      const batchSize = Math.floor(Math.random() * 3) + 3
+      
+      for (let j = 0; j < batchSize; j++) {
+        // 从记录的树枝末端位置中随机选择一个
+        const randomBranch = branchEndPoints[Math.floor(Math.random() * branchEndPoints.length)]
+        // 在树枝位置附近稍微随机偏移
+        const x = randomBranch.x + (Math.random() - 0.5) * 30
+        const y = randomBranch.y + (Math.random() - 0.5) * 20
+        
+        fallingLeaves.push({
+          x: x,
+          y: y,
+          size: Math.random() * 10 + 6,
+          speed: Math.random() * 1.5 + 1,
+          rotation: Math.random() * Math.PI * 2,
+          rotSpeed: (Math.random() - 0.5) * 0.08,
+          color: [[255, 140, 0], [200, 100, 0], [180, 80, 20], [220, 120, 30], [255, 100, 0], [160, 82, 45]][Math.floor(Math.random() * 6)],
+          // 每片树叶完全独立的摇摆参数
+          swayFreq: Math.random() * 0.025 + 0.015,
+          swayAmp: Math.random() * 1.2 + 0.4,
+          swayPhase: Math.random() * Math.PI * 2,
+          drift: (Math.random() - 0.5) * 0.5
+        })
+      }
     }
     
     // 更新和绘制落叶
     for (let i = fallingLeaves.length - 1; i >= 0; i--) {
       const leaf = fallingLeaves[i]
       leaf.y += leaf.speed
-      leaf.x += p.sin(p.frameCount * 0.03 + i) * 0.8
+      // 每片树叶完全独立的摇摆轨迹
+      leaf.x += Math.sin(p.frameCount * leaf.swayFreq + leaf.swayPhase) * leaf.swayAmp + leaf.drift
       leaf.rotation += leaf.rotSpeed
       
       p.push()
@@ -674,15 +766,16 @@ const sketch = (p) => {
       p.rotate(leaf.rotation)
       p.noStroke()
       // 使用落叶自带的颜色
-      p.fill(leaf.color[0], leaf.color[1], leaf.color[2], 200)
+      p.fill(leaf.color[0], leaf.color[1], leaf.color[2], 230)
       p.ellipse(0, 0, leaf.size, leaf.size * 0.6)
       // 叶脉
-      p.stroke(leaf.color[0] - 30, leaf.color[1] - 30, leaf.color[2] - 30, 150)
+      p.stroke(leaf.color[0] - 30, leaf.color[1] - 30, leaf.color[2] - 30, 180)
       p.strokeWeight(1)
       p.line(-leaf.size * 0.3, 0, leaf.size * 0.3, 0)
       p.pop()
       
-      if (leaf.y > p.height) {
+      // 掉出屏幕底部后移除
+      if (leaf.y > p.height + 30) {
         fallingLeaves.splice(i, 1)
       }
     }
@@ -692,16 +785,20 @@ const sketch = (p) => {
     if (p.key === ' ') {
       treeSeed = p.random(1000)
       p.randomSeed(treeSeed)
-      // 清空落叶和雪花，但保留蝴蝶、蜜蜂和鸟儿（它们会在屏幕外被自动移除）
-      snowflakes = []
+      // 清空落叶，但保留雪花（冬季时）和蝴蝶、蜜蜂、鸟儿
       fallingLeaves = []
-      // 注意：不清空 butterflies、bees、birds，让它们继续飞
+      // 注意：不清空 snowflakes、butterflies、bees、birds
     } else if (p.key >= '1' && p.key <= '4') {
       currentSeason.value = parseInt(p.key)
       seasonName.value = seasons[currentSeason.value].name
       // 切换季节时清空特定季节动画
       snowflakes = []
       fallingLeaves = []
+      // 重置冬季计时器和初始化标记
+      winterStartTime = 0
+      isWinterInitialized = false
+      branchSnowAlpha.clear()
+      branchSnowIdCounter = 0
       // 注意：不清空 butterflies、bees、birds，让它们继续飞
     }
   }

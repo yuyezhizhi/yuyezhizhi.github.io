@@ -30,15 +30,15 @@ const routes = [
     meta: { fullscreen: true }
   },
   {
-    path: '/datavortex',
-    name: 'DataVortex',
-    component: () => import('../views/DataVortex.vue'),
-    meta: { fullscreen: true }
-  },
-  {
     path: '/butterfly',
     name: 'ButterflyNet',
     component: () => import('../views/ButterflyNet.vue'),
+    meta: { fullscreen: true }
+  },
+  {
+    path: '/datavortex',
+    name: 'DataVortex',
+    component: () => import('../views/DataVortex.vue'),
     meta: { fullscreen: true }
   },
   {
@@ -125,18 +125,8 @@ const routes = [
     component: () => import('../views/LotusPond.vue'),
     meta: { fullscreen: true }
   },
-  {
-    path: '/gravity-field',
-    name: 'GravityField',
-    component: () => import('../views/GravityField.vue'),
-    meta: { fullscreen: true }
-  },
-  {
-    path: '/black-hole',
-    name: 'BlackHole',
-    component: () => import('../views/BlackHole.vue'),
-    meta: { fullscreen: true }
-  },
+
+
   {
     path: '/wave-interference',
     name: 'WaveInterference',
@@ -198,12 +188,6 @@ const routes = [
     meta: { fullscreen: true }
   },
   {
-    path: '/music-network',
-    name: 'MusicNetwork',
-    component: () => import('../views/MusicNetwork.vue'),
-    meta: { fullscreen: true }
-  },
-  {
     path: '/morphing-sphere',
     name: 'MorphingSphere',
     component: () => import('../views/MorphingSphere.vue'),
@@ -213,6 +197,12 @@ const routes = [
     path: '/stereo-channel',
     name: 'StereoChannel',
     component: () => import('../views/StereoChannel.vue'),
+    meta: { fullscreen: true }
+  },
+  {
+    path: '/music-network',
+    name: 'MusicNetwork',
+    component: () => import('../views/MusicNetwork.vue'),
     meta: { fullscreen: true }
   },
   {

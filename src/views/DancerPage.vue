@@ -80,8 +80,8 @@ const sketch = (p) => {
         waveSpeed: 0.04 + Math.random() * 0.03,
         waveAmplitude: 25 + Math.random() * 25,
         opacity: 76.5,
-        hue: 0,
-        saturation: 40 + Math.random() * 30,  // 更淡的颜色
+        hue: 120 + Math.random() * 40,  // 淡绿色 (120-160度)
+        saturation: 30 + Math.random() * 20,  // 低饱和度，更淡雅
         thickness: 6 + Math.random() * 4,  // 减小粗细，更飘逸
         taperRatio: 0.15,  // 尾部更细（15%）
         layer: Math.floor(Math.random() * 3),  // 分层：0=后层，1=中层，2=前层
@@ -351,7 +351,15 @@ const sketch = (p) => {
     lastMouseX = mouseX_pos
     lastMouseY = mouseY_pos
     
-    p.background(0, 40)  // 加快残影消失速度（从20增加到40）
+    // 柔和暗色渐变背景
+    const bgGradient = p.drawingContext.createLinearGradient(0, 0, 0, p.height)
+    bgGradient.addColorStop(0, '#2D2438')
+    bgGradient.addColorStop(0.4, '#1E2835')
+    bgGradient.addColorStop(0.7, '#243442')
+    bgGradient.addColorStop(1, '#1A2A3A')
+    p.drawingContext.fillStyle = bgGradient
+    p.noStroke()
+    p.rect(0, 0, p.width, p.height)
     
     // 绘制星星
     for (let star of stars) {
@@ -359,7 +367,7 @@ const sketch = (p) => {
       const alpha = twinkle * 200 + 55
       
       p.noStroke()
-      p.fill(255, alpha)
+      p.fill(255, 255, 255, alpha)
       p.circle(star.x, star.y, star.size)
     }
     

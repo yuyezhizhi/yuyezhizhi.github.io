@@ -16,22 +16,10 @@ export const journeys = [
         duration: 60
       },
       {
-        id: 'gravity-field',
-        title: '引力场',
-        narrative: '当足够多的粒子聚集，引力场开始形成，塑造着周围的空间...',
-        duration: 60
-      },
-      {
         id: 'magnetic-field',
         title: '磁场可视化',
         narrative: '磁场如无形的琴弦，在宇宙中编织着复杂的图案...',
         duration: 60
-      },
-      {
-        id: 'black-hole',
-        title: '黑洞吸积盘',
-        narrative: '最终，我们来到宇宙中最神秘的存在——黑洞，连光也无法逃脱它的怀抱...',
-        duration: 90
       }
     ]
   },

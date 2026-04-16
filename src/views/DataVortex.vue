@@ -40,17 +40,26 @@ const sketch = (p) => {
   }
 
   p.draw = () => {
-    p.background(0)
+    // 明亮渐变背景
+    const bgGradient = p.drawingContext.createLinearGradient(0, 0, p.width, p.height)
+    bgGradient.addColorStop(0, '#E0F7FA')
+    bgGradient.addColorStop(0.5, '#F3E5F5')
+    bgGradient.addColorStop(1, '#FFF3E0')
+    p.drawingContext.fillStyle = bgGradient
+    p.noStroke()
+    p.rect(0, 0, p.width, p.height)
 
     // 中心螺旋
     p.push()
     p.translate(p.width / 2, p.height / 2)
     
-    // 绘制螺旋线
+    // 绘制彩虹螺旋线
     p.noFill()
+    p.colorMode(p.HSB)
     for (let l = 0; l < spiralLayers; l++) {
-      p.stroke(255, 255, 255, 30)
-      p.strokeWeight(1)
+      const hue = (p.frameCount * 0.5 + l * 60) % 360
+      p.stroke(hue, 60, 90, 0.4)
+      p.strokeWeight(2)
       p.beginShape()
       for (let angle = 0; angle < p.TWO_PI * 3; angle += 0.1) {
         const r = l * 80 + angle * 20
@@ -60,6 +69,7 @@ const sketch = (p) => {
       }
       p.endShape()
     }
+    p.colorMode(p.RGB)
     p.pop()
 
     // 更新和绘制节点
@@ -82,9 +92,11 @@ const sketch = (p) => {
       // 计算到中心的距离
       const distToCenter = Math.hypot(node.x - centerX, node.y - centerY)
 
-      // 连接到附近节点
-      p.stroke(255, 255, 255, alpha * 0.3)
-      p.strokeWeight(0.5)
+      // 连接到附近节点 - 彩虹色连线
+      p.colorMode(p.HSB)
+      const lineHue = (node.layer * 60 + p.frameCount * 0.5) % 360
+      p.stroke(lineHue, 50, 80, alpha * 0.003)
+      p.strokeWeight(1)
 
       for (let j = i + 1; j < Math.min(i + 10, nodes.length); j++) {
         const other = nodes[j]
@@ -96,14 +108,20 @@ const sketch = (p) => {
 
       // 连线到中心
       if (distToCenter < 300) {
-        p.stroke(255, 255, 255, alpha * 0.5 * (1 - distToCenter / 300))
+        p.stroke(lineHue, 60, 90, alpha * 0.005 * (1 - distToCenter / 300))
         p.line(node.x, node.y, p.width / 2, p.height / 2)
       }
+      p.colorMode(p.RGB)
       
-      // 绘制节点
+      // 绘制节点 - 彩虹色
       p.noStroke()
-      p.fill(255, 255, 255, alpha)
-      p.rect(node.x - 4, node.y - 4, 8, 8)
+      const nodeHue = (node.layer * 60 + p.frameCount) % 360
+      p.colorMode(p.HSB)
+      p.fill(nodeHue, 70, 95, alpha * 0.01)
+      p.circle(node.x, node.y, 10)
+      p.fill(nodeHue, 50, 100, 1)
+      p.circle(node.x, node.y, 6)
+      p.colorMode(p.RGB)
       
       // 绘制数值
       if (pulse > 0.5) {
