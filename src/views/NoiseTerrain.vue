@@ -15,7 +15,7 @@ import { ref, onMounted, onBeforeUnmount } from 'vue'
 import p5 from 'p5'
 
 const noiseSeed = ref(0)
-const gridSize = ref(60)
+const gridSize = ref(200)
 
 let p5Instance = null
 let terrain = []
@@ -65,27 +65,27 @@ const sketch = (p) => {
     const camZ = camDistance * p.sin(camAngleY) * p.cos(camAngleX)
     p.camera(camX, camY, camZ, 0, 0, 0, 0, 1, 0)
     
-    // 更新噪声偏移
-    flying -= 0.003
-    let yoff = flying
-    
-    for (let y = 0; y < rows; y++) {
-      let xoff = 0
-      for (let x = 0; x < cols; x++) {
-        // 多层噪声叠加
-        let noiseVal = p.noise(xoff, yoff)
-        let detailNoise = p.noise(xoff * 2, yoff * 2) * 0.5
-        let finalNoise = noiseVal + detailNoise * 0.3
-        
-        terrain[x][y] = p.map(finalNoise, 0, 1, -100, 150)
-        xoff += 0.08
+    // 只在初始化时生成一次地形，不再更新（地形静止）
+    if (terrain[0][0] === 0) {
+      let yoff = 0
+      for (let y = 0; y < rows; y++) {
+        let xoff = 0
+        for (let x = 0; x < cols; x++) {
+          // 使用更平滑的噪声（降低频率，减小高度范围）
+          let noiseVal = p.noise(xoff * 0.5, yoff * 0.5)
+          terrain[x][y] = p.map(noiseVal, 0, 1, -40, 80)
+          xoff += 0.08
+        }
+        yoff += 0.08
       }
-      yoff += 0.08
     }
     
     // 绘制地形
     p.rotateX(p.PI / 2.5)
     p.translate(-w / 2, -h / 2, 0)
+    
+    // 禁用描边以提高性能
+    p.noStroke()
     
     // 绘制地形网格
     for (let y = 0; y < rows - 1; y++) {
@@ -94,80 +94,60 @@ const sketch = (p) => {
         const h1 = terrain[x][y]
         const h2 = terrain[x][y + 1]
         
-        // 根据高度设置颜色
-        const color1 = getHeightColor(p, h1)
-        const color2 = getHeightColor(p, h2)
+        // 根据高度设置更丰富的颜色（适应新的高度范围-40到80）
+        let r1, g1, b1, r2, g2, b2
         
-        p.fill(color1.r, color1.g, color1.b, 180)
-        p.stroke(color1.r * 0.5, color1.g * 0.5, color1.b * 0.5, 100)
-        p.strokeWeight(0.5)
+        // 高度1的颜色
+        if (h1 < -20) {
+          r1 = 20; g1 = 40; b1 = 100  // 深海
+        } else if (h1 < -10) {
+          r1 = 40; g1 = 90; b1 = 160  // 中海
+        } else if (h1 < 0) {
+          r1 = 80; g1 = 150; b1 = 200  // 浅海
+        } else if (h1 < 15) {
+          r1 = 194; g1 = 178; b1 = 128  // 沙滩
+        } else if (h1 < 35) {
+          r1 = 34; g1 = 139; b1 = 34  // 森林绿
+        } else if (h1 < 60) {
+          r1 = 120; g1 = 100; b1 = 80  // 岩石棕
+        } else {
+          r1 = 255; g1 = 250; b1 = 250  // 纯白雪山
+        }
+        
+        // 高度2的颜色
+        if (h2 < -20) {
+          r2 = 20; g2 = 40; b2 = 100
+        } else if (h2 < -10) {
+          r2 = 40; g2 = 90; b2 = 160
+        } else if (h2 < 0) {
+          r2 = 80; g2 = 150; b2 = 200
+        } else if (h2 < 15) {
+          r2 = 194; g2 = 178; b2 = 128
+        } else if (h2 < 35) {
+          r2 = 34; g2 = 139; b2 = 34
+        } else if (h2 < 60) {
+          r2 = 120; g2 = 100; b2 = 80
+        } else {
+          r2 = 255; g2 = 250; b2 = 250
+        }
+        
+        p.fill(r1, g1, b1, 220)
         p.vertex(x * scl, y * scl, h1)
         
-        p.fill(color2.r, color2.g, color2.b, 180)
-        p.stroke(color2.r * 0.5, color2.g * 0.5, color2.b * 0.5, 100)
+        p.fill(r2, g2, b2, 220)
         p.vertex(x * scl, (y + 1) * scl, h2)
       }
       p.endShape()
     }
     
-    // 绘制线框叠加
-    p.stroke(255, 255, 255, 30)
-    p.strokeWeight(0.3)
-    p.noFill()
-    for (let y = 0; y < rows - 1; y += 2) {
-      p.beginShape(p.LINES)
-      for (let x = 0; x < cols - 1; x += 2) {
-        p.vertex(x * scl, y * scl, terrain[x][y] + 2)
-        p.vertex((x + 1) * scl, y * scl, terrain[x + 1][y] + 2)
-        p.vertex(x * scl, y * scl, terrain[x][y] + 2)
-        p.vertex(x * scl, (y + 1) * scl, terrain[x][y + 1] + 2)
-      }
-      p.endShape()
-    }
-  }
-
-  const getHeightColor = (p, h) => {
-    // HSB色彩映射
-    p.colorMode(p.HSB, 360, 100, 100)
-    let hue, sat, bri
-    
-    if (h < -30) {
-      // 深海
-      hue = 220
-      sat = 80
-      bri = p.map(h, -100, -30, 20, 50)
-    } else if (h < 10) {
-      // 海洋到平原
-      hue = p.map(h, -30, 10, 220, 160)
-      sat = 70
-      bri = p.map(h, -30, 10, 50, 70)
-    } else if (h < 60) {
-      // 平原到山地
-      hue = p.map(h, 10, 60, 120, 80)
-      sat = 60
-      bri = p.map(h, 10, 60, 70, 85)
-    } else {
-      // 雪山
-      hue = 0
-      sat = 0
-      bri = p.map(h, 60, 150, 85, 100)
-    }
-    
-    const c = p.color(hue, sat, bri)
-    p.colorMode(p.RGB)
-    return {
-      r: p.red(c),
-      g: p.green(c),
-      b: p.blue(c)
-    }
+    // 线框绘制已移除以提高性能
   }
 
   p.mouseDragged = () => {
-    if (p.mouseButton === p.LEFT) {
-      camAngleY += (p.mouseX - p.pmouseX) * 0.01
-      camAngleX += (p.mouseY - p.pmouseY) * 0.01
-      camAngleX = p.constrain(camAngleX, -p.PI / 2 + 0.1, p.PI / 2 - 0.1)
-    }
+    // 左键拖动控制视角（降低灵敏度，上下方向反转）
+    camAngleY += (p.mouseX - p.pmouseX) * 0.003
+    camAngleX -= (p.mouseY - p.pmouseY) * 0.003
+    camAngleX = p.constrain(camAngleX, -p.PI / 2 + 0.1, p.PI / 2 - 0.1)
   }
 
   p.mouseWheel = (event) => {
@@ -180,7 +160,12 @@ const sketch = (p) => {
     if (p.key === 'r' || p.key === 'R') {
       noiseSeed.value = Math.floor(p.random(1000))
       p.noiseSeed(noiseSeed.value)
-      flying = 0
+      // 清空地形数组，触发重新生成
+      for (let x = 0; x < cols; x++) {
+        for (let y = 0; y < rows; y++) {
+          terrain[x][y] = 0
+        }
+      }
     }
   }
 
@@ -229,25 +214,24 @@ onBeforeUnmount(() => {
     position: absolute;
     top: 20px;
     right: 20px;
-    background: transparent;
+    background: rgba(0, 0, 0, 0.6);
     padding: 0.8rem 1.2rem;
     border-radius: 8px;
-    backdrop-filter: none;
-    border: none;
-    color: #4ca1af;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #ffffff;
 
     .instruction {
       margin: 0 0 0.5rem 0;
       font-size: 0.85rem;
-      opacity: 0.9;
-      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+      opacity: 1;
+      font-weight: 500;
     }
 
     .info p {
       margin: 0;
       font-size: 0.75rem;
-      opacity: 0.75;
-      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+      opacity: 0.9;
     }
   }
 }

@@ -2,9 +2,9 @@
   <div class="mandala-container">
     <div id="p5-canvas"></div>
     <div class="controls">
-      <p class="instruction">按住鼠标绘制 | 1-8调节对称 | C清空 | S保存</p>
+      <p class="instruction">按住鼠标绘制 | 1-5调节对称 | 6-0切换颜色 | C清空 | S保存</p>
       <div class="info">
-        <p>对称: {{ symmetry }}折 | 模式: {{ drawMode }}</p>
+        <p>对称: {{ symmetry }}折 | 颜色: {{ currentColor }}</p>
       </div>
     </div>
   </div>
@@ -16,22 +16,39 @@ import p5 from 'p5'
 
 const symmetry = ref(8)
 const drawMode = ref('自由')
+const currentColor = ref('流动')
 
 let p5Instance = null
 let pg = null // 离屏图形缓冲区
-let symmetryOptions = [2, 4, 6, 8, 10, 12, 16, 24]
+let symmetryOptions = [2, 4, 6, 8, 10]
+let colorOptions = [
+  { name: '流动', hue: null },    // 0 - 默认流动
+  { name: '红', hue: 0 },         // 1
+  { name: '橙', hue: 30 },        // 2
+  { name: '黄', hue: 60 },        // 3
+  { name: '绿', hue: 120 },       // 4
+  { name: '红', hue: 0 },         // 5 - 对应按键6
+  { name: '橙', hue: 30 },        // 6 - 对应按键7
+  { name: '黄', hue: 60 },        // 7 - 对应按键8
+  { name: '绿', hue: 120 },       // 8 - 对应按键9
+  { name: '蓝', hue: 240 }        // 9 - 对应按键0
+]
 let hueOffset = 0
 let isDrawing = false
+let fixedHue = null
 
 const sketch = (p) => {
   p.setup = () => {
     const canvas = p.createCanvas(p.windowWidth, p.windowHeight)
     canvas.parent('p5-canvas')
     
-    // 创建离屏缓冲区 - 明亮背景
+    // 先设置RGB模式设置背景色
     pg = p.createGraphics(p.windowWidth, p.windowHeight)
+    pg.colorMode(p.RGB)
     pg.background(255, 250, 245)
+    pg.colorMode(p.HSB, 360, 100, 100, 100)  // 再切换到HSB模式
     
+    p.colorMode(p.RGB)
     p.background(255, 250, 245)
     p.colorMode(p.HSB, 360, 100, 100, 100)
   }
@@ -51,8 +68,10 @@ const sketch = (p) => {
       drawSymmetrical(p)
     }
     
-    // 色相缓慢变化
-    hueOffset = (hueOffset + 0.2) % 360
+    // 色相缓慢变化（仅在流动模式下）
+    if (fixedHue === null) {
+      hueOffset = (hueOffset + 0.2) % 360
+    }
   }
 
   const drawGuideLines = (p) => {
@@ -115,12 +134,25 @@ const sketch = (p) => {
     const dist = p.sqrt(dx * dx + dy * dy)
     const baseAngle = p.atan2(dy, dx)
     
-    // 根据距离计算色相（近=紫色，远=青色）
-    const hue = p.map(dist, 0, p.min(p.width, p.height) / 2, 280, 180)
-    const finalHue = (hue + hueOffset) % 360
+    // 计算色相：固定颜色模式或流动模式
+    let finalHue
+    if (fixedHue !== null) {
+      // 固定颜色模式
+      finalHue = fixedHue
+    } else {
+      // 流动模式：根据距离计算色相
+      const hue = p.map(dist, 0, p.min(p.width, p.height) / 2, 280, 180)
+      finalHue = (hue + hueOffset) % 360
+    }
     
     pg.push()
     pg.translate(cx, cy)
+    
+    // 计算上一帧和当前帧的相对位置
+    const prevX = p.pmouseX - cx
+    const prevY = p.pmouseY - cy
+    const currX = p.mouseX - cx
+    const currY = p.mouseY - cy
     
     // 在每个对称扇区绘制
     for (let i = 0; i < symmetry.value; i++) {
@@ -130,12 +162,12 @@ const sketch = (p) => {
       pg.rotate(sectorAngle)
       
       // 绘制线条
-      drawGlowingLine(pg, p.pmouseX - cx, p.pmouseY - cy, dx, dy, finalHue)
+      drawGlowingLine(pg, prevX, prevY, currX, currY, finalHue)
       
       // 镜像绘制
       pg.push()
       pg.scale(1, -1)
-      drawGlowingLine(pg, p.pmouseX - cx, -(p.pmouseY - cy), dx, -dy, finalHue)
+      drawGlowingLine(pg, prevX, -prevY, currX, -currY, finalHue)
       pg.pop()
       
       pg.pop()
@@ -172,17 +204,34 @@ const sketch = (p) => {
   p.keyPressed = () => {
     const key = p.key
     
-    // 数字键切换对称数
-    if (key >= '1' && key <= '8') {
+    // 1-5切换对称数
+    if (key >= '1' && key <= '5') {
       const index = parseInt(key) - 1
       if (index < symmetryOptions.length) {
         symmetry.value = symmetryOptions[index]
       }
     }
     
+    // 6-0切换颜色（6,7,8,9,0对应颜色选项索引5,6,7,8,9）
+    if (key >= '6' && key <= '9') {
+      const index = parseInt(key)  // 6->6, 7->7, 8->8, 9->9
+      if (index < colorOptions.length) {
+        fixedHue = colorOptions[index].hue
+        currentColor.value = colorOptions[index].name
+      }
+    }
+    if (key === '0') {
+      // 0键切换到深红
+      fixedHue = colorOptions[9].hue
+      currentColor.value = colorOptions[9].name
+      console.log('0键按下，颜色:', currentColor.value, 'hue:', fixedHue)
+    }
+    
     // C键清空
     if (key === 'c' || key === 'C') {
+      pg.colorMode(p.RGB)
       pg.background(255, 250, 245)
+      pg.colorMode(p.HSB, 360, 100, 100, 100)
     }
     
     // S键保存
@@ -197,7 +246,9 @@ const sketch = (p) => {
     // 保存当前绘制内容
     const oldPg = pg
     pg = p.createGraphics(p.windowWidth, p.windowHeight)
+    pg.colorMode(p.RGB)
     pg.background(255, 250, 245)
+    pg.colorMode(p.HSB, 360, 100, 100, 100)  // 重新设置HSB模式
     pg.image(oldPg, 0, 0)
   }
 }
@@ -235,23 +286,24 @@ onBeforeUnmount(() => {
     position: absolute;
     top: 20px;
     right: 20px;
-    background: rgba(255, 255, 255, 0.8);
+    background: rgba(0, 0, 0, 0.6);
     padding: 0.8rem 1.2rem;
     border-radius: 8px;
     backdrop-filter: blur(10px);
-    border: 1px solid rgba(200, 180, 220, 0.3);
-    color: #6B5B95;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #ffffff;
 
     .instruction {
       margin: 0 0 0.5rem 0;
       font-size: 0.85rem;
-      opacity: 0.9;
+      opacity: 1;
+      font-weight: 500;
     }
 
     .info p {
       margin: 0;
       font-size: 0.75rem;
-      opacity: 0.75;
+      opacity: 0.9;
     }
   }
 }

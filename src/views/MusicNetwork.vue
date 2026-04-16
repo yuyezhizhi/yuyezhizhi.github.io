@@ -336,25 +336,25 @@ onBeforeUnmount(() => {
     position: absolute;
     top: 20px;
     right: 20px;
-    background: rgba(0, 0, 0, 0.4);
+    background: rgba(0, 0, 0, 0.6);
     backdrop-filter: blur(10px);
-    padding: 1rem 1.5rem;
-    border-radius: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    color: #f77062;
+    padding: 0.8rem 1.2rem;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #ffffff;
     text-align: right;
 
     .instruction {
       margin: 0 0 0.3rem 0;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       font-weight: 500;
-      text-shadow: 0 0 10px rgba(247, 112, 98, 0.5);
+      opacity: 1;
     }
 
     .subtitle {
       margin: 0;
       font-size: 0.75rem;
-      opacity: 0.8;
+      opacity: 0.9;
     }
   }
 

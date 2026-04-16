@@ -15,10 +15,11 @@
 
 ## 更新摘要
 **变更内容**
-- 更新了分形树动画系统的技术实现，从周期性生成改为智能初始化系统
-- 新增了10只独特蝴蝶、8只独特蜜蜂、10只独特鸟类的详细描述
-- 增强了动物行为特征和飞行模式的技术说明
-- 更新了四季动画系统的实现细节
+- 新增了雪花积累效果系统，包括渐进式积雪出现机制和积雪透明度管理
+- 实现了绝对坐标传递系统，优化了分形树递归算法的精度
+- 改进了季节过渡系统，增加了冬季积雪的延迟出现和渐变效果
+- 优化了动物系统的行为模式，增强了春季蝴蝶、蜜蜂和夏季鸟类的智能飞行
+- 改进了落叶系统，实现了基于树枝末端位置的批量落叶机制
 
 ## 目录
 1. [项目概述](#项目概述)
@@ -26,12 +27,14 @@
 3. [核心技术实现](#核心技术实现)
 4. [分形树算法详解](#分形树算法详解)
 5. [智能动物系统](#智能动物系统)
-6. [性能优化策略](#性能优化策略)
-7. [用户交互设计](#用户交互设计)
-8. [路由与导航](#路由与导航)
-9. [部署与构建](#部署与构建)
-10. [故障排除指南](#故障排除指南)
-11. [总结](#总结)
+6. [雪花积累效果系统](#雪花积累效果系统)
+7. [季节过渡优化](#季节过渡优化)
+8. [性能优化策略](#性能优化策略)
+9. [用户交互设计](#用户交互设计)
+10. [路由与导航](#路由与导航)
+11. [部署与构建](#部署与构建)
+12. [故障排除指南](#故障排除指南)
+13. [总结](#总结)
 
 ## 项目概述
 
@@ -40,13 +43,14 @@
 ### 核心特性
 - **递归分形树生成**：基于数学原理的自相似树形结构
 - **智能动物系统**：独特的蝴蝶、蜜蜂、鸟类群，每只都有个性化特征
-- **四季动态切换**：春、夏、秋、冬四种不同的视觉风格
-- **环境特效**：雪花飘落、落叶飞舞、蝴蝶蜜蜂、鸟类飞行
+- **雪花积累效果**：冬季积雪的渐进式出现和透明度管理
+- **绝对坐标传递**：优化的分形树递归算法，提高渲染精度
+- **季节过渡优化**：平滑的四季切换和环境特效
 - **响应式设计**：适配各种屏幕尺寸的全屏动画体验
 - **高性能渲染**：优化的 p5.js 实现确保流畅的动画效果
 
 **章节来源**
-- [FractalTree.vue:1-769](file://src/views/FractalTree.vue#L1-L769)
+- [FractalTree.vue:1-866](file://src/views/FractalTree.vue#L1-L866)
 - [README.md:1-115](file://README.md#L1-L115)
 
 ## 项目结构
@@ -157,7 +161,8 @@ end
 ```mermaid
 flowchart TD
 Start([开始绘制]) --> CheckDepth{深度是否为0?}
-CheckDepth --> |是| DrawLeaf[绘制叶子/花朵]
+CheckDepth --> |是| RecordPoint[记录树枝末端位置]
+RecordPoint --> DrawLeaf[绘制叶子/积雪]
 CheckDepth --> |否| CalculateWind[计算微风摇摆]
 CalculateWind --> CalcEnd[计算终点坐标]
 CalcEnd --> DrawBranchLine[绘制主枝干]
@@ -170,7 +175,16 @@ DrawLeaf --> End
 ```
 
 **图表来源**
-- [FractalTree.vue:113-157](file://src/views/FractalTree.vue#L113-L157)
+- [FractalTree.vue:124-170](file://src/views/FractalTree.vue#L124-L170)
+
+### 绝对坐标传递系统
+
+**更新** 实现了绝对坐标传递机制，优化了分形树递归算法的精度和稳定性：
+
+- **树枝末端位置记录**：使用 `branchEndPoints` 数组存储每个分支的绝对坐标
+- **递归坐标传递**：在 `drawBranch` 函数中直接传递绝对坐标而非相对偏移
+- **积雪定位精确**：基于记录的绝对坐标精确放置积雪效果
+- **落叶生成优化**：利用绝对坐标生成更真实的落叶效果
 
 ### 参数化设计
 
@@ -202,7 +216,7 @@ subgraph "季节变化"
 L[春季] --> M[嫩绿叶子]
 N[夏季] --> O[浓绿叶子]
 P[秋季] --> Q[橙红叶子]
-R[冬季] --> S[白色雪花]
+R[冬季] --> S[白色积雪]
 end
 ```
 
@@ -210,7 +224,7 @@ end
 - [FractalTree.vue:130-138](file://src/views/FractalTree.vue#L130-L138)
 
 **章节来源**
-- [FractalTree.vue:113-157](file://src/views/FractalTree.vue#L113-L157)
+- [FractalTree.vue:124-170](file://src/views/FractalTree.vue#L124-L170)
 
 ## 智能动物系统
 
@@ -235,7 +249,7 @@ Bird->>Bird : 配置飞行路径和行为
 ```
 
 **图表来源**
-- [FractalTree.vue:224-484](file://src/views/FractalTree.vue#L224-L484)
+- [FractalTree.vue:298-718](file://src/views/FractalTree.vue#L298-L718)
 
 ### 春季动物系统
 
@@ -258,7 +272,7 @@ Bird->>Bird : 配置飞行路径和行为
   - **大小差异**：6-12像素不等
 
 **章节来源**
-- [FractalTree.vue:224-484](file://src/views/FractalTree.vue#L224-L484)
+- [FractalTree.vue:298-718](file://src/views/FractalTree.vue#L298-L718)
 
 ### 夏季鸟类系统
 
@@ -293,10 +307,100 @@ UpdatePos --> DrawAnimal[绘制动物]
 ```
 
 **图表来源**
-- [FractalTree.vue:224-484](file://src/views/FractalTree.vue#L224-L484)
+- [FractalTree.vue:298-718](file://src/views/FractalTree.vue#L298-L718)
 
 **章节来源**
-- [FractalTree.vue:224-484](file://src/views/FractalTree.vue#L224-L484)
+- [FractalTree.vue:298-718](file://src/views/FractalTree.vue#L298-L718)
+
+## 雪花积累效果系统
+
+### 渐进式积雪出现机制
+
+**新增** 实现了雪花积累效果系统，为冬季增添了真实的积雪体验：
+
+```mermaid
+sequenceDiagram
+participant Winter as 冬季开始
+participant SnowSystem as 雪花系统
+participant Branch as 树枝末端
+participant Snowflake as 积雪片
+Winter->>SnowSystem : 初始化冬季参数
+SnowSystem->>Branch : 记录树枝末端位置
+SnowSystem->>Snowflake : 生成积雪标识
+SnowSystem->>Snowflake : 设置透明度状态
+loop 每帧更新
+SnowSystem->>Snowflake : 递增透明度
+SnowSystem->>Branch : 检查积雪出现进度
+end
+```
+
+**图表来源**
+- [FractalTree.vue:208-252](file://src/views/FractalTree.vue#L208-L252)
+
+### 积雪参数配置
+
+| 参数 | 默认值 | 作用 | 影响效果 |
+|------|--------|------|----------|
+| `snowAppearDelay` | 300帧（5秒） | 积雪出现延迟 | 增加真实感 |
+| `snowAppearDuration` | 300帧（5秒） | 积雪出现持续时间 | 控制渐变速度 |
+| `branchSnowAlpha` | Map结构 | 积雪透明度管理 | 实现独立积雪控制 |
+| `branchSnowIdCounter` | 计数器 | 积雪标识生成 | 确保唯一性 |
+
+### 积雪绘制算法
+
+**更新** 实现了基于分支ID的稳定积雪绘制机制：
+
+- **延迟出现**：通过 `winterStartTime` 和 `snowAppearDelay` 控制积雪出现时机
+- **渐进透明度**：使用 `branchSnowAlpha` Map管理每片积雪的透明度
+- **固定大小范围**：通过分支ID计算积雪大小（3-6像素）
+- **高光效果**：添加透明度稍低的高光增强立体感
+
+**章节来源**
+- [FractalTree.vue:208-252](file://src/views/FractalTree.vue#L208-L252)
+
+## 季节过渡优化
+
+### 季节切换机制
+
+**更新** 改进了季节过渡系统，实现了更平滑的季节切换体验：
+
+```mermaid
+flowchart TD
+Start([季节检测]) --> CheckFrame{第一帧?}
+CheckFrame --> |是| RedrawBG[重绘渐变背景]
+CheckFrame --> |否| CheckChange{季节变化?}
+CheckChange --> |是| RedrawBG
+CheckChange --> |否| FadeClear[半透明覆盖清除]
+RedrawBG --> UpdateLastSeason[更新lastSeason]
+FadeClear --> Continue[继续渲染]
+UpdateLastSeason --> Continue
+Continue --> End([完成])
+```
+
+**图表来源**
+- [FractalTree.vue:52-65](file://src/views/FractalTree.vue#L52-L65)
+
+### 背景渐变优化
+
+**更新** 实现了更柔和的背景渐变效果：
+
+- **径向渐变**：使用 `createRadialGradient` 创建中心亮边缘暗的渐变
+- **柔和色彩**：背景色在中心和边缘之间平滑过渡
+- **季节适配**：每种季节使用不同的基础色调
+- **性能优化**：仅在第一帧或季节变化时重绘背景
+
+### 冬季特殊处理
+
+**更新** 为冬季添加了特殊的渲染优化：
+
+- **增加清除透明度**：冬季使用120的透明度避免雪花轨迹
+- **积雪初始化标记**：使用 `isWinterInitialized` 防止重复初始化
+- **积雪计时器重置**：切换季节时重置 `winterStartTime`
+- **积雪状态清理**：切换季节时清理 `branchSnowAlpha` Map
+
+**章节来源**
+- [FractalTree.vue:52-65](file://src/views/FractalTree.vue#L52-L65)
+- [FractalTree.vue:208-252](file://src/views/FractalTree.vue#L208-L252)
 
 ## 性能优化策略
 
@@ -349,6 +453,7 @@ Skip --> End
 - **生命周期管理**：组件卸载时清理 p5 实例
 - **帧率控制**：通过条件渲染减少不必要的计算
 - **动物持久化**：季节切换时保留动物对象
+- **积雪状态管理**：使用Map结构高效管理积雪状态
 
 **章节来源**
 - [vite.config.js:13-29](file://vite.config.js#L13-L29)
@@ -539,7 +644,9 @@ Deploy --> GitHubPages[GitHub Pages]
 
 - **算法创新**：基于数学原理的递归分形树实现
 - **智能动物系统**：独特的动物群，每只都有个性化特征
-- **视觉丰富**：四季变换和环境特效的完美融合
+- **雪花积累效果**：冬季积雪的真实渐进式出现机制
+- **绝对坐标传递**：优化的分形树递归算法，提高渲染精度
+- **季节过渡优化**：平滑的四季切换和环境特效
 - **性能优化**：现代构建工具和渲染优化策略
 - **用户体验**：直观的交互设计和响应式布局
 
