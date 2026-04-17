@@ -62,17 +62,11 @@ export const journeys = [
     id: 'wave-energy',
     title: '波与能量',
     subtitle: '物理之美的可视化探索',
-    description: '从弦波干涉到音频可视化，感受能量在空间中传播的韵律',
+    description: '从彩虹波浪到音频可视化，感受能量在空间中传播的韵律',
     icon: '〰️',
     color: 'linear-gradient(135deg, #00b4db 0%, #0083b0 100%)',
     duration: '5-8 分钟',
     artworks: [
-      {
-        id: 'wave-interference',
-        title: '弦波干涉',
-        narrative: '当两束波相遇，它们创造出美丽的干涉图案...',
-        duration: 60
-      },
       {
         id: 'rainbow-wave',
         title: '彩虹波浪',
@@ -113,13 +107,6 @@ export const journeys = [
         id: 'quicksand',
         title: '流沙坍塌',
         narrative: '看着流沙缓缓流动，感受时间的流逝...',
-        duration: '自由',
-        interactive: true
-      },
-      {
-        id: 'starlight-dance',
-        title: '星光舞蹈',
-        narrative: '星光跟随你的指尖起舞，你是这场舞蹈的指挥...',
         duration: '自由',
         interactive: true
       },

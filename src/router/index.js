@@ -122,12 +122,6 @@ const routes = [
 
 
   {
-    path: '/wave-interference',
-    name: 'WaveInterference',
-    component: () => import('../views/WaveInterference.vue'),
-    meta: { fullscreen: true }
-  },
-  {
     path: '/magnetic-field',
     name: 'MagneticField',
     component: () => import('../views/MagneticField.vue'),

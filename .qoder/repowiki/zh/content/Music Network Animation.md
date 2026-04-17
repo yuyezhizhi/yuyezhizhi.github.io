@@ -399,7 +399,7 @@ A --> C[现代背景模糊]
 A --> D[白色边框系统]
 A --> E[排版优化]
 A --> F[可读性提升]
-B --> G[rgba(255, 255, 255, 0.2)]
+B --> G[rgba(0, 0, 0, 0.6)]
 C --> H[backdrop-filter: blur(10px)]
 D --> I[border: 1px solid rgba(255, 255, 255, 0.2)]
 E --> J[font-size: 0.85rem/0.75rem]
@@ -437,7 +437,7 @@ F --> K[opacity: 1/0.9]
 #### 模糊效果实现
 ```css
 .controls {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(0, 0, 0, 0.6);
   backdrop-filter: blur(10px);
   /* 其他样式保持不变 */
 }

@@ -200,17 +200,6 @@ export const animations = [
   },
   // 新增动画
   {
-    id: 'wave-interference',
-    name: 'WaveInterference',
-    path: '/wave-interference',
-    category: 'wave',
-    title: '弦波干涉',
-    description: '多组弦波相互干涉形成的美丽图案',
-    difficulty: 'intermediate',
-    tags: ['弦波', '干涉', '物理'],
-    color: 'linear-gradient(135deg, #00b4db 0%, #0083b0 100%)'
-  },
-  {
     id: 'magnetic-field',
     name: 'MagneticField',
     path: '/magnetic-field',

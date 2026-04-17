@@ -339,7 +339,7 @@ F --> G[实时更新]
 Fireworks组件的控制面板经过全面的UI样式改进，采用了现代化的设计理念：
 
 #### 设计特性
-- **暗半透明背景**：使用 `rgba(255, 255, 255, 0.2)` 实现半透明黑色背景
+- **暗半透明背景**：使用 `rgba(0, 0, 0, 0.6)` 实现半透明黑色背景
 - **现代背景模糊效果**：启用 `backdrop-filter: blur(10px)` 提供毛玻璃效果
 - **白色边框**：添加 `1px solid rgba(255, 255, 255, 0.2)` 白色边框增强层次感
 - **改进的排版**：优化字体大小、权重和透明度设置
@@ -350,7 +350,7 @@ Fireworks组件的控制面板经过全面的UI样式改进，采用了现代化
 ```mermaid
 graph LR
 subgraph "控制面板样式"
-A[暗半透明背景<br/>rgba(255, 255, 255, 0.2)] --> B[背景模糊<br/>backdrop-filter: blur(10px)]
+A[暗半透明背景<br/>rgba(0, 0, 0, 0.6)] --> B[背景模糊<br/>backdrop-filter: blur(10px)]
 B --> C[白色边框<br/>border: 1px solid rgba(255, 255, 255, 0.2)]
 C --> D[改进排版<br/>font-size: 0.85rem, 0.75rem]
 D --> E[更好可读性<br/>opacity: 1, 0.9]
