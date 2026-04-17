@@ -1,5 +1,10 @@
 <template>
-  <div class="fullscreen-canvas" ref="canvasContainer"></div>
+  <div class="dancer-page">
+    <div class="fullscreen-canvas" ref="canvasContainer"></div>
+    <div class="controls">
+      <p class="instruction">点击触发粒子爆发 | 静止时产生烟花</p>
+    </div>
+  </div>
 </template>
 
 <script setup>
@@ -10,53 +15,105 @@ const canvasContainer = ref(null)
 let sketchInstance = null
 
 const sketch = (p) => {
-  let ribbons = []
-  let particles = []
+  // 创建单个舞者状态
+  function createDancer(id, hueBase, phaseOffset) {
+    return {
+      id,
+      hueBase,
+      phaseOffset,
+      x: 0, y: 0,
+      baseX: 0, baseY: 0,
+      vx: 0, vy: 0,
+      angle: 0,
+      dancePhase: phaseOffset,
+      danceSpeed: 0.022 + Math.random() * 0.006,
+      moveX: 0, moveY: 0,
+      rotationSpeed: 0.018 + Math.random() * 0.006,
+      rotationDirection: Math.random() < 0.5 ? 1 : -1,
+      targetDirection: 1,
+      currentDirectionSmooth: 1,
+      ribbons: [],
+      ribbonLights: [],
+      particles: [],
+    }
+  }
+
+  let dancers = []
   let stars = []
-  let ribbonLights = []  // 丝带上的光点
   let frame = 0
-  
+
   // 鼠标交互相关
   let mouseX_pos = 0, mouseY_pos = 0
-  let mouseTrail = []  // 鼠标拖尾
-  let mouseParticles = []  // 鼠标粒子
-  let mouseInfluenceRadius = 150  // 鼠标影响半径
-  let lastMouseX = 0, lastMouseY = 0  // 上次鼠标位置
-  let mouseStillTimer = 0  // 鼠标静止计时器
-  let fireworks = []  // 烟花数组
-  
-  // 音乐节奏相关
+  let mouseTrail = []
+  let mouseParticles = []
+  let mouseInfluenceRadius = 150
+  let lastMouseX = 0, lastMouseY = 0
+  let mouseStillTimer = 0
+  let fireworks = []
+
+  // 音乐节奏相关（全局共享）
   let audioContext = null
   let analyser = null
   let dataArray = null
-  let musicEnergy = 0  // 音乐能量值
-  let beatStrength = 0  // 节拍强度（现在用于控制旋转速度）
-  let prevBassEnergy = 0  // 上一帧的低音能量
-  let isMusicPlaying = false  // 音乐是否播放
-  let useSimulatedBeat = false  // 使用模拟节拍（测试用）
-  let simulatedBeatTimer = 0  // 模拟节拍计时器
-  let continuousRotation = 0  // 连续旋转角度
-  let rotationDirection = Math.random() < 0.5 ? 1 : -1  // 随机初始方向：1=顺时针，-1=逆时针
-  let lastDirectionChange = 0  // 上次改变方向的时间
-  let targetDirection = rotationDirection  // 目标方向（用于平滑过渡）
-  let currentDirectionSmooth = rotationDirection  // 当前平滑方向值
-  
-  // 舞者舞蹈相关变量
-  let dancerX, dancerY
-  let dancerAngle = 0
-  let dancePhase = 0
-  let danceSpeed = 0.025  // 适中的舞蹈速度
-  let dancerMoveX = 0
-  let dancerMoveY = 0
-  let rotationSpeed = 0.02  // 稳定的旋转速度
+  let musicEnergy = 0
+  let beatStrength = 0
+  let prevBassEnergy = 0
+  let isMusicPlaying = false
+  let useSimulatedBeat = false
+  let simulatedBeatTimer = 0
+  let targetDirection = 1
+  let currentDirectionSmooth = 1
+
+  // 3个舞者颜色主题（色相基础）
+  const dancerHues = [
+    120,  // 舞者1：淡绿色
+    260,  // 舞者2：紫色
+    30,   // 舞者3：橙金色
+  ]
+
+  // 初始化单个舞者的丝带和粒子
+  function initDancerData(dancer) {
+    dancer.ribbons = []
+    dancer.ribbonLights = []
+    dancer.particles = []
+
+    for (let i = 0; i < 32; i++) {
+      const angle = (i / 32) * Math.PI * 2
+      dancer.ribbons.push({
+        angle,
+        baseAngle: angle,
+        length: 115,
+        maxLength: 115,
+        waveOffset: Math.random() * Math.PI * 2,
+        waveSpeed: 0.04 + Math.random() * 0.03,
+        waveAmplitude: 25 + Math.random() * 25,
+        opacity: 76.5,
+        hue: dancer.hueBase + Math.random() * 40,
+        saturation: 30 + Math.random() * 20,
+        thickness: 6 + Math.random() * 4,
+        taperRatio: 0.15,
+        layer: Math.floor(Math.random() * 3),
+        curveIntensity: 0.3 + Math.random() * 0.4,
+        points: []
+      })
+    }
+
+    for (let i = 0; i < 130; i++) {
+      dancer.ribbonLights.push({
+        ribbonIndex: Math.floor(Math.random() * 32),
+        position: Math.random(),
+        size: Math.random() * 2 + 1,
+        twinkleSpeed: 0.03 + Math.random() * 0.04,
+        twinkleOffset: Math.random() * Math.PI * 2,
+        hue: dancer.hueBase + Math.random() * 60
+      })
+    }
+  }
 
   p.setup = () => {
     p.createCanvas(p.windowWidth, p.windowHeight)
     p.frameRate(60)
-    
-    dancerX = p.width / 2
-    dancerY = p.height / 2
-    
+
     // 初始化星星背景
     for (let i = 0; i < 200; i++) {
       stars.push({
@@ -67,100 +124,74 @@ const sketch = (p) => {
         twinkleOffset: Math.random() * Math.PI * 2
       })
     }
-    
-    // 初始化丝带（从中心向外扩散的光带）- 缩小一半
-    for (let i = 0; i < 32; i++) {  // 增加到32条
-      const angle = (i / 32) * Math.PI * 2
-      ribbons.push({
-        angle: angle,
-        baseAngle: angle,
-        length: 125,  // 缩小一半：250 -> 125
-        maxLength: 125,
-        waveOffset: Math.random() * Math.PI * 2,
-        waveSpeed: 0.04 + Math.random() * 0.03,
-        waveAmplitude: 25 + Math.random() * 25,
-        opacity: 76.5,
-        hue: 120 + Math.random() * 40,  // 淡绿色 (120-160度)
-        saturation: 30 + Math.random() * 20,  // 低饱和度，更淡雅
-        thickness: 6 + Math.random() * 4,  // 减小粗细，更飘逸
-        taperRatio: 0.15,  // 尾部更细（15%）
-        layer: Math.floor(Math.random() * 3),  // 分层：0=后层，1=中层，2=前层
-        curveIntensity: 0.3 + Math.random() * 0.4,  // 弯曲强度随机
-        points: []
-      })
-    }
-    
-    // 初始化光粒子
-    for (let i = 0; i < 150; i++) {
-      particles.push({
-        x: dancerX + (Math.random() - 0.5) * 500,
-        y: dancerY + (Math.random() - 0.5) * 500,
-        size: Math.random() * 4 + 1,
-        speed: Math.random() * 0.5 + 0.2,
-        angle: Math.random() * Math.PI * 2,
-        hue: Math.random() < 0.3 ? (220 + Math.random() * 80) : 0,  // 30%概率是蓝紫色，70%是白色
-        opacity: Math.random() * 100 + 50,
-        orbitRadius: Math.random() * 300 + 100,
-        orbitSpeed: (Math.random() - 0.5) * 0.02,
-        orbitAngle: Math.random() * Math.PI * 2
-      })
-    }
-    
-    // 初始化丝带上的闪烁光点
-    for (let i = 0; i < 400; i++) {
-      ribbonLights.push({
-        ribbonIndex: Math.floor(Math.random() * 32),
-        position: Math.random(),
-        size: Math.random() * 2 + 1,
-        twinkleSpeed: 0.03 + Math.random() * 0.04,
-        twinkleOffset: Math.random() * Math.PI * 2,
-        hue: Math.random() < 0.2 ? (220 + Math.random() * 80) : 0
-      })
-    }
-    
+
+    // 3个舞者分布在屏幕左中右三区域
+    const positions = [
+      { x: p.width * 0.25, y: p.height * 0.5 },
+      { x: p.width * 0.5,  y: p.height * 0.45 },
+      { x: p.width * 0.75, y: p.height * 0.5 },
+    ]
+
+    dancers = dancerHues.map((hue, i) => {
+      const d = createDancer(i, hue, i * Math.PI * 2 / 3)
+      d.baseX = positions[i].x
+      d.baseY = positions[i].y
+      d.x = d.baseX
+      d.y = d.baseY
+      d.targetDirection = d.rotationDirection
+      d.currentDirectionSmooth = d.rotationDirection
+      initDancerData(d)
+      return d
+    })
+
     mouseX_pos = p.width / 2
     mouseY_pos = p.height / 2
-    
-    // 直接启用模拟节拍模式（无需麦克风权限）
+
     useSimulatedBeat = true
     isMusicPlaying = true
   }
   
+  // 舞者排斥力（防止重叠）
+  function applyRepulsion() {
+    const minDist = 260  // 最小间距（约等于2倍丝带半径）
+    for (let i = 0; i < dancers.length; i++) {
+      for (let j = i + 1; j < dancers.length; j++) {
+        const a = dancers[i], b = dancers[j]
+        const dx = b.x - a.x
+        const dy = b.y - a.y
+        const dist = Math.sqrt(dx * dx + dy * dy)
+        if (dist < minDist && dist > 0) {
+          const force = (minDist - dist) / minDist * 0.8
+          const nx = dx / dist, ny = dy / dist
+          a.vx -= nx * force
+          a.vy -= ny * force
+          b.vx += nx * force
+          b.vy += ny * force
+        }
+      }
+    }
+    // 施加速度并衰减，同时限制在屏幕内
+    for (const d of dancers) {
+      d.x += d.vx
+      d.y += d.vy
+      d.vx *= 0.85
+      d.vy *= 0.85
+      // 边界弹回
+      const margin = 130
+      if (d.x < margin) { d.x = margin; d.vx = Math.abs(d.vx) }
+      if (d.x > p.width - margin) { d.x = p.width - margin; d.vx = -Math.abs(d.vx) }
+      if (d.y < margin) { d.y = margin; d.vy = Math.abs(d.vy) }
+      if (d.y > p.height - margin) { d.y = p.height - margin; d.vy = -Math.abs(d.vy) }
+    }
+  }
+
   // 鼠标移动跟踪
   p.mouseMoved = () => {
     mouseX_pos = p.mouseX
     mouseY_pos = p.mouseY
-    
-    // 重置静止计时器
     mouseStillTimer = 0
     lastMouseX = p.mouseX
     lastMouseY = p.mouseY
-    
-    // 添加拖尾
-    mouseTrail.push({
-      x: p.mouseX,
-      y: p.mouseY,
-      life: 30,
-      maxLife: 30
-    })
-    
-    // 移动时释放粒子
-    if (frame % 3 === 0) {
-      for (let i = 0; i < 3; i++) {
-        const angle = Math.random() * Math.PI * 2
-        const speed = Math.random() * 2 + 1
-        mouseParticles.push({
-          x: p.mouseX,
-          y: p.mouseY,
-          vx: Math.cos(angle) * speed,
-          vy: Math.sin(angle) * speed,
-          life: 40 + Math.random() * 20,
-          maxLife: 40 + Math.random() * 20,
-          size: Math.random() * 3 + 1,
-          hue: Math.random() < 0.3 ? (220 + Math.random() * 80) : 0
-        })
-      }
-    }
   }
   
   // 鼠标点击产生粒子爆发
@@ -168,29 +199,31 @@ const sketch = (p) => {
     mouseX_pos = p.mouseX
     mouseY_pos = p.mouseY
     
-    // 切换模拟节拍的快慢
-    if (frame % 30 === 0) {  // 每30帧点击才响应一次，避免太快
-      simulatedBeatTimer = 0  // 重置计时器，立即产生节拍
-      console.log('🥁 手动触发节拍!')
-    }
-    
-    // 爆发更多粒子
-    for (let i = 0; i < 20; i++) {
-      const angle = (i / 20) * Math.PI * 2
-      const speed = 3 + Math.random() * 4
-      mouseParticles.push({
-        x: p.mouseX,
-        y: p.mouseY,
-        vx: Math.cos(angle) * speed,
-        vy: Math.sin(angle) * speed,
-        life: 50 + Math.random() * 30,
-        maxLife: 50 + Math.random() * 30,
-        size: Math.random() * 4 + 2,
-        hue: Math.random() < 0.4 ? (220 + Math.random() * 80) : 0
-      })
-    }
+    // 点击发射烟花
+    createFirework(p.mouseX, p.mouseY)
   }
   
+  // 更新单个舞者的运动状态
+  function updateDancerMotion(d) {
+    d.dancePhase += d.danceSpeed
+
+    // 随机改变方向（每个舞者独立）
+    const now = Date.now()
+    if (!d._lastDirChange) d._lastDirChange = now
+    if (!d._dirThreshold) d._dirThreshold = 800 + Math.random() * 2200
+    if (now - d._lastDirChange > d._dirThreshold) {
+      d.targetDirection = -d.targetDirection
+      d._lastDirChange = now
+      d._dirThreshold = 800 + Math.random() * 2200
+    }
+    d.currentDirectionSmooth += (d.targetDirection - d.currentDirectionSmooth) * 0.03
+    d.angle += (0.01 + beatStrength * 0.02) * d.currentDirectionSmooth
+
+    // 独立的漂移运动（加入相位偏移使三者不同步）
+    d.moveX = Math.sin(d.dancePhase * 1.3 + d.phaseOffset) * 85 + Math.cos(d.dancePhase * 0.7) * 50
+    d.moveY = Math.cos(d.dancePhase * 1.1 + d.phaseOffset) * 120 + Math.sin(d.dancePhase * 0.9) * 80
+  }
+
   // 启动音乐分析（使用麦克风或系统音频）
   function startMusicAnalysis() {
     try {
@@ -268,10 +301,8 @@ const sketch = (p) => {
       }
       
       // 平滑过渡到目标方向（更慢的缓动效果）
-      const smoothSpeed = 0.03  // 更小的值，更慢更优雅
+      const smoothSpeed = 0.03
       currentDirectionSmooth += (targetDirection - currentDirectionSmooth) * smoothSpeed
-      
-      continuousRotation += (0.01 + beatStrength * 0.02) * currentDirectionSmooth  // 使用平滑后的方向
       return
     }
     
@@ -306,52 +337,169 @@ const sketch = (p) => {
   
   // 创建烟花
   function createFirework(x, y) {
+    // 限制同时存在的烟花数量，防止性能爆炸
+    if (fireworks.length >= 5) return
     const particleCount = 30 + Math.floor(Math.random() * 20)  // 30-50个粒子
-    const hue = Math.random() * 360  // 随机颜色
     const particles = []
     
     for (let i = 0; i < particleCount; i++) {
-      const angle = (i / particleCount) * Math.PI * 2
-      const speed = 2 + Math.random() * 3
+      const angle = (i / particleCount) * Math.PI * 2 + Math.random() * 0.5
+      const speed = 3 + Math.random() * 5
       particles.push({
         x: x,
         y: y,
         vx: Math.cos(angle) * speed,
         vy: Math.sin(angle) * speed,
-        life: 60 + Math.random() * 30,  // 60-90帧生命周期
-        maxLife: 60 + Math.random() * 30,
-        size: 2 + Math.random() * 3,
-        hue: hue + Math.random() * 30 - 15  // slight color variation
+        life: 40 + Math.random() * 20,
+        maxLife: 40 + Math.random() * 20,
+        size: 0.5 + Math.random() * 1,  // 更小的粒子
+        hue: 0  // 白色
       })
     }
     
-    fireworks.push({
-      particles: particles
-    })
+    fireworks.push({ particles })
   }
   
+  // 绘制单个舞者的丝带
+  function drawDancerRibbons(d) {
+    const currentX = d.x + d.moveX
+    const currentY = d.y + d.moveY
+    d.ribbons.sort((a, b) => a.layer - b.layer)
+
+    for (let ribbon of d.ribbons) {
+      ribbon.length = ribbon.maxLength
+      const wave = Math.sin(frame * ribbon.waveSpeed + ribbon.waveOffset) * ribbon.waveAmplitude
+      const danceInfluencedAngle = ribbon.baseAngle + d.angle * 0.5
+      const musicWaveBoost = 1 + beatStrength * 0.3 + musicEnergy * 0.2
+
+      const mouseForceX = currentX - mouseX_pos
+      const mouseForceY = currentY - mouseY_pos
+      const mDist = Math.sqrt(mouseForceX * mouseForceX + mouseForceY * mouseForceY)
+      let mouseAngleOffset = 0
+      if (mDist < mouseInfluenceRadius && mDist > 0) {
+        const influence = (1 - mDist / mouseInfluenceRadius) * 0.05
+        mouseAngleOffset = Math.atan2(mouseForceY, mouseForceX) * influence
+      }
+
+      ribbon.points = []
+      const segments = 28
+      if (!ribbon.pointVelocity) {
+        ribbon.pointVelocity = new Array(segments + 1).fill(0)
+        ribbon.pointAngle = new Array(segments + 1).fill(0)
+      }
+
+      const directionFactor = d.currentDirectionSmooth >= 0 ? 1 : -1
+
+      for (let i = 0; i <= segments; i++) {
+        const t = i / segments
+        const currentLength = ribbon.length * t
+        const targetVelocity = (0.01 + beatStrength * 0.02) * d.currentDirectionSmooth * (1.0 - t * 0.8)
+        ribbon.pointVelocity[i] += (targetVelocity - ribbon.pointVelocity[i]) * 0.08
+        ribbon.pointAngle[i] += ribbon.pointVelocity[i]
+        const pointRotation = ribbon.pointAngle[i]
+
+        const wavePhase = frame * ribbon.waveSpeed + ribbon.waveOffset
+        const musicInfluenceAtPoint = (1 - t) * beatStrength
+        const decayFactor = Math.exp(-t * 1.5)
+        const baseWaveEffect = Math.sin(wavePhase + t * 2 * directionFactor) * wave * t * 0.3 * decayFactor
+        const baseSecondaryWave = Math.cos(wavePhase * 1.1 + t * 3 * directionFactor) * wave * 0.1 * t * decayFactor
+        const musicBoostedWave = Math.sin(wavePhase + t * 1.8 * directionFactor) * wave * t * 0.35 * musicInfluenceAtPoint * decayFactor
+        const musicBoostedSecondary = Math.cos(wavePhase * 1.0 + t * 2.5 * directionFactor) * wave * 0.12 * t * musicInfluenceAtPoint * decayFactor
+        const waveEffect = (baseWaveEffect + musicBoostedWave) * musicWaveBoost
+        const secondaryWave = baseSecondaryWave + musicBoostedSecondary
+        const skirtCurveDecay = Math.exp(-t * 2.0)
+        const skirtCurve = Math.sin(t * Math.PI * directionFactor) * 15 * ribbon.curveIntensity * (1 + musicInfluenceAtPoint * 0.1) * skirtCurveDecay
+        const angleOffset = (waveEffect * 0.0025 + secondaryWave * 0.0015 + skirtCurve * 0.0008 + mouseAngleOffset) * 0.95
+        const angle = danceInfluencedAngle + pointRotation + angleOffset
+        ribbon.points.push({
+          x: currentX + Math.cos(angle) * currentLength,
+          y: currentY + Math.sin(angle) * currentLength
+        })
+      }
+
+      const layerOpacity = ribbon.layer === 0 ? 0.15 : (ribbon.layer === 1 ? 0.25 : 0.35)
+      if (ribbon.points.length > 1) {
+        p.drawingContext.save()
+        p.drawingContext.shadowBlur = 8 + ribbon.layer * 4
+        const lightness = 88 + Math.random() * 7
+        p.drawingContext.shadowColor = `hsla(${ribbon.hue}, ${ribbon.saturation}%, ${lightness}%, ${layerOpacity * 0.5})`
+        p.noFill()
+        p.strokeCap(p.ROUND)
+        p.strokeJoin(p.ROUND)
+
+        for (let layer = 0; layer < 2; layer++) {
+          const layerRatio = layer / 1
+          const offset = (layerRatio - 0.5) * ribbon.thickness * 1.2
+          const layerAlpha = (0.05 + layerRatio * 0.15) * (layerOpacity / 0.35)
+          for (let i = 0; i < ribbon.points.length - 1; i++) {
+            const t = i / (ribbon.points.length - 1)
+            const taper = 1 - t * (1 - ribbon.taperRatio)
+            const pt = ribbon.points[i], npt = ribbon.points[i + 1]
+            const dx = npt.x - pt.x, dy = npt.y - pt.y
+            const len = Math.sqrt(dx * dx + dy * dy)
+            if (len === 0) continue
+            const perpX = -dy / len, perpY = dx / len
+            p.stroke(`hsla(${ribbon.hue}, ${ribbon.saturation}%, 92%, ${layerAlpha})`)
+            p.strokeWeight(ribbon.thickness * taper)
+            p.line(pt.x + perpX * offset, pt.y + perpY * offset, npt.x + perpX * offset, npt.y + perpY * offset)
+          }
+        }
+        p.drawingContext.restore()
+      }
+    }
+
+    // 丝带光点
+    for (let light of d.ribbonLights) {
+      const ribbon = d.ribbons[light.ribbonIndex]
+      if (!ribbon || ribbon.points.length === 0) continue
+      const pointIndex = Math.floor(light.position * (ribbon.points.length - 1))
+      const point = ribbon.points[pointIndex]
+      if (!point) continue
+      const twinkle = Math.sin(frame * light.twinkleSpeed + light.twinkleOffset) * 0.5 + 0.5
+      const alpha = twinkle * 200 + 55
+      p.drawingContext.save()
+      p.drawingContext.shadowBlur = 10
+      p.drawingContext.shadowColor = `hsla(${light.hue}, 90%, 95%, ${alpha / 255})`
+      p.noStroke()
+      p.fill(light.hue, 90, 85, alpha)
+      p.circle(point.x, point.y, light.size)
+      p.drawingContext.restore()
+    }
+
+    // 身体 + 头部
+    p.push()
+    p.translate(currentX, currentY)
+    p.rotate(d.angle)
+    p.drawingContext.save()
+    p.drawingContext.shadowBlur = 15
+    p.drawingContext.shadowColor = 'rgba(255,255,255,0.5)'
+    p.noStroke()
+    p.fill(255, 255, 255, 180)
+    p.ellipse(0, 0, 70, 30)
+    p.drawingContext.restore()
+    p.drawingContext.save()
+    p.drawingContext.shadowBlur = 8
+    p.drawingContext.shadowColor = 'rgba(0,0,0,0.5)'
+    p.fill(0, 0, 0, 255)
+    p.circle(0, 0, 25)
+    p.drawingContext.restore()
+    p.pop()
+  }
+
   p.draw = () => {
     frame++
-    
-    // 分析音乐节奏
     analyzeMusic()
-    
-    // 检测鼠标是否静止
-    const mouseDist = Math.sqrt((mouseX_pos - lastMouseX) ** 2 + (mouseY_pos - lastMouseY) ** 2)
-    if (mouseDist < 2) {  // 鼠标移动小于2像素视为静止
+
+    // 鼠标静止检测
+    const mdx = mouseX_pos - lastMouseX, mdy = mouseY_pos - lastMouseY
+    if (Math.sqrt(mdx * mdx + mdy * mdy) < 2) {
       mouseStillTimer++
-      // 每60帧（约1秒）放一次烟花
-      if (mouseStillTimer >= 60) {
-        createFirework(mouseX_pos, mouseY_pos)
-        mouseStillTimer = 0  // 重置计时器
-      }
-    } else {
-      mouseStillTimer = 0  // 鼠标移动，重置计时器
-    }
+      if (mouseStillTimer >= 60) { createFirework(mouseX_pos, mouseY_pos); mouseStillTimer = 0 }
+    } else { mouseStillTimer = 0 }
     lastMouseX = mouseX_pos
     lastMouseY = mouseY_pos
-    
-    // 柔和暗色渐变背景
+
+    // 背景
     const bgGradient = p.drawingContext.createLinearGradient(0, 0, 0, p.height)
     bgGradient.addColorStop(0, '#2D2438')
     bgGradient.addColorStop(0.4, '#1E2835')
@@ -360,362 +508,103 @@ const sketch = (p) => {
     p.drawingContext.fillStyle = bgGradient
     p.noStroke()
     p.rect(0, 0, p.width, p.height)
-    
-    // 绘制星星
+
+    // 星星
     for (let star of stars) {
       const twinkle = Math.sin(frame * star.twinkleSpeed + star.twinkleOffset) * 0.5 + 0.5
-      const alpha = twinkle * 200 + 55
-      
       p.noStroke()
-      p.fill(255, 255, 255, alpha)
+      p.fill(255, 255, 255, twinkle * 200 + 55)
       p.circle(star.x, star.y, star.size)
     }
-    
-    // 更新舞蹈状态 - 平滑连续旋转
-    dancePhase += danceSpeed
-    
-    // 每5秒随机改变旋转方向
-    if (frame % 300 === 0) {
-      rotationDirection = -rotationDirection  // 反转方向
-    }
-    
-    // 持续稳定旋转
-    dancerAngle += rotationSpeed * rotationDirection
-    
-    // 舞者在屏幕上优雅移动 - 加大上下范围
-    dancerMoveX = Math.sin(dancePhase * 1.3) * 100 + Math.cos(dancePhase * 0.7) * 60
-    dancerMoveY = Math.cos(dancePhase * 1.1) * 150 + Math.sin(dancePhase * 0.9) * 100  // 上下范围加大
-    
-    const currentDancerX = dancerX + dancerMoveX
-    const currentDancerY = dancerY + dancerMoveY
-    
-    // 绘制舞者身体（白色椭圆）
-    p.push()
-    p.translate(currentDancerX, currentDancerY)
-    p.rotate(dancerAngle)
-    
-    // 身体 - 白色半透明椭圆（更扁，与头部协调）
-    p.drawingContext.save()
-    p.drawingContext.shadowBlur = 15
-    p.drawingContext.shadowColor = 'rgba(255, 255, 255, 0.5)'
-    p.noStroke()
-    p.fill(255, 255, 255, 180)  // 白色半透明
-    p.ellipse(0, 0, 70, 30)  // 宽70，高30，非常扁的椭圆
-    p.drawingContext.restore()
-    
-    p.pop()
-    
-    // 按层级排序绘制：后层->中层->前层
-    ribbons.sort((a, b) => a.layer - b.layer)
-    
-    // 绘制丝带光带
-    for (let ribbon of ribbons) {
-      // 更新丝带长度（保持最大，不再增长）
-      ribbon.length = ribbon.maxLength
-      
-      // 丝带基础波动
-      const wave = Math.sin(frame * ribbon.waveSpeed + ribbon.waveOffset) * ribbon.waveAmplitude
-      
-      // 丝带受舞蹈影响 - 使用连续旋转
-      const danceInfluencedAngle = ribbon.baseAngle + dancerAngle * 0.5
-      
-      // 音乐节拍影响：轻微调整波动幅度（不再大幅跳动）
-      const musicWaveBoost = 1 + beatStrength * 0.3 + musicEnergy * 0.2
-      
-      // 计算鼠标对丝带的影响
-      const mouseForceX = currentDancerX - mouseX_pos
-      const mouseForceY = currentDancerY - mouseY_pos
-      const mouseDist = Math.sqrt(mouseForceX * mouseForceX + mouseForceY * mouseForceY)
-      let mouseAngleOffset = 0
-      
-      if (mouseDist < mouseInfluenceRadius && mouseDist > 0) {
-        const influence = (1 - mouseDist / mouseInfluenceRadius) * 0.05
-        mouseAngleOffset = Math.atan2(mouseForceY, mouseForceX) * influence
-      }
-      
-      // 计算丝带上的点 - 减少分段数提升性能
-      ribbon.points = []
-      const segments = 30  // 从40降低到30，大幅提升性能
-      
-      // 关键：使用速度-加速度模型实现真实惯性
-      // 初始化（如果不存在）
-      if (!ribbon.pointVelocity) {
-        ribbon.pointVelocity = []
-        ribbon.pointAngle = []
-        for (let i = 0; i <= segments; i++) {
-          ribbon.pointVelocity.push(0)  // 每点的旋转速度
-          ribbon.pointAngle.push(0)     // 每点的旋转角度
-        }
-      }
-      
-      for (let i = 0; i <= segments; i++) {
-        const t = i / segments
-        const currentLength = ribbon.length * t
-        
-        // 目标旋转速度：根部快，尾部慢，方向由 currentDirectionSmooth 决定
-        const targetVelocity = (0.01 + beatStrength * 0.02) * currentDirectionSmooth * (1.0 - t * 0.8)
-        
-        // 计算加速度（趋向目标速度）
-        const acceleration = (targetVelocity - ribbon.pointVelocity[i]) * 0.08  // 0.08是响应速度
-        
-        // 更新速度
-        ribbon.pointVelocity[i] += acceleration
-        
-        // 积分得到角度
-        ribbon.pointAngle[i] += ribbon.pointVelocity[i]
-        
-        // 使用该点的旋转角度（带惯性）
-        const pointRotation = ribbon.pointAngle[i]
-        
-        // 计算波浪效果 - 中国舞风格：根部跟随节奏，尾部极慢跟随，且会慢慢恢复平直
-        const wavePhase = frame * ribbon.waveSpeed + ribbon.waveOffset
-        
-        // 音乐影响只在根部（t接近0时最强，向尾部递减）
-        const musicInfluenceAtPoint = (1 - t) * beatStrength  // 根部100%影响，尾部0%
-        
-        // 关键修复：根据旋转方向确定方向因子，确保逆时针时波动反向
-        const directionFactor = currentDirectionSmooth >= 0 ? 1 : -1
-        
-        // 基础波动（整体都有，但较弱）- 尾部非常慢，且会衰减
-        const decayFactor = Math.exp(-t * 1.5)  // 指数衰减：t=0时为1，t=1时为0.22
-        const baseWaveEffect = Math.sin(wavePhase + t * 2 * directionFactor) * wave * t * 0.3 * decayFactor
-        const baseSecondaryWave = Math.cos(wavePhase * 1.1 + t * 3 * directionFactor) * wave * 0.1 * t * decayFactor
-        
-        // 音乐增强的波动（主要在根部）- 也会快速衰减
-        const musicBoostedWave = Math.sin(wavePhase + t * 1.8 * directionFactor) * wave * t * 0.35 * musicInfluenceAtPoint * decayFactor
-        const musicBoostedSecondary = Math.cos(wavePhase * 1.0 + t * 2.5 * directionFactor) * wave * 0.12 * t * musicInfluenceAtPoint * decayFactor
-        
-        // 合并两种波动
-        const waveEffect = (baseWaveEffect + musicBoostedWave) * musicWaveBoost
-        const secondaryWave = baseSecondaryWave + musicBoostedSecondary
-        
-        // 裙摆曲线：根部固定，中间弯曲，尾部极慢跟随，且会逐渐恢复平直
-        // 关键修复：曲线方向也需要随旋转方向反转
-        const skirtCurveDecay = Math.exp(-t * 2.0)  // 更强的衰减，让尾部更快恢复平直
-        const skirtCurve = Math.sin(t * Math.PI * directionFactor) * 15 * ribbon.curveIntensity * (1 + musicInfluenceAtPoint * 0.1) * skirtCurveDecay
-        
-        // 关键：添加恢复直线的弹性力
-        // 当没有外力时，裙摆会趋向于直线（angleOffset = 0）
-        const restoreForce = 0.95  // 恢复系数，越接近1恢复越慢
-        
-        // 计算角度偏移（加入鼠标影响和点位旋转）
-        const angleOffset = (waveEffect * 0.0025 + secondaryWave * 0.0015 + skirtCurve * 0.0008 + mouseAngleOffset) * restoreForce
-        const angle = danceInfluencedAngle + pointRotation + angleOffset
-        
-        const x = currentDancerX + Math.cos(angle) * currentLength
-        const y = currentDancerY + Math.sin(angle) * currentLength
-        
-        ribbon.points.push({ x, y })
-      }
-      
-      // 根据层级设置不同的透明度
-      const layerOpacity = ribbon.layer === 0 ? 0.15 : (ribbon.layer === 1 ? 0.25 : 0.35)
-      
-      // 设置模糊效果
-      if (ribbon.points.length > 1) {
-        p.drawingContext.save()
-        p.drawingContext.shadowBlur = 8 + ribbon.layer * 4  // 前层模糊更大
-        const lightness = 88 + Math.random() * 7
-        p.drawingContext.shadowColor = `hsla(${ribbon.hue}, ${ribbon.saturation}%, ${lightness}%, ${layerOpacity * 0.5})`
-        
-        p.noFill()
-        p.strokeCap(p.ROUND)
-        p.strokeJoin(p.ROUND)
-        
-        // 绘制2层线条（减少层数提升性能）
-        const layers = 2
-        for (let layer = 0; layer < layers; layer++) {
-          const layerRatio = layer / (layers - 1)
-          const offset = (layerRatio - 0.5) * ribbon.thickness * 1.2
-          const layerAlpha = (0.05 + layerRatio * 0.15) * (layerOpacity / 0.35)
-          
-          for (let i = 0; i < ribbon.points.length - 1; i++) {
-            const t = i / (ribbon.points.length - 1)
-            const taper = 1 - t * (1 - ribbon.taperRatio)
-            const point = ribbon.points[i]
-            const nextPoint = ribbon.points[i + 1]
-            
-            const dx = nextPoint.x - point.x
-            const dy = nextPoint.y - point.y
-            const len = Math.sqrt(dx * dx + dy * dy)
-            if (len === 0) continue
-            
-            const perpX = -dy / len
-            const perpY = dx / len
-            
-            const offsetX1 = point.x + perpX * offset
-            const offsetY1 = point.y + perpY * offset
-            const offsetX2 = nextPoint.x + perpX * offset
-            const offsetY2 = nextPoint.y + perpY * offset
-            
-            p.stroke(`hsla(${ribbon.hue}, ${ribbon.saturation}%, 92%, ${layerAlpha})`)
-            p.strokeWeight(ribbon.thickness * taper)
-            p.line(offsetX1, offsetY1, offsetX2, offsetY2)
-          }
-        }
-        
-        p.drawingContext.restore()
-      }
-      
-      // 绘制丝带上的闪烁光点
-    }
-    
-    // 绘制丝带上的光点
-    for (let light of ribbonLights) {
-      const ribbon = ribbons[light.ribbonIndex]
-      if (!ribbon || ribbon.points.length === 0) continue
-      
-      // 计算光点在丝带上的位置
-      const pointIndex = Math.floor(light.position * (ribbon.points.length - 1))
-      const point = ribbon.points[pointIndex]
-      if (!point) continue
-      
-      // 闪烁效果
-      const twinkle = Math.sin(frame * light.twinkleSpeed + light.twinkleOffset) * 0.5 + 0.5
-      const alpha = twinkle * 200 + 55
-      
-      p.drawingContext.save()
-      p.drawingContext.shadowBlur = 10
-      p.drawingContext.shadowColor = `hsla(${light.hue}, 90%, 95%, ${alpha / 255})`
-      
-      p.noStroke()
-      // 白色光点为主，偶尔有蓝紫色
-      const lightness = light.hue === 0 ? 95 : 85
-      p.fill(light.hue, 90, lightness, alpha)
-      p.circle(point.x, point.y, light.size)
-      
-      p.drawingContext.restore()
-    }
-    
-    // 绘制鼠标拖尾光晕
-    for (let i = mouseTrail.length - 1; i >= 0; i--) {
-      const trail = mouseTrail[i]
-      const lifeRatio = trail.life / trail.maxLife
-      const alpha = lifeRatio * 100
-      
-      p.drawingContext.save()
-      p.drawingContext.shadowBlur = 20
-      p.drawingContext.shadowColor = `hsla(0, 50%, 95%, ${alpha / 255})`
-      
-      const gradient = p.drawingContext.createRadialGradient(
-        trail.x, trail.y, 0,
-        trail.x, trail.y, 30 * lifeRatio
-      )
-      gradient.addColorStop(0, `hsla(0, 50%, 95%, ${alpha / 255})`)
-      gradient.addColorStop(1, `hsla(0, 50%, 95%, 0)`)
-      
-      p.drawingContext.fillStyle = gradient
-      p.noStroke()
-      p.circle(trail.x, trail.y, 60 * lifeRatio)
-      p.drawingContext.restore()
-      
-      trail.life--
-      if (trail.life <= 0) {
-        mouseTrail.splice(i, 1)
-      }
-    }
-    
+
+    // 更新每个舞者运动 + 排斥力
+    for (const d of dancers) updateDancerMotion(d)
+    applyRepulsion()
+
+    // 绘制每个舞者
+    for (const d of dancers) drawDancerRibbons(d)
+
     // 绘制鼠标粒子
     for (let i = mouseParticles.length - 1; i >= 0; i--) {
       const particle = mouseParticles[i]
-      
-      // 更新位置
       particle.x += particle.vx
       particle.y += particle.vy
       particle.vx *= 0.98
       particle.vy *= 0.98
       particle.life--
-      
-      if (particle.life <= 0) {
-        mouseParticles.splice(i, 1)
-        continue
-      }
-      
+      if (particle.life <= 0) { mouseParticles.splice(i, 1); continue }
       const lifeRatio = particle.life / particle.maxLife
       const alpha = lifeRatio * 200
-      
       p.drawingContext.save()
       p.drawingContext.shadowBlur = 8
       p.drawingContext.shadowColor = `hsla(${particle.hue}, 80%, 90%, ${alpha / 255})`
-      
       p.noStroke()
       p.fill(particle.hue, 80, 95, alpha)
       p.circle(particle.x, particle.y, particle.size * lifeRatio)
-      
       p.drawingContext.restore()
     }
 
     // 绘制烟花
     for (let i = fireworks.length - 1; i >= 0; i--) {
       const fw = fireworks[i]
-      
-      // 更新烟花粒子
       for (let j = fw.particles.length - 1; j >= 0; j--) {
         const ptc = fw.particles[j]
         ptc.x += ptc.vx
         ptc.y += ptc.vy
-        ptc.vy += 0.05  // 重力
-        ptc.vx *= 0.99  // 空气阻力
+        ptc.vy += 0.05
+        ptc.vx *= 0.99
         ptc.vy *= 0.99
         ptc.life--
-        
-        if (ptc.life <= 0) {
-          fw.particles.splice(j, 1)
-          continue
-        }
-        
+        if (ptc.life <= 0) { fw.particles.splice(j, 1); continue }
         const lifeRatio = ptc.life / ptc.maxLife
-        const alpha = lifeRatio * 255
-        
-        p.drawingContext.save()
-        p.drawingContext.shadowBlur = 10
-        p.drawingContext.shadowColor = `hsla(${ptc.hue}, 100%, 70%, ${alpha / 255})`
-        
-        p.noStroke()
-        p.fill(ptc.hue, 100, 70, alpha)
-        p.circle(ptc.x, ptc.y, ptc.size * lifeRatio)
-        
-        p.drawingContext.restore()
+        const alpha = lifeRatio
+        const ctx = p.drawingContext
+        ctx.save()
+        // 白色外圈光晕（无lighter，避免性能问题）
+        ctx.shadowBlur = 20
+        ctx.shadowColor = `rgba(255, 255, 255, ${alpha})`
+        ctx.beginPath()
+        ctx.arc(ptc.x, ptc.y, ptc.size * lifeRatio * 2, 0, Math.PI * 2)
+        ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`
+        ctx.fill()
+        ctx.restore()
       }
-      
-      // 移除已结束的烟花
-      if (fw.particles.length === 0) {
-        fireworks.splice(i, 1)
-      }
+      if (fw.particles.length === 0) fireworks.splice(i, 1)
     }
     
-    // 绘制头部（在最上层，纯黑色）
-    p.push()
-    p.translate(currentDancerX, currentDancerY)
-    p.rotate(dancerAngle)
-    
-    p.drawingContext.save()
-    p.drawingContext.shadowBlur = 8
-    p.drawingContext.shadowColor = 'rgba(0, 0, 0, 0.5)'
-    p.noStroke()
-    p.fill(0, 0, 0, 255)  // 纯黑色
-    p.circle(0, 0, 25)  // 在身体中心，直径25
-    p.drawingContext.restore()
-    
-    p.pop()
-    
-    // 显示提示文字（右上角）
-    p.push()
-    p.noStroke()
-    p.fill(200, 220, 255, 180)
-    p.textSize(14)
-    p.textAlign(p.RIGHT, p.TOP)
-    p.text('✨ 光之舞者', p.width - 20, 20)
-    p.fill(180, 200, 240, 130)
-    p.textSize(12)
-    p.text('静静观赏，如水般流动 🎵', p.width - 20, 42)
-    p.pop()
+    // 鼠标粒子
+    for (let i = mouseParticles.length - 1; i >= 0; i--) {
+      const particle = mouseParticles[i]
+      particle.x += particle.vx; particle.y += particle.vy
+      particle.vx *= 0.98; particle.vy *= 0.98
+      particle.life--
+      if (particle.life <= 0) { mouseParticles.splice(i, 1); continue }
+      const lifeRatio = particle.life / particle.maxLife
+      const alpha = lifeRatio * 200
+      p.drawingContext.save()
+      p.drawingContext.shadowBlur = 8
+      p.drawingContext.shadowColor = `hsla(${particle.hue}, 80%, 90%, ${alpha / 255})`
+      p.noStroke()
+      p.fill(particle.hue, 80, 95, alpha)
+      p.circle(particle.x, particle.y, particle.size * lifeRatio)
+      p.drawingContext.restore()
+    }
   }
   
   p.windowResized = () => {
     p.resizeCanvas(p.windowWidth, p.windowHeight)
-    dancerX = p.width / 2
-    dancerY = p.height / 2
+    // 重新分布3个舞者
+    const positions = [
+      { x: p.width * 0.25, y: p.height * 0.5 },
+      { x: p.width * 0.5,  y: p.height * 0.45 },
+      { x: p.width * 0.75, y: p.height * 0.5 },
+    ]
+    dancers.forEach((d, i) => {
+      d.baseX = positions[i].x
+      d.baseY = positions[i].y
+      d.x = d.baseX
+      d.y = d.baseY
+    })
   }
 }
 
@@ -733,9 +622,42 @@ onUnmounted(() => {
 })
 </script>
 
-<style scoped>
-.fullscreen-canvas {
+<style scoped lang="less">
+.dancer-page {
   position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.controls {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: rgba(255, 255, 255, 0.3);
+    padding: 0.5rem 1rem;
+    border-radius: 0 0 0 8px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-top: none;
+    border-right: none;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    .instruction {
+      margin: 0;
+      font-size: 0.75rem;
+      opacity: 1;
+      line-height: 1.3;
+      white-space: nowrap;
+    }
+  }
+
+.fullscreen-canvas {
+  position: absolute;
   top: 0;
   left: 0;
   width: 100%;

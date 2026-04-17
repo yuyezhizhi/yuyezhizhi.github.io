@@ -126,6 +126,16 @@ export default {
     
     // 监听滚动事件
     window.addEventListener('scroll', this.handleScroll)
+    
+    // 监听路由变化，离开旅程页面时清理 activeJourney
+    this.$watch('$route', (to) => {
+      if (this.activeJourney && to.path !== '/journeys') {
+        const isJourneyArtwork = this.activeJourney.artworks.some(a => a.id === to.path.slice(1))
+        if (!isJourneyArtwork) {
+          this.activeJourney = null
+        }
+      }
+    })
   },
   beforeUnmount() {
     // 移除滚动事件监听

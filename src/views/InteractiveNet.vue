@@ -1,7 +1,9 @@
 <template>
   <div class="fullscreen-canvas">
     <canvas id="interactive-net-canvas"></canvas>
-    <div class="hint-text">拖动网中的任意点来交互</div>
+    <div class="controls">
+      <p>拖动网中的任意点来交互</p>
+    </div>
   </div>
 </template>
 
@@ -299,15 +301,25 @@ export default {
   cursor: grabbing;
 }
 
-.hint-text {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  color: rgba(66, 133, 244, 0.9);
-  font-size: 16px;
-  font-family: Arial, sans-serif;
-  pointer-events: none;
-  user-select: none;
+.controls {
+  position: fixed;
+  top: 0;
+  right: 0;
+  background: rgba(255, 255, 255, 0.3);
+  padding: 0.6rem 1rem;
+  border-radius: 0 0 0 8px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-top: none;
+  border-right: none;
+  color: #000000;
   z-index: 10;
+  p {
+    margin: 0;
+    font-size: 0.75rem;
+    opacity: 1;
+    line-height: 1.3;
+    white-space: nowrap;
+  }
 }
 </style>

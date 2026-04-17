@@ -2,10 +2,7 @@
   <div class="meteor-shower-container">
     <div id="p5-canvas"></div>
     <div class="controls">
-      <p class="instruction">鼠标移动改变方向 | 点击产生爆发 | 空格切换速度</p>
-      <div class="info">
-        <p>流星: {{ meteorCount }} | 速度: {{ meteorSpeed.toFixed(1) }}x</p>
-      </div>
+      <p class="instruction">鼠标移动改变方向 | 点击产生爆发 | 空格切换速度 | 流星: {{ meteorCount }} | 速度: {{ meteorSpeed.toFixed(1) }}x</p>
     </div>
   </div>
 </template>
@@ -304,28 +301,23 @@ onBeforeUnmount(() => {
 
   .controls {
     position: absolute;
-    top: 20px;
-    right: 20px;
-    background: rgba(0, 0, 0, 0.6);
-    padding: 0.8rem 1.2rem;
-    border-radius: 8px;
-    color: #a29bfe;
+    top: 0;
+    right: 0;
+    background: rgba(255, 255, 255, 0.3);
+    padding: 0.5rem 1rem;
+    border-radius: 0 0 0 8px;
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.2);
+    border-top: none;
+    border-right: none;
+    color: #ffffff;
 
     .instruction {
-      margin: 0 0 0.5rem 0;
-      font-size: 0.85rem;
+      margin: 0;
+      font-size: 0.75rem;
       opacity: 1;
-      font-weight: 500;
-    }
-
-    .info {
-      p {
-        margin: 0;
-        font-size: 0.75rem;
-        opacity: 0.9;
-      }
+      line-height: 1.3;
+      white-space: nowrap;
     }
   }
 }

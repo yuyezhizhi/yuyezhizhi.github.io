@@ -529,7 +529,7 @@ onBeforeUnmount(() => {
     background: rgba(255, 255, 255, 0.2);
     padding: 0.8rem 1.2rem;
     border-radius: 8px;
-    color: #2c5f2d;
+    color: rgb(1, 108, 62);
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.3);
 

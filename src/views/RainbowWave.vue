@@ -2,10 +2,7 @@
   <div class="rainbow-wave-container">
     <div id="p5-canvas"></div>
     <div class="controls">
-      <p class="instruction">移动鼠标改变波形 | 点击切换色彩</p>
-      <div class="info">
-        <p>色彩模式: {{ colorModeName }}</p>
-      </div>
+      <p class="instruction">移动鼠标改变波形 | 点击切换色彩 | 色彩模式: {{ colorModeName }}</p>
     </div>
   </div>
 </template>
@@ -52,6 +49,11 @@ onMounted(() => {
       const waves = 8
       const baseAmplitude = 100
       const mouseYRatio = p.mouseY / p.height
+      const mouseXRatio = p.mouseX / p.width
+      
+      // 鼠标影响波的频率和相位
+      const freqMultiplier = 0.003 + mouseXRatio * 0.008 // 频率范围: 0.003 ~ 0.011
+      const phaseShift = mouseYRatio * p.PI // 相位偏移范围: 0 ~ PI
       
       for (let i = 0; i < waves; i++) {
         p.noFill()
@@ -90,12 +92,12 @@ onMounted(() => {
         
         p.beginShape()
         for (let x = 0; x <= p.width; x += 10) {
-          // 增大鼠标影响：从 0.5 改为 1.5，让变化更明显
-          const mouseInfluence = (mouseYRatio - 0.5) * 2 * baseAmplitude * 1.5
+          // 鼠标X控制频率（波形疏密），鼠标Y控制相位偏移
+          const wavePhase = x * freqMultiplier + time + i * 0.5 + phaseShift * (i + 1)
+          const secondaryPhase = x * (freqMultiplier * 2) + time * 1.5 + i
           const y = p.height / 2 + 
-                   p.sin(x * 0.005 + time + i * 0.5) * baseAmplitude +
-                   p.sin(x * 0.01 + time * 1.5 + i) * 30 +
-                   mouseInfluence +
+                   p.sin(wavePhase) * baseAmplitude +
+                   p.sin(secondaryPhase) * 30 +
                    (i - waves / 2) * 30
           p.vertex(x, y)
         }
@@ -107,11 +109,11 @@ onMounted(() => {
         
         p.beginShape()
         for (let x = 0; x <= p.width; x += 10) {
-          const mouseInfluence = (mouseYRatio - 0.5) * 2 * baseAmplitude * 1.5
+          const wavePhase = x * freqMultiplier + time + i * 0.5 + phaseShift * (i + 1)
+          const secondaryPhase = x * (freqMultiplier * 2) + time * 1.5 + i
           const y = p.height / 2 + 
-                   p.sin(x * 0.005 + time + i * 0.5) * baseAmplitude +
-                   p.sin(x * 0.01 + time * 1.5 + i) * 30 +
-                   mouseInfluence +
+                   p.sin(wavePhase) * baseAmplitude +
+                   p.sin(secondaryPhase) * 30 +
                    (i - waves / 2) * 30
           p.vertex(x, y)
         }
@@ -201,29 +203,26 @@ onBeforeUnmount(() => {
 
   .controls {
     position: absolute;
-    top: 20px;
-    right: 20px;
-    background: transparent;
-    padding: 0.8rem 1.2rem;
-    border-radius: 8px;
+    top: 0;
+    right: 0;
+    background: rgba(255, 255, 255, 0.3);
+    padding: 0.5rem 1rem;
+    border-radius: 0 0 0 8px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-top: none;
+    border-right: none;
     color: #ff6b9d;
-    backdrop-filter: none;
-    border: none;
-
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
     .instruction {
-      margin: 0 0 0.5rem 0;
-      font-size: 0.85rem;
-      opacity: 0.9;
-      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-    }
-
-    .info {
-      p {
-        margin: 0;
-        font-size: 0.75rem;
-        opacity: 0.75;
-        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-      }
+      margin: 0;
+      font-size: 0.75rem;
+      opacity: 1;
+      line-height: 1.3;
+      white-space: nowrap;
     }
   }
 }

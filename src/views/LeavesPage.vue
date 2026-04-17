@@ -1,18 +1,16 @@
 <template>
   <div class="leaves-page">
     <canvas id="leavesCanvas"></canvas>
-    <div class="hint-text">{{ hintText }}</div>
+    <div class="controls">
+      <p>1. 大树生长中，鼠标移出窗口等待；2. 大树生长完成，鼠标移入页面，吸附树叶，大树消失</p>
+      <p>3. 树叶跟随鼠标时，点击左键爆开树叶掉落到地面；4. 鼠标移出窗口5s后，大树重新开始生长</p>
+    </div>
   </div>
 </template>
 
 <script>
 export default {
   name: 'LeavesPage',
-  data() {
-    return {
-      hintText: '等待大树生长...'
-    };
-  },
   mounted() {
     // 获取Canvas元素和2D上下文
     const canvas = document.getElementById('leavesCanvas');
@@ -377,52 +375,26 @@ export default {
     
     // 首次生长标记
     let initialTreeStarted = false;
-    
-    // 提示文字状态
-    const hintState = {
-      text: '等待大树生长...',
-      hasClicked: false, // 标记用户是否已经点击过
-      clickedTime: 0, // 记录点击时间
-      updateHint() {
-        const now = Date.now();
-        
-        if (treeState.isGrowing) {
-          this.text = '大树正在生长...';
-          this.hasClicked = false; // 重置点击标记
-          this.clickedTime = 0;
-        } else if (treeState.growth >= 1 && treeState.branchesGrown && !mouseState.isActive) {
-          this.text = '移动鼠标与树叶互动';
-          this.hasClicked = false; // 重置点击标记
-          this.clickedTime = 0;
-        } else if (mouseState.isActive && treeState.opacity > 0.3) {
-          // 鼠标激活且树可见时，显示组合提示
-          if (this.hasClicked && (now - this.clickedTime) < 2000) {
-            // 点击后2秒内，显示两个提示
-            this.text = '点击左键爆开树叶 | 鼠标移出屏幕，等待大树重新生长';
-          } else {
-            // 未点击或点击超过2秒，只显示点击提示
-            this.text = '点击左键爆开树叶';
-          }
-        } else if (!treeState.isVisible && !treeState.isGrowing) {
-          this.text = '鼠标移出屏幕，等待大树重新生长';
-        }
-      }
+
+    // 点击状态标记
+    const clickState = {
+      hasClicked: false,
+      clickedTime: 0
     };
-    
-    // 用于更新Vue组件的hintText
-    const vm = this;
     
     // 鼠标移动事件
     canvas.addEventListener('mousemove', (e) => {
-      // 大树生长过程中不响应鼠标事件
-      if (treeState.isGrowing) return;
-      
-      userHasMovedMouse = true;
+      // 更新鼠标位置（始终更新，用于显示枫叶鼠标）
       mouseState.x = e.clientX;
       mouseState.y = e.clientY;
       mouseState.isActive = true;
+
+      // 大树生长过程中不响应树叶互动逻辑
+      if (treeState.isGrowing) return;
+
+      userHasMovedMouse = true;
       mouseState.leaveTime = 0;
-      
+
       // 如果树还没有开始渐隐，开始渐隐过程
       if (treeState.opacity >= 1 && treeState.fadeOutStartTime === 0) {
         treeState.fadeOutStartTime = Date.now();
@@ -430,10 +402,12 @@ export default {
     });
     
     canvas.addEventListener('mouseout', () => {
-      // 大树生长过程中不响应鼠标事件
-      if (treeState.isGrowing) return;
-      
+      // 始终更新鼠标状态（用于隐藏枫叶鼠标）
       mouseState.isActive = false;
+
+      // 大树生长过程中不响应树叶重置逻辑
+      if (treeState.isGrowing) return;
+
       mouseState.leaveTime = Date.now();
       // 鼠标移出画布后，大树消失
       treeState.isVisible = false;
@@ -467,8 +441,8 @@ export default {
       
       if (e.button === 0) { // 左键点击
         // 标记用户已点击，并记录时间
-        hintState.hasClicked = true;
-        hintState.clickedTime = Date.now();
+        clickState.hasClicked = true;
+        clickState.clickedTime = Date.now();
         
         // 所有不在树上的树叶爆开并掉落
         leaves.forEach(leaf => {
@@ -714,6 +688,61 @@ export default {
       });
     }
 
+    // 绘制红色小枫叶鼠标
+    function drawMapleLeaf(x, y) {
+      const size = 10;
+      ctx.save();
+      ctx.translate(x, y);
+
+      // 绘制枫叶形状 - 简化版五角枫叶
+      ctx.beginPath();
+      ctx.fillStyle = 'rgba(220, 60, 60, 0.85)';
+      ctx.strokeStyle = 'rgba(180, 40, 40, 0.9)';
+      ctx.lineWidth = 1;
+
+      // 枫叶的五个尖角 (顶部、右上、右下、左下、左上)
+      const points = [
+        { x: 0, y: -size },           // 顶部
+        { x: size * 0.3, y: -size * 0.3 },  // 右上内凹
+        { x: size * 0.9, y: -size * 0.2 },  // 右上尖
+        { x: size * 0.4, y: size * 0.2 },   // 右下内凹
+        { x: size * 0.6, y: size * 0.8 },   // 右下尖
+        { x: 0, y: size * 0.4 },            // 底部内凹
+        { x: -size * 0.6, y: size * 0.8 },  // 左下尖
+        { x: -size * 0.4, y: size * 0.2 },  // 左下内凹
+        { x: -size * 0.9, y: -size * 0.2 }, // 左上尖
+        { x: -size * 0.3, y: -size * 0.3 }, // 左上内凹
+      ];
+
+      ctx.moveTo(points[0].x, points[0].y);
+      for (let i = 1; i < points.length; i++) {
+        ctx.lineTo(points[i].x, points[i].y);
+      }
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      // 绘制叶脉
+      ctx.beginPath();
+      ctx.strokeStyle = 'rgba(160, 30, 30, 0.8)';
+      ctx.lineWidth = 0.8;
+      // 主叶脉
+      ctx.moveTo(0, size * 0.5);
+      ctx.lineTo(0, -size * 0.6);
+      // 侧叶脉
+      ctx.moveTo(0, -size * 0.2);
+      ctx.lineTo(size * 0.4, -size * 0.4);
+      ctx.moveTo(0, -size * 0.2);
+      ctx.lineTo(-size * 0.4, -size * 0.4);
+      ctx.moveTo(0, size * 0.1);
+      ctx.lineTo(size * 0.3, size * 0.4);
+      ctx.moveTo(0, size * 0.1);
+      ctx.lineTo(-size * 0.3, size * 0.4);
+      ctx.stroke();
+
+      ctx.restore();
+    }
+
     // 初始化树叶位置
     leaves.forEach(leaf => {
       leaf.setTreePosition(1); // 初始化为大树状态的位置
@@ -723,9 +752,6 @@ export default {
     function animate() {
       ctx.fillStyle = 'rgba(255, 255, 255, 1)';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
-      
-      // 更新提示文字
-      hintState.updateHint();
 
       // 更新鼠标离开时间
       if (!mouseState.isActive && mouseState.leaveTime > 0) {
@@ -801,11 +827,12 @@ export default {
       
       // 更新和绘制树叶
       updateAndDrawLeaves();
-      
-      // 更新提示文字
-      hintState.updateHint();
-      vm.hintText = hintState.text;
-      
+
+      // 绘制红色小枫叶鼠标
+      if (mouseState.isActive) {
+        drawMapleLeaf(mouseState.x, mouseState.y);
+      }
+
       // 继续动画循环
       requestAnimationFrame(animate);
     }
@@ -847,7 +874,8 @@ export default {
   overflow: hidden;
   background: #ffffff;
   z-index: 1;
-  
+  cursor: none;
+
   canvas {
     display: block;
     width: 100%;
@@ -855,31 +883,31 @@ export default {
     cursor: none;
   }
   
-  .instructions {
+  .controls {
     position: absolute;
-    color: white;
-    font-family: Arial;
-    padding: 20px;
+    top: 0;
+    right: 0;
+    background: rgba(255, 255, 255, 0.3);
+    padding: 0.6rem 1rem;
+    border-radius: 0 0 0 8px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-top: none;
+    border-right: none;
+    color: #8b4513;
     z-index: 10;
-  }
-  
-  .hint-text {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    color: rgba(139, 69, 19, 0.8);
-    font-size: 16px;
-    font-family: Arial, sans-serif;
-    pointer-events: none;
-    user-select: none;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    z-index: 10;
-    background: rgba(255, 255, 255, 0.9);
-    padding: 10px 15px;
-    border-radius: 5px;
-    cursor: default;
+
+    p {
+      margin: 0 0 0.2rem 0;
+      font-size: 0.75rem;
+      opacity: 0.9;
+      line-height: 1.3;
+      white-space: nowrap;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
   }
 }
 </style>

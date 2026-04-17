@@ -2,10 +2,7 @@
   <div class="flower-garden-container">
     <div id="p5-canvas"></div>
     <div class="controls">
-      <p class="instruction">点击种植花朵 | 每50次出现超级花朵</p>
-      <div class="info">
-        <p>花朵数: {{ flowerCount }}</p>
-      </div>
+      <p class="instruction">点击种植花朵 | 每50次出现超级花朵 | 花朵数: {{ flowerCount }}</p>
     </div>
   </div>
 </template>
@@ -435,29 +432,26 @@ onBeforeUnmount(() => {
 
   .controls {
     position: absolute;
-    top: 20px;
-    right: 20px;
-    background: transparent;
-    padding: 0.8rem 1.2rem;
-    border-radius: 8px;
-    color: #ff8a80;
-    backdrop-filter: none;
-    border: none;
-
+    top: 0;
+    right: 0;
+    background: rgba(255, 255, 255, 0.3);
+    padding: 0.5rem 1rem;
+    border-radius: 0 0 0 8px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-top: none;
+    border-right: none;
+    color: #f00;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
     .instruction {
-      margin: 0 0 0.5rem 0;
-      font-size: 0.85rem;
-      opacity: 0.9;
-      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-    }
-
-    .info {
-      p {
-        margin: 0;
-        font-size: 0.75rem;
-        opacity: 0.75;
-        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-      }
+      margin: 0;
+      font-size: 0.75rem;
+      opacity: 1;
+      line-height: 1.3;
+      white-space: nowrap;
     }
   }
 }

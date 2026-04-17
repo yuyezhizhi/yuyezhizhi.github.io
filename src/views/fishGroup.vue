@@ -1,5 +1,10 @@
 <template>
-  <div class="fullscreen-canvas" ref="canvasContainer"></div>
+  <div class="fish-group-page">
+    <div class="fullscreen-canvas" ref="canvasContainer"></div>
+    <div class="controls">
+      <p class="instruction">点击产生波浪驱赶鱼群</p>
+    </div>
+  </div>
 </template>
 
 <script setup>
@@ -49,24 +54,17 @@ const sketch = (p) => {
       boid.show()
     }
 
+    // 绘制半透明小圆形鼠标
+    drawMouseCircle()
+
   }
 
-  // 绘制透明圆形鼠标样式（已禁用）
+  // 绘制半透明小圆形鼠标
   const drawMouseCircle = () => {
-    return // 不绘制鼠标
-  }
-
-  const oldDrawMouseCircle = () => {
     p.push()
-    p.noFill()
-    p.stroke(255, 255, 255, 100)
-    p.strokeWeight(2)
-    p.circle(p.mouseX, p.mouseY, mouseCircleSize)
-    
-    // 内部小圆点
-    p.fill(255, 255, 255, 150)
+    p.fill(255, 255, 255, 100)
     p.noStroke()
-    p.circle(p.mouseX, p.mouseY, 6)
+    p.circle(p.mouseX, p.mouseY, 16)
     p.pop()
   }
 
@@ -280,8 +278,19 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-.fullscreen-canvas {
+.fish-group-page {
   position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+}
+
+.fullscreen-canvas {
+  position: absolute;
   top: 0;
   left: 0;
   width: 100%;
@@ -291,11 +300,36 @@ onUnmounted(() => {
   padding: 0;
   background: #1e283c;
   z-index: 1;
+  cursor: none;
 }
 
 .fullscreen-canvas canvas {
   display: block;
   width: 100%;
   height: 100%;
+  cursor: none;
+}
+
+.controls {
+  position: fixed;
+  top: 0;
+  right: 0;
+  background: rgba(255, 255, 255, 0.3);
+  padding: 0.5rem 1rem;
+  border-radius: 0 0 0 8px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-top: none;
+  border-right: none;
+  color: #ffffff;
+  z-index: 10;
+
+  .instruction {
+    margin: 0;
+    font-size: 0.75rem;
+    opacity: 1;
+    line-height: 1.3;
+    white-space: nowrap;
+  }
 }
 </style>

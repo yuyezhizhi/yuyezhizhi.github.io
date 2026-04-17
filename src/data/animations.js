@@ -177,17 +177,6 @@ export const animations = [
     color: 'linear-gradient(135deg, #ff6b6b 0%, #feca57 25%, #48dbfb 50%, #ff9ff3 75%, #54a0ff 100%)'
   },
   {
-    id: 'starlight-dance',
-    name: 'StarlightDance',
-    path: '/starlight-dance',
-    category: 'interactive',
-    title: '星光舞蹈',
-    description: '跟随鼠标舞动的星光粒子',
-    difficulty: 'intermediate',
-    tags: ['星光', '跟随', '粒子'],
-    color: 'linear-gradient(135deg, #ffd700 0%, #ffed4e 50%, #fff9c4 100%)'
-  },
-  {
     id: 'candy-rain',
     name: 'CandyRain',
     path: '/candy-rain',

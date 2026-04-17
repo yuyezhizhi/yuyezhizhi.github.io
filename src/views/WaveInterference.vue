@@ -20,7 +20,7 @@ const frequency = ref(0.1)
 let p5Instance = null
 let waveSources = []
 let gridPoints = []
-const GRID_SPACING = 4
+const GRID_SPACING = 8  // 增大间距，降低分辨率提升性能
 
 onMounted(() => {
   const sketch = (p) => {
@@ -75,77 +75,76 @@ onMounted(() => {
       waveSources.push(new WaveSource(p.width * 0.65, p.height * 0.5))
     }
 
-    p.draw = () => {
-      // 深蓝背景
-      p.background(10, 20, 40)
-      
-      const cols = p.ceil(p.width / GRID_SPACING)
-      const rows = p.ceil(p.height / GRID_SPACING)
-      const time = p.frameCount
-      
-      // 更新波源
-      for (let source of waveSources) {
-        source.update()
-      }
-      
-      // 使用像素操作绘制波纹
-      p.push()
-      p.noStroke()
-      
-      for (let y = 0; y < rows; y++) {
-        for (let x = 0; x < cols; x++) {
-          const px = x * GRID_SPACING
-          const py = y * GRID_SPACING
-          
-          // 叠加所有波源的振幅
-          let totalAmplitude = 0
-          for (let source of waveSources) {
-            totalAmplitude += source.getAmplitudeAt(px, py, time)
-          }
-          
-          // 限制振幅范围
-          totalAmplitude = p.constrain(totalAmplitude, -50, 50)
-          
-          // 振幅映射到颜色
-          p.colorMode(p.HSB)
-          let hue, brightness, saturation, alpha
-          
-          if (totalAmplitude < -10) {
-            // 波谷 - 深蓝
-            hue = p.map(totalAmplitude, -50, -10, 240, 220)
-            brightness = p.map(totalAmplitude, -50, -10, 30, 50)
-            saturation = 80
-            alpha = p.map(totalAmplitude, -50, -10, 200, 150)
-          } else if (totalAmplitude > 10) {
-            // 波峰 - 白色/亮黄
-            hue = p.map(totalAmplitude, 10, 50, 180, 60)
-            brightness = p.map(totalAmplitude, 10, 50, 80, 100)
-            saturation = p.map(totalAmplitude, 10, 50, 60, 20)
-            alpha = p.map(totalAmplitude, 10, 50, 180, 255)
-          } else {
-            // 零点附近 - 青色
-            hue = 190
-            brightness = 60
-            saturation = 70
-            alpha = 120
-          }
-          
-          // 根据振幅调整大小
-          const size = GRID_SPACING * 0.9
-          p.fill(hue, saturation, brightness, alpha)
-          p.rect(px - GRID_SPACING/2, py - GRID_SPACING/2, size, size)
+      p.draw = () => {
+        const time = p.frameCount
+        
+        // 更新波源
+        for (let source of waveSources) {
+          source.update()
         }
-      }
-      
-      p.pop()
-      
-      // 绘制波源
-      for (let source of waveSources) {
-        source.display()
-      }
+        
+        // 使用像素缓冲区直接操作
+        p.loadPixels()
+        const pixels = p.pixels
+        const width = p.width
+        const height = p.height
+        
+        for (let y = 0; y < height; y += GRID_SPACING) {
+          for (let x = 0; x < width; x += GRID_SPACING) {
+            // 叠加所有波源的振幅
+            let totalAmplitude = 0
+            for (let source of waveSources) {
+              const d = Math.sqrt((x - source.pos.x) ** 2 + (y - source.pos.y) ** 2)
+              if (d >= 5) {
+                const amplitude = 30 / Math.sqrt(d + 10)
+                totalAmplitude += amplitude * Math.sin(0.05 * d - frequency.value * time * 10)
+              }
+            }
+            totalAmplitude = Math.max(-50, Math.min(50, totalAmplitude))
+            
+            // 振幅映射到颜色
+            let r, g, b
+            if (totalAmplitude < -10) {
+              // 波谷 - 深蓝
+              const t = (totalAmplitude + 50) / 40
+              r = 20 + t * 20
+              g = 30 + t * 30
+              b = 80 + t * 40
+            } else if (totalAmplitude > 10) {
+              // 波峰 - 白色/亮黄
+              const t = (totalAmplitude - 10) / 40
+              r = 150 + t * 105
+              g = 200 + t * 55
+              b = 200 + t * 55
+            } else {
+              // 零点附近 - 青色
+              r = 40
+              g = 120
+              b = 140
+            }
+            
+            // 填充网格块
+            for (let dy = 0; dy < GRID_SPACING && y + dy < height; dy++) {
+              for (let dx = 0; dx < GRID_SPACING && x + dx < width; dx++) {
+                const idx = 4 * ((y + dy) * width + (x + dx))
+                pixels[idx] = r
+                pixels[idx + 1] = g
+                pixels[idx + 2] = b
+                pixels[idx + 3] = 255
+              }
+            }
+          }
+        }
+        
+        p.updatePixels()
+        
+        // 绘制波源
+        for (let source of waveSources) {
+          source.display()
+        }
 
-      waveSourceCount.value = waveSources.length
-    }
+        waveSourceCount.value = waveSources.length
+      }
 
     p.mouseClicked = () => {
       // 添加新波源（最多8个）

@@ -17,6 +17,16 @@
 - [src/views/BlackHole.vue](file://src/views/BlackHole.vue)
 - [src/views/FluidSimulationPage.vue](file://src/views/FluidSimulationPage.vue)
 - [src/views/FlowerGarden.vue](file://src/views/FlowerGarden.vue)
+- [src/App.vue](file://src/App.vue)
+- [src/views/AudioWheel.vue](file://src/views/AudioWheel.vue)
+- [src/views/BubblePop.vue](file://src/views/BubblePop.vue)
+- [src/views/DigitalRainPage.vue](file://src/views/DigitalRainPage.vue)
+- [src/views/FractalTree.vue](file://src/views/FractalTree.vue)
+- [src/views/MusicNetwork.vue](file://src/views/MusicNetwork.vue)
+- [src/views/Fireworks.vue](file://src/views/Fireworks.vue)
+- [src/views/ButterflyNet.vue](file://src/views/ButterflyNet.vue)
+- [src/views/CandyRain.vue](file://src/views/CandyRain.vue)
+- [src/views/CellDivision.vue](file://src/views/CellDivision.vue)
 </cite>
 
 ## 目录
@@ -25,18 +35,19 @@
 3. [核心组件](#核心组件)
 4. [架构概览](#架构概览)
 5. [详细组件分析](#详细组件分析)
-6. [依赖分析](#依赖分析)
-7. [性能考虑](#性能考虑)
-8. [故障排除指南](#故障排除指南)
-9. [结论](#结论)
-10. [附录](#附录)
+6. [UI样式统一改进](#ui样式统一改进)
+7. [依赖分析](#依赖分析)
+8. [性能考虑](#性能考虑)
+9. [故障排除指南](#故障排除指南)
+10. [结论](#结论)
+11. [附录](#附录)
 
 ## 简介
 本项目是一个基于Vue 3 + Vite的个人博客，其中包含丰富的Canvas动画系统。系统采用两种主要的Canvas渲染技术：
 - 原生Canvas 2D API：用于实现DynamicBackground组件的粒子系统
 - p5.js 2.2.3：用于实现各种复杂的粒子系统和物理模拟动画
 
-动画系统涵盖了从基础的粒子效果到高级的物理模拟，包括鱼群效果、重力场可视化、黑洞吸积盘、流体模拟等多种复杂动画。**最新更新**：FlowerGarden动画引入了超级花朵机制、云朵系统、改进的粒子效果和增强的背景可视化等重大视觉增强功能。
+动画系统涵盖了从基础的粒子效果到高级的物理模拟，包括鱼群效果、重力场可视化、黑洞吸积盘、流体模拟等多种复杂动画。**最新更新**：Canvas动画系统获得了统一的UI样式改进，所有可视化组件（AudioWheel、BubblePop、DigitalRainPage、FractalTree、MusicNetwork、Fireworks等）都获得了统一的暗半透明背景、现代背景模糊效果、白色边框、改进的排版和更好的可读性。
 
 ## 项目结构
 项目采用模块化组织方式，主要分为以下几个部分：
@@ -64,6 +75,7 @@ subgraph "views/"
 L[动画页面集合]
 M[新增: FlowerGarden.vue - 花园动画]
 N[现有: 各种p5.js动画页面]
+O[统一UI样式改进]
 end
 ```
 
@@ -105,41 +117,52 @@ A[Vue 3组件]
 B[路由系统]
 C[页面组件]
 D[FlowerGarden - 新增]
+E[统一UI样式]
 end
 subgraph "动画引擎层"
-E[原生Canvas 2D API]
-F[p5.js 2.2.3]
-G[物理引擎]
-H[花花园系统]
-I[云朵系统]
-J[粒子系统]
+F[原生Canvas 2D API]
+G[p5.js 2.2.3]
+H[物理引擎]
+I[花花园系统]
+J[云朵系统]
+K[粒子系统]
 end
 subgraph "数据层"
-K[动画配置]
-L[路由配置]
-M[性能监控]
-N[花朵计数器]
-O[云朵配置]
+L[动画配置]
+M[路由配置]
+N[性能监控]
+O[花朵计数器]
+P[云朵配置]
 end
 subgraph "渲染层"
-P[requestAnimationFrame]
-Q[事件监听器]
-R[内存管理]
-S[渐变背景]
-T[贝塞尔云朵]
+Q[requestAnimationFrame]
+R[事件监听器]
+S[内存管理]
+T[渐变背景]
+U[贝塞尔云朵]
+V[暗半透明背景]
+W[背景模糊效果]
+X[白色边框]
+Y[改进排版]
+Z[更好可读性]
 end
-A --> E
 A --> F
-B --> K
+A --> G
+B --> L
 C --> G
-D --> H
 D --> I
 D --> J
-F --> P
+D --> K
 G --> Q
-H --> S
+H --> R
 I --> T
-J --> R
+J --> U
+K --> S
+E --> V
+E --> W
+E --> X
+E --> Y
+E --> Z
 ```
 
 **图表来源**
@@ -452,6 +475,62 @@ H --> G
 - [src/views/FluidSimulationPage.vue:40-174](file://src/views/FluidSimulationPage.vue#L40-L174)
 - [src/views/AudioVisualizerPage.vue:38-271](file://src/views/AudioVisualizerPage.vue#L38-L271)
 
+## UI样式统一改进
+
+### 统一暗半透明背景
+所有p5.js动画页面都采用了统一的暗半透明背景设计，提升了视觉层次感和沉浸感：
+
+- **AudioWheel**：使用明亮渐变背景（#E8EAF6到#FFF3E0）
+- **BubblePop**：采用纯色背景（240, 230, 255）提升性能
+- **DigitalRainPage**：深蓝黑色背景（#1a1a2e到#1a1a2e）
+- **FractalTree**：柔和的渐变背景（根据四季变化）
+- **MusicNetwork**：深蓝黑色背景（#050520）
+- **Fireworks**：纯黑色背景
+- **ButterflyNet**：浅色渐变背景（#f5f7fa到#fff9f0）
+
+### 现代背景模糊效果
+所有控制面板都集成了现代化的背景模糊效果：
+
+- **backdrop-filter: blur(10px)**：提供毛玻璃般的视觉效果
+- **rgba(255, 255, 255, 0.2)**：半透明黑色背景增强内容可读性
+- **统一的圆角设计**：border-radius: 8px
+- **一致的边距和内边距**：确保视觉平衡
+
+### 白色边框系统
+所有控制面板都采用了统一的白色边框设计：
+
+- **border: 1px solid rgba(255, 255, 255, 0.2)**：提供微妙的边框轮廓
+- **增强的视觉分离**：使控制面板从背景中清晰分离
+- **一致性设计语言**：所有组件遵循相同的边框规范
+
+### 改进的排版和可读性
+UI组件的排版和可读性得到了显著改善：
+
+- **字体大小标准化**：标题0.85rem，副标题0.75rem
+- **透明度优化**：文本透明度设置为0.9或1.0
+- **字体权重**：重要信息使用font-weight: 500
+- **文本阴影**：在某些组件中添加text-shadow增强对比度
+- **居中对齐**：控制面板采用右对齐，提升阅读体验
+
+### 统一的交互设计
+所有动画页面都采用了统一的交互设计模式：
+
+- **固定定位**：控制面板使用position: absolute
+- **响应式布局**：支持不同屏幕尺寸
+- **统一的z-index管理**：确保正确的层级关系
+- **自定义鼠标样式**：根据动画主题定制鼠标指针
+
+**章节来源**
+- [src/views/AudioWheel.vue:200-256](file://src/views/AudioWheel.vue#L200-L256)
+- [src/views/BubblePop.vue:215-261](file://src/views/BubblePop.vue#L215-L261)
+- [src/views/DigitalRainPage.vue:286-333](file://src/views/DigitalRainPage.vue#L286-L333)
+- [src/views/FractalTree.vue:1-800](file://src/views/FractalTree.vue#L1-L800)
+- [src/views/MusicNetwork.vue:317-373](file://src/views/MusicNetwork.vue#L317-L373)
+- [src/views/Fireworks.vue:297-343](file://src/views/Fireworks.vue#L297-L343)
+- [src/views/ButterflyNet.vue:594-612](file://src/views/ButterflyNet.vue#L594-L612)
+- [src/views/CandyRain.vue:262-309](file://src/views/CandyRain.vue#L262-L309)
+- [src/views/CellDivision.vue:222-267](file://src/views/CellDivision.vue#L222-L267)
+
 ## 依赖分析
 
 ### 技术栈依赖关系
@@ -578,6 +657,8 @@ H[粒子计数]
 I[内存使用]
 J[花朵数量]
 K[云朵位置]
+L[背景模糊效果]
+M[控制面板样式]
 end
 A --> D
 B --> G
@@ -585,6 +666,7 @@ C --> H
 D --> I
 E --> J
 F --> K
+L --> M
 ```
 
 **图表来源**
@@ -594,7 +676,7 @@ F --> K
 - [src/views/ParticleVortexPage.vue:235-243](file://src/views/ParticleVortexPage.vue#L235-L243)
 
 ## 结论
-本项目的Canvas动画系统展现了现代Web动画开发的最佳实践，通过原生Canvas 2D API和p5.js的有机结合，实现了从基础粒子效果到复杂物理模拟的完整动画生态。**最新更新**：FlowerGarden动画的成功集成展示了系统在处理复杂视觉效果方面的强大能力，包括超级花朵机制、云朵系统、改进的粒子效果和增强的背景可视化等创新功能。系统在性能优化、内存管理和移动端适配方面都达到了专业水准，为类似项目提供了宝贵的参考模板。
+本项目的Canvas动画系统展现了现代Web动画开发的最佳实践，通过原生Canvas 2D API和p5.js的有机结合，实现了从基础粒子效果到复杂物理模拟的完整动画生态。**最新更新**：Canvas动画系统获得了统一的UI样式改进，所有可视化组件都获得了统一的暗半透明背景、现代背景模糊效果、白色边框、改进的排版和更好的可读性，这大大提升了用户体验的一致性和视觉美感。FlowerGarden动画的成功集成展示了系统在处理复杂视觉效果方面的强大能力，包括超级花朵机制、云朵系统、改进的粒子效果和增强的背景可视化等创新功能。系统在性能优化、内存管理和移动端适配方面都达到了专业水准，为类似项目提供了宝贵的参考模板。
 
 ## 附录
 
@@ -609,8 +691,9 @@ F --> K
 | 波形能量 | 3 | 波动、干涉等波动现象 |
 | 生成艺术 | 4 | 分形、曼陀罗等艺术创作 |
 | 交互治愈 | 4 | 可交互的治愈系动画 |
+| UI样式改进 | 6 | AudioWheel、BubblePop、DigitalRainPage、FractalTree、MusicNetwork、Fireworks |
 
-**更新**：FlowerGarden作为新的自然系动画，为系统增加了独特的花朵生成和交互体验。
+**更新**：FlowerGarden作为新的自然系动画，为系统增加了独特的花朵生成和交互体验。同时，所有可视化组件都获得了统一的UI样式改进。
 
 **章节来源**
 - [src/data/animations.js:1-400](file://src/data/animations.js#L1-L400)
@@ -626,16 +709,13 @@ Vite配置针对大型动画项目进行了专门优化：
 
 ### 新增功能特性对比
 
-| 功能特性 | DynamicBackground | FlowerGarden | 其他p5.js动画 |
-|----------|-------------------|--------------|---------------|
-| 粒子系统 | ✅ 基础粒子 | ❌ 无 | ✅ 复杂粒子 |
-| 花朵系统 | ❌ 无 | ✅ 超级花朵机制 | ❌ 无 |
-| 云朵系统 | ❌ 无 | ✅ 动态云朵 | ❌ 无 |
-| 背景可视化 | ❌ 无 | ✅ 渐变天空+太阳光晕 | ✅ 基础背景 |
-| 粒子效果 | ✅ 基础粒子 | ✅ 改进粒子（超级花朵） | ✅ 各种特效 |
-| 交互机制 | ✅ 鼠标交互 | ✅ 点击种植花朵 | ✅ 各种交互 |
-| 性能优化 | ✅ 内存管理 | ✅ 对象池优化 | ✅ 各种优化 |
-
-**图表来源**
-- [src/views/FlowerGarden.vue:23-196](file://src/views/FlowerGarden.vue#L23-L196)
-- [src/components/DynamicBackground.vue:14-154](file://src/components/DynamicBackground.vue#L14-L154)
+| 功能特性 | DynamicBackground | FlowerGarden | 其他p5.js动画 | UI样式改进 |
+|----------|-------------------|--------------|---------------|------------|
+| 粒子系统 | ✅ 基础粒子 | ❌ 无 | ✅ 复杂粒子 | ✅ 统一暗半透明背景 |
+| 花朵系统 | ❌ 无 | ✅ 超级花朵机制 | ❌ 无 | ✅ 现代背景模糊效果 |
+| 云朵系统 | ❌ 无 | ✅ 动态云朵 | ❌ 无 | ✅ 白色边框系统 |
+| 背景可视化 | ❌ 无 | ✅ 渐变天空+太阳光晕 | ✅ 基础背景 | ✅ 改进排版和可读性 |
+| 粒子效果 | ✅ 基础粒子 | ✅ 改进粒子（超级花朵） | ✅ 各种特效 | ✅ 统一交互设计 |
+| 交互机制 | ✅ 鼠标交互 | ✅ 点击种植花朵 | ✅ 各种交互 | ✅ 响应式布局 |
+| 性能优化 | ✅ 内存管理 | ✅ 对象池优化 | ✅ 各种优化 | ✅ 性能自适应 |
+| UI一致性 | ❌ 无 | ❌ 无 | ❌ 无 | ✅ 统一设计语言 |

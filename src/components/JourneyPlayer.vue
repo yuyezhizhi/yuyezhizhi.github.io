@@ -54,16 +54,10 @@
       <button 
         class="control-btn next" 
         @click="nextArtwork"
-        :disabled="currentArtworkIndex === currentJourney.artworks.length - 1"
       >
         {{ isLastArtwork ? '完成旅程' : '下一个 →' }}
       </button>
     </div>
-
-    <!-- 退出旅程按钮 -->
-    <button class="exit-journey" @click="exitJourney">
-      ✕ 退出旅程
-    </button>
 
     <!-- 旅程完成弹窗 -->
     <Transition name="modal">
@@ -405,37 +399,6 @@ onUnmounted(() => {
   }
 }
 
-// 退出按钮 - 放在进度条上方右侧
-.exit-journey {
-  position: fixed;
-  bottom: 8rem; // 进度条上方（上移20px）
-  right: 1rem;
-  width: auto;
-  height: auto;
-  padding: 0.4rem 0.875rem;
-  border: none;
-  border-radius: 1rem;
-  background: rgba(255, 255, 255, 0.9);
-  color: #666;
-  font-size: 0.75rem;
-  line-height: 1;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  backdrop-filter: blur(10px);
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
-  z-index: 1001;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.3rem;
-  white-space: nowrap;
-
-  &:hover {
-    background: #ff6b6b;
-    color: white;
-  }
-}
-
 // 完成弹窗
 .completion-modal {
   position: fixed;
@@ -615,13 +578,6 @@ onUnmounted(() => {
         font-size: 0.75rem;
       }
     }
-  }
-
-  .exit-journey {
-    right: 0.5rem;
-    bottom: 7rem;
-    padding: 0.35rem 0.75rem;
-    font-size: 0.7rem;
   }
 
   .narrative-overlay .narrative-content {

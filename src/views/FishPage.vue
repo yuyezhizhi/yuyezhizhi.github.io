@@ -1,6 +1,9 @@
 <template>
   <div class="fish-page">
     <canvas id="fishCanvas"></canvas>
+    <div class="controls">
+      <p class="instruction">鼠标移动驱赶鱼群 | 静止时自动漩涡</p>
+    </div>
   </div>
 </template>
 
@@ -129,14 +132,25 @@ export default {
 
     // 动画循环
     function animate() {
-      ctx.fillStyle = 'rgba(17, 34, 51, 0.2)';
+      ctx.fillStyle = '#112233';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
-      
+
       fishes.forEach(fish => {
         fish.update(mouseX, mouseY, isMouseActive);
         fish.draw();
       });
-      
+
+      // 绘制半透明小圆形鼠标（无拖尾）
+      if (isMouseActive) {
+        ctx.beginPath();
+        ctx.arc(mouseX, mouseY, 8, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
+
       requestAnimationFrame(animate);
     }
     animate();
@@ -162,7 +176,27 @@ export default {
     height: 100%;
     cursor: none;
   }
-  
 
+  .controls {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: rgba(255, 255, 255, 0.3);
+    padding: 0.5rem 1rem;
+    border-radius: 0 0 0 8px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-top: none;
+    border-right: none;
+    color: #ffffff;
+
+    .instruction {
+      margin: 0;
+      font-size: 0.75rem;
+      opacity: 1;
+      line-height: 1.3;
+      white-space: nowrap;
+    }
+  }
 }
 </style>

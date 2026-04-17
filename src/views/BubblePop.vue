@@ -2,10 +2,7 @@
   <div class="bubble-pop-container">
     <div id="p5-canvas"></div>
     <div class="controls">
-      <p class="instruction">点击产生泡泡 | 移动鼠标引导</p>
-      <div class="info">
-        <p>泡泡数: {{ bubbleCount }}</p>
-      </div>
+      <p class="instruction">点击产生泡泡 | 移动鼠标引导 | 泡泡数: {{ bubbleCount }}</p>
     </div>
   </div>
 </template>
@@ -232,28 +229,26 @@ onBeforeUnmount(() => {
 
   .controls {
     position: absolute;
-    top: 20px;
-    right: 20px;
-    background: rgba(0, 0, 0, 0.6);
-    padding: 0.8rem 1.2rem;
-    border-radius: 8px;
-    color: #ffffff;
+    top: 0;
+    right: 0;
+    background: rgba(255, 255, 255, 0.3);
+    padding: 0.5rem 1rem;
+    border-radius: 0 0 0 8px;
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.2);
-
+    border-top: none;
+    border-right: none;
+    color: #161515;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
     .instruction {
-      margin: 0 0 0.5rem 0;
-      font-size: 0.85rem;
+      margin: 0;
+      font-size: 0.75rem;
       opacity: 1;
-      font-weight: 500;
-    }
-
-    .info {
-      p {
-        margin: 0;
-        font-size: 0.75rem;
-        opacity: 0.9;
-      }
+      line-height: 1.3;
+      white-space: nowrap;
     }
   }
 }
