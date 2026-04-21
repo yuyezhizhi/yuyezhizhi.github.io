@@ -108,6 +108,12 @@ const routes = [
     meta: { fullscreen: true }
   },
   {
+    path: '/flower-fireworks',
+    name: 'FlowerFireworks',
+    component: () => import('../views/FlowerFireworks.vue'),
+    meta: { fullscreen: true }
+  },
+  {
     path: '/candy-rain',
     name: 'CandyRain',
     component: () => import('../views/CandyRain.vue'),

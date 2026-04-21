@@ -177,6 +177,17 @@ export const animations = [
     color: 'linear-gradient(135deg, #ff6b6b 0%, #feca57 25%, #48dbfb 50%, #ff9ff3 75%, #54a0ff 100%)'
   },
   {
+    id: 'flower-fireworks',
+    name: 'FlowerFireworks',
+    path: '/flower-fireworks',
+    category: 'nature',
+    title: '花朵烟花',
+    description: '彩虹花朵与烟花交织的梦幻场景',
+    difficulty: 'intermediate',
+    tags: ['花朵', '烟花', '彩虹'],
+    color: 'linear-gradient(135deg, #ff9a9e 0%, #fecfef 25%, #a8edea 50%, #fed6e3 75%, #d299c2 100%)'
+  },
+  {
     id: 'candy-rain',
     name: 'CandyRain',
     path: '/candy-rain',

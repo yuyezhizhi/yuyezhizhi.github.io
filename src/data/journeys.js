@@ -55,6 +55,12 @@ export const journeys = [
         title: '蝴蝶网',
         narrative: '蝴蝶翩翩起舞，为这场自然交响曲画上优雅的句号...',
         duration: 60
+      },
+      {
+        id: 'flower-fireworks',
+        title: '花朵烟花',
+        narrative: '彩虹花朵绽放如烟花般绚烂，小蜜蜂在花丛中穿梭，谱写自然的华彩乐章...',
+        duration: 60
       }
     ]
   },
