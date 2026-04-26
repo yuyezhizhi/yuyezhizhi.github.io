@@ -40,3 +40,5 @@ dist-ssr
 
 # Build cache
 .vite
+.lingma
+.qoder
