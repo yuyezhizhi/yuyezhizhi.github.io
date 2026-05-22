@@ -2,18 +2,33 @@
 <html lang="zh-CN">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>好玩的动画 - yuyezhizhi</title>
-    <meta name="description" content="分享前端开发技术、Vue、React、JavaScript等知识" />
-    <!-- 内容安全策略 -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' https://cdn.jsdelivr.net; media-src 'self' https://www.soundhelix.com blob:;" />
+    <title>好玩的动画 - 创意编程动画合集</title>
+    <meta name="description" content="探索创意编程的无限可能 - 30+个互动动画作品，涵盖自然模拟、粒子物理、音频可视化、生成艺术等" />
+    <meta name="keywords" content="创意编程, p5.js, 动画, 交互艺术, 生成艺术, 粒子效果, Canvas, Vue" />
+
+    <!-- Open Graph 社交分享标签 -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="好玩的动画 - 创意编程动画合集" />
+    <meta property="og:description" content="探索创意编程的无限可能 - 30+个互动动画作品，涵盖自然模拟、粒子物理、音频可视化、生成艺术等" />
+    <meta property="og:url" content="https://yuyezhizhi.github.io/" />
+    <meta property="og:site_name" content="好玩的动画" />
+    <meta property="og:locale" content="zh_CN" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="好玩的动画 - 创意编程动画合集" />
+    <meta name="twitter:description" content="探索创意编程的无限可能 - 30+个互动动画作品" />
+
+    <!-- 内容安全策略 - 移除不再需要的 cdn.jsdelivr.net -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' https://www.soundhelix.com blob:; media-src 'self' https://www.soundhelix.com blob:;" />
     <!-- XSS 保护 -->
     <meta http-equiv="X-XSS-Protection" content="1; mode=block" />
-    <!-- 防止点击劫持 - X-Frame-Options 必须通过 HTTP 响应头设置，meta 标签无效 -->
-    <!-- 请在服务器配置中设置: X-Frame-Options: SAMEORIGIN -->
-    <!-- 强制 HTTPS - HSTS 需要通过服务器响应头配置，meta 标签无效 -->
-    <!-- p5.sound 将通过 npm 导入，不再使用 CDN -->
+    <!-- 主题色 -->
+    <meta name="theme-color" content="#667eea" />
+    <!-- PWA manifest -->
+    <link rel="manifest" href="/manifest.json" />
   </head>
   <body>
     <div id="app"></div>

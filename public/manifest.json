@@ -1,0 +1,19 @@
+{
+  "name": "好玩的动画",
+  "short_name": "动画合集",
+  "description": "探索创意编程的无限可能 - 30+个互动动画作品",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fff5f5",
+  "theme_color": "#667eea",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["entertainment", "education"]
+}

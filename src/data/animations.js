@@ -78,9 +78,9 @@ export const animations = [
     color: 'linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)'
   },
   {
-    id: 'interactivetnet',
+    id: 'interactive-net',
     name: 'InteractiveNet',
-    path: '/interactivetnet',
+    path: '/interactive-net',
     category: 'interactive',
     title: '交互网',
     description: '可交互的弹性网络结构',

@@ -100,7 +100,8 @@ export default {
       ringRadius: 10,
       ringCircumference: 0,
       activeJourney: null,
-      journeys: journeys
+      journeys: journeys,
+      ticking: false
     }
   },
   computed: {
@@ -143,13 +144,19 @@ export default {
   },
   methods: {
     handleScroll() {
-      // 当滚动超过200px时显示回到顶部按钮
-      this.showBackToTop = window.scrollY > 200
-      
-      // 计算页面滚动进度
-      const totalHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight
-      const progress = (window.scrollY / totalHeight) * 100
-      this.scrollProgress = Math.min(Math.max(progress, 0), 100)
+      // 使用 requestAnimationFrame 节流
+      if (this.ticking) return
+      this.ticking = true
+      requestAnimationFrame(() => {
+        // 当滚动超过200px时显示回到顶部按钮
+        this.showBackToTop = window.scrollY > 200
+
+        // 计算页面滚动进度
+        const totalHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight
+        const progress = (window.scrollY / totalHeight) * 100
+        this.scrollProgress = Math.min(Math.max(progress, 0), 100)
+        this.ticking = false
+      })
     },
     backToTop() {
       // 平滑滚动到顶部
@@ -226,7 +233,7 @@ body {
   transition: @transition, opacity 0.3s ease;
   backdrop-filter: none;
   background: none;
-  opacity: 0.3;
+  opacity: 0.6;
   
   &:hover {
     opacity: 1;
@@ -463,5 +470,23 @@ body {
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
+}
+
+// 尊重用户的减少动画偏好
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .animated-text .letter {
+    animation: none !important;
+  }
+
+  .fade-enter-active,
+  .fade-leave-active {
+    transition: none !important;
+  }
 }
 </style>

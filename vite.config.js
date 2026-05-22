@@ -31,12 +31,6 @@ export default defineConfig({
         manualChunks: {
           // 拆分核心依赖
           'vue-vendor': ['vue', 'vue-router'],
-          // 拆分各个第三方库
-          'highlightjs': ['highlight.js'],
-          'marked': ['marked'],
-          'dompurify': ['dompurify'],
-          // 拆分echarts（只在Animation页面使用）
-          'echarts': ['echarts'],
           // 拆分p5.js（用于Canvas动画）
           'p5': ['p5'],
           // 拆分three.js（用于3D效果）

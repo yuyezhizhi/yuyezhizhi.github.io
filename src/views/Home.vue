@@ -22,6 +22,24 @@
       </div>
     </div>
 
+    <!-- 搜索栏 -->
+    <div class="search-bar">
+      <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"/>
+        <path d="M21 21l-4.35-4.35"/>
+      </svg>
+      <input
+        v-model="searchQuery"
+        type="text"
+        class="search-input"
+        placeholder="搜索动画名称、标签..."
+        aria-label="搜索动画"
+      />
+      <button v-if="searchQuery" class="search-clear" @click="searchQuery = ''" aria-label="清除搜索">
+        ✕
+      </button>
+    </div>
+
     <!-- 分类Tab栏 -->
     <div class="category-tabs">
       <button
@@ -44,6 +62,24 @@
         <span class="tab-name">我的收藏</span>
         <span class="tab-count">{{ favoriteIds.length }}</span>
       </button>
+      <!-- 收藏数据导出/导入 -->
+      <div class="favorites-actions" v-if="favoriteIds.length > 0">
+        <button class="action-btn" @click="exportFavorites" title="导出收藏">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+        </button>
+        <button class="action-btn" @click="triggerImport" title="导入收藏">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+            <polyline points="17 8 12 3 7 8"/>
+            <line x1="12" y1="3" x2="12" y2="15"/>
+          </svg>
+        </button>
+        <input ref="importInput" type="file" accept=".json" style="display:none" @change="importFavorites" />
+      </div>
     </div>
 
     <!-- 动画卡片网格 -->
@@ -75,7 +111,7 @@
       <!-- 空状态 -->
       <div v-if="filteredAnimations.length === 0" key="empty" class="empty-state">
         <div class="empty-icon">🎨</div>
-        <p>{{ showFavoritesOnly ? '还没有收藏任何作品，去发现喜欢的动画吧！' : '该分类下暂无作品' }}</p>
+        <p>{{ showFavoritesOnly ? '还没有收藏任何作品，去发现喜欢的动画吧！' : searchQuery ? '没有找到匹配的动画，试试其他关键词' : '该分类下暂无作品' }}</p>
       </div>
     </TransitionGroup>
   </div>
@@ -90,6 +126,7 @@ import FavoriteButton from '../components/FavoriteButton.vue'
 const currentCategory = ref('all')
 const showFavoritesOnly = ref(false)
 const favoriteIds = ref([])
+const searchQuery = ref('')
 
 // 从 localStorage 加载收藏
 const loadFavorites = () => {
@@ -134,20 +171,31 @@ const getDifficultyLabel = (difficulty) => {
   return labels[difficulty] || difficulty
 }
 
-// 根据当前分类筛选动画
+// 根据当前分类和搜索筛选动画
 const filteredAnimations = computed(() => {
   let result = animations
-  
+
   // 按分类筛选
   if (currentCategory.value !== 'all') {
     result = result.filter(animation => animation.category === currentCategory.value)
   }
-  
+
   // 按收藏筛选
   if (showFavoritesOnly.value) {
     result = result.filter(animation => favoriteIds.value.includes(animation.id))
   }
-  
+
+  // 按搜索关键词筛选
+  if (searchQuery.value.trim()) {
+    const query = searchQuery.value.trim().toLowerCase()
+    result = result.filter(animation =>
+      animation.title.toLowerCase().includes(query) ||
+      animation.description.toLowerCase().includes(query) ||
+      animation.tags.some(tag => tag.toLowerCase().includes(query)) ||
+      animation.name.toLowerCase().includes(query)
+    )
+  }
+
   return result
 })
 
@@ -157,6 +205,55 @@ const toggleFavoritesFilter = () => {
   if (showFavoritesOnly.value) {
     currentCategory.value = 'all'
   }
+}
+
+// 导入文件输入框引用
+const importInput = ref(null)
+
+// 导出收藏数据
+const exportFavorites = () => {
+  const data = {
+    version: 1,
+    exportDate: new Date().toISOString(),
+    favorites: favoriteIds.value
+  }
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `animation-favorites-${new Date().toISOString().slice(0, 10)}.json`
+  a.click()
+  URL.revokeObjectURL(url)
+}
+
+// 触发文件选择
+const triggerImport = () => {
+  importInput.value?.click()
+}
+
+// 导入收藏数据
+const importFavorites = (event) => {
+  const file = event.target.files?.[0]
+  if (!file) return
+
+  const reader = new FileReader()
+  reader.onload = (e) => {
+    try {
+      const data = JSON.parse(e.target.result)
+      if (data.favorites && Array.isArray(data.favorites)) {
+        // 合并导入，不覆盖已有收藏
+        const merged = [...new Set([...favoriteIds.value, ...data.favorites])]
+        favoriteIds.value = merged
+        localStorage.setItem('animation-favorites', JSON.stringify(merged))
+        window.dispatchEvent(new CustomEvent('favorites-updated'))
+      }
+    } catch {
+      // 无效文件忽略
+    }
+  }
+  reader.readAsText(file)
+  // 重置 input 以便可以再次选择同一文件
+  event.target.value = ''
 }
 </script>
 
@@ -275,6 +372,64 @@ const toggleFavoritesFilter = () => {
   }
   50% {
     transform: translateY(-10px);
+  }
+}
+
+// 搜索栏
+.search-bar {
+  display: flex;
+  align-items: center;
+  max-width: 500px;
+  margin: 0 auto 2rem;
+  position: relative;
+
+  .search-icon {
+    position: absolute;
+    left: 1rem;
+    width: 18px;
+    height: 18px;
+    color: #999;
+    pointer-events: none;
+  }
+
+  .search-input {
+    width: 100%;
+    padding: 0.7rem 2.5rem 0.7rem 2.8rem;
+    border: 2px solid transparent;
+    border-radius: 2rem;
+    background: white;
+    font-size: 0.95rem;
+    color: #333;
+    outline: none;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+
+    &::placeholder {
+      color: #bbb;
+    }
+
+    &:focus {
+      border-color: rgba(102, 126, 234, 0.4);
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.15);
+    }
+  }
+
+  .search-clear {
+    position: absolute;
+    right: 0.8rem;
+    background: none;
+    border: none;
+    color: #999;
+    font-size: 0.9rem;
+    cursor: pointer;
+    padding: 0.2rem 0.4rem;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+
+    &:hover {
+      color: #666;
+      background: #f0f0f0;
+    }
   }
 }
 
@@ -444,6 +599,34 @@ const toggleFavoritesFilter = () => {
 .favorites-tab {
   &.active {
     background: linear-gradient(135deg, #ff6b6b 0%, #ee5a5a 100%) !important;
+  }
+}
+
+// 收藏操作按钮
+.favorites-actions {
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+
+  .action-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border: none;
+    border-radius: 50%;
+    background: white;
+    color: #999;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+
+    &:hover {
+      color: #667eea;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+    }
   }
 }
 

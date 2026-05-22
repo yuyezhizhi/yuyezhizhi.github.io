@@ -54,7 +54,7 @@ const routes = [
     meta: { fullscreen: true }
   },
   {
-    path: '/interactivetnet',
+    path: '/interactive-net',
     name: 'InteractiveNet',
     component: () => import('../views/InteractiveNet.vue'),
     meta: { fullscreen: true }
@@ -204,7 +204,17 @@ const routes = [
     name: 'Journeys',
     component: () => import('../views/JourneysPage.vue')
   },
-
+  // 旧路径重定向（修复拼写错误）
+  {
+    path: '/interactivetnet',
+    redirect: '/interactive-net'
+  },
+  // 404 兜底路由
+  {
+    path: '/:pathMatch(.*)*',
+    name: 'NotFound',
+    component: () => import('../views/NotFound.vue')
+  }
 ]
 
 const router = createRouter({
