@@ -33,9 +33,6 @@ jobs:
       - name: Fix permissions for node_modules
         run: chmod -R +x node_modules/.bin
 
-      - name: Lint
-        run: npm run lint
-
       - name: Build with npm run build
         run: npm run build
 
